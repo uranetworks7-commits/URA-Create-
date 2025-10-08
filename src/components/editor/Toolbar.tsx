@@ -5,15 +5,17 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useEditor } from '@/context/EditorContext';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import type { ButtonElement, ContainerElement, ImageElement, TextElement } from '@/lib/types';
-import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw } from 'lucide-react';
+import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw, Monitor, Eye } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
+import { useState } from 'react';
 
 export default function Toolbar() {
   const { state, dispatch } = useEditor();
   const isElementSelected = !!state.selectedElementId;
   const selectedElement = state.project.pages[state.currentPageIndex]?.elements.find(el => el.id === state.selectedElementId);
+  const [showPreviewIcon, setShowPreviewIcon] = useState(false);
 
   const addElement = (type: 'text' | 'button' | 'image' | 'container') => {
     const commonProps = {
@@ -112,6 +114,12 @@ export default function Toolbar() {
     else if (direction === 'out') newZoom = Math.max(state.zoom - 0.1, 0.2);
     else newZoom = 1;
     dispatch({ type: 'SET_ZOOM', payload: { zoom: newZoom } });
+  };
+  
+  const handlePreview = () => {
+    localStorage.setItem('ura-preview-project', JSON.stringify(state.project));
+    window.open('/preview', '_blank');
+    setShowPreviewIcon(false);
   };
 
   return (
@@ -256,6 +264,28 @@ export default function Toolbar() {
           </TooltipTrigger>
           <TooltipContent side="right"><p>Crop Tool (Coming Soon)</p></TooltipContent>
         </Tooltip>
+
+        <div className="w-10 my-0.5 border-t border-border" />
+
+        {showPreviewIcon ? (
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handlePreview}>
+                        <Eye />
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right"><p>Preview Project</p></TooltipContent>
+            </Tooltip>
+        ) : (
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowPreviewIcon(true)}>
+                        <Monitor />
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right"><p>Digital Preview</p></TooltipContent>
+            </Tooltip>
+        )}
 
       </TooltipProvider>
     </aside>
