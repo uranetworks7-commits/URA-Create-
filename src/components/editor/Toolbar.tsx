@@ -257,7 +257,7 @@ export default function Toolbar() {
 
   const handleBuild = () => {
     localStorage.setItem('ura-preview-project', JSON.stringify(state.project));
-    window.open('/build', '_blank');
+    window.location.href = '/build';
   };
 
   const handleQuickBuild = () => {
@@ -590,5 +590,6 @@ export default function Toolbar() {
     
 
     
+
 
 
