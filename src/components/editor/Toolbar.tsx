@@ -87,15 +87,17 @@ export default function Toolbar() {
       };
       dispatch({ type: 'ADD_ELEMENT', payload: { element } });
     } else if (type === 'image') {
-       const placeholder = PlaceHolderImages[0] || { imageUrl: 'https://picsum.photos/seed/default/400/300' };
-      const element: ImageElement = {
-        ...commonProps,
-        type: 'image',
-        name: 'Image',
-        src: placeholder.imageUrl,
-        size: { width: 300, height: 200 },
-      };
-      dispatch({ type: 'ADD_ELEMENT', payload: { element } });
+      const src = window.prompt("Enter the image URL:");
+      if (src) {
+        const element: ImageElement = {
+          ...commonProps,
+          type: 'image',
+          name: 'Image',
+          src: src,
+          size: { width: 300, height: 200 },
+        };
+        dispatch({ type: 'ADD_ELEMENT', payload: { element } });
+      }
     } else if (type === 'container') {
       const element: ContainerElement = {
         ...commonProps,
