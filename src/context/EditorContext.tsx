@@ -9,6 +9,7 @@ type EditorAction =
   | { type: 'NEW_PROJECT'; payload: { backgroundColor: string, name: string } }
   | { type: 'NEW_PROJECT_FROM_TEMPLATE'; payload: { template: Page, name: string } }
   | { type: 'LOAD_PROJECT'; payload: Project }
+  | { type: 'UPDATE_PROJECT_NAME'; payload: { name: string } }
   | { type: 'ADD_PAGE' }
   | { type: 'DELETE_PAGE'; payload: { pageId: string } }
   | { type: 'SWITCH_PAGE'; payload: { pageIndex: number } }
@@ -89,6 +90,9 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
                 draft.initialElementSizes[el.id] = el.size;
             });
         });
+        break;
+      case 'UPDATE_PROJECT_NAME':
+        draft.project.name = action.payload.name;
         break;
       case 'ADD_PAGE': {
         const newPage = createNewPage(`Page ${draft.project.pages.length + 1}`, '#ffffff');

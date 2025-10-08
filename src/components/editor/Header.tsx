@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2, Trash2 } from 'lucide-react';
 import { useEditor } from '@/context/EditorContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -45,12 +45,19 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
   const [selectedCloudProject, setSelectedCloudProject] = useState<ProjectWithId | null>(null);
   
   const [saveAccessId, setSaveAccessId] = useState('');
+  const [saveProjectName, setSaveProjectName] = useState(state.project.name);
   const [isSaving, setIsSaving] = useState(false);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<ProjectWithId | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deleteAgreed, setDeleteAgreed] = useState(false);
+
+  useEffect(() => {
+    if (isSaveDialogOpen) {
+      setSaveProjectName(state.project.name);
+    }
+  }, [isSaveDialogOpen, state.project.name]);
   
   const handleAccessIdSubmit = async () => {
     if (accessId.length !== 6) {
@@ -84,21 +91,34 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
         toast({ variant: 'destructive', title: 'Invalid ID', description: 'Access ID must be 6 digits.' });
         return;
       }
+       if (!saveProjectName.trim()) {
+        toast({ variant: 'destructive', title: 'Invalid Name', description: 'Project name cannot be empty.' });
+        return;
+      }
+
       setIsSaving(true);
+      
+      const projectToSave = {
+        ...state.project,
+        name: saveProjectName,
+      };
+
       try {
-        const savedProject = await saveProjectToDb(saveAccessId, state.project, null, false);
+        const savedProject = await saveProjectToDb(saveAccessId, projectToSave, null, false);
+        dispatch({ type: 'UPDATE_PROJECT_NAME', payload: { name: saveProjectName } });
         toast({ title: 'Project Saved!', description: `Saved "${savedProject.project.name}" to ID: ${saveAccessId}` });
         setIsSaveDialogOpen(false);
         setSaveAccessId('');
       } catch(e) {
         if ((e as Error).message.includes('Project name already exists')) {
-             const confirmOverwrite = window.confirm(`A project named "${state.project.name}" already exists. Do you want to overwrite it?`);
+             const confirmOverwrite = window.confirm(`A project named "${saveProjectName}" already exists. Do you want to overwrite it?`);
              if (confirmOverwrite) {
                 const projects = await loadProjectsFromDb(saveAccessId);
-                const existing = projects.find(p => p.project.name === state.project.name);
+                const existing = projects.find(p => p.project.name === saveProjectName);
                 if (existing) {
-                    await saveProjectToDb(saveAccessId, state.project, existing.id, true);
-                    toast({ title: 'Project Overwritten!', description: `Updated "${state.project.name}"` });
+                    await saveProjectToDb(saveAccessId, projectToSave, existing.id, true);
+                    dispatch({ type: 'UPDATE_PROJECT_NAME', payload: { name: saveProjectName } });
+                    toast({ title: 'Project Overwritten!', description: `Updated "${saveProjectName}"` });
                     setIsSaveDialogOpen(false);
                     setSaveAccessId('');
                 }
@@ -254,8 +274,14 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
                 <DialogDescription>Enter a 6-digit ID to save your project. Anyone with this ID can load it.</DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <Label htmlFor="save-id">Project ID</Label>
-                    <Input id="save-id" value={saveAccessId} onChange={(e) => setSaveAccessId(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="e.g., 123456" maxLength={6} />
+                    <div className="space-y-1">
+                        <Label htmlFor="save-name">Project Name</Label>
+                        <Input id="save-name" value={saveProjectName} onChange={(e) => setSaveProjectName(e.target.value)} placeholder="My Awesome Project" />
+                    </div>
+                     <div className="space-y-1">
+                        <Label htmlFor="save-id">Project ID</Label>
+                        <Input id="save-id" value={saveAccessId} onChange={(e) => setSaveAccessId(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="e.g., 123456" maxLength={6} />
+                    </div>
                 </div>
                 <DialogFooter>
                 <Button onClick={handleSaveProject} disabled={isSaving} size="sm">
