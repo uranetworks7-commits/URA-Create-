@@ -19,7 +19,9 @@ type EditorAction =
   | { type: 'DELETE_ELEMENT'; payload: { elementId: string } }
   | { type: 'SELECT_ELEMENT'; payload: { elementId: string | null } }
   | { type: 'TOGGLE_SETTINGS' }
-  | { type: 'SET_MOVE_INCREMENT'; payload: { increment: number } };
+  | { type: 'SET_MOVE_INCREMENT'; payload: { increment: number } }
+  | { type: 'SET_ZOOM'; payload: { zoom: number } }
+  | { type: 'RESIZE_ELEMENT'; payload: { elementId: string; scale: number } };
 
 const createNewPage = (name: string, backgroundColor: string): Page => ({
   id: crypto.randomUUID(),
@@ -38,6 +40,8 @@ const initialState: EditorState = {
   history: [],
   historyIndex: -1,
   moveIncrement: 10,
+  zoom: 1,
+  initialElementSizes: {},
 };
 
 const editorReducer = (state: EditorState, action: EditorAction): EditorState => {
@@ -49,6 +53,7 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
         draft.currentPageIndex = 0;
         draft.selectedElementId = null;
         draft.showSettings = false;
+        draft.initialElementSizes = {};
         break;
       }
       case 'NEW_PROJECT_FROM_TEMPLATE': {
@@ -60,6 +65,10 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
         draft.currentPageIndex = 0;
         draft.selectedElementId = null;
         draft.showSettings = false;
+        draft.initialElementSizes = {};
+        newPage.elements.forEach(el => {
+          draft.initialElementSizes[el.id] = el.size;
+        });
         break;
       }
       case 'LOAD_PROJECT':
@@ -67,6 +76,12 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
         draft.currentPageIndex = 0;
         draft.selectedElementId = null;
         draft.showSettings = false;
+        draft.initialElementSizes = {};
+        action.payload.pages.forEach(p => {
+            p.elements.forEach(el => {
+                draft.initialElementSizes[el.id] = el.size;
+            });
+        });
         break;
       case 'ADD_PAGE': {
         const newPage = createNewPage(`Page ${draft.project.pages.length + 1}`, '#ffffff');
@@ -100,20 +115,22 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
       }
       case 'ADD_ELEMENT': {
         if (draft.currentPageIndex !== -1) {
-          draft.project.pages[draft.currentPageIndex].elements.push(action.payload.element);
-          draft.selectedElementId = action.payload.element.id;
+          const element = action.payload.element;
+          draft.project.pages[draft.currentPageIndex].elements.push(element);
+          draft.selectedElementId = element.id;
           draft.showSettings = true;
+          draft.initialElementSizes[element.id] = element.size;
         }
         break;
       }
       case 'ADD_ELEMENTS': {
         if (draft.currentPageIndex !== -1) {
-            const newElements = action.payload.elements.map(el => ({
-                ...el,
-                id: crypto.randomUUID() // Ensure unique IDs
-            }));
+            const newElements = action.payload.elements.map(el => {
+                const newEl = { ...el, id: crypto.randomUUID() };
+                draft.initialElementSizes[newEl.id] = newEl.size;
+                return newEl;
+            });
             draft.project.pages[draft.currentPageIndex].elements.push(...newElements);
-            // Don't auto-select when adding a group of elements
         }
         break;
       }
@@ -131,6 +148,7 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
         if (draft.currentPageIndex !== -1) {
           const page = draft.project.pages[draft.currentPageIndex];
           page.elements = page.elements.filter(el => el.id !== action.payload.elementId);
+          delete draft.initialElementSizes[action.payload.elementId];
           if (draft.selectedElementId === action.payload.elementId) {
             draft.selectedElementId = null;
             draft.showSettings = false;
@@ -152,6 +170,32 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
       case 'SET_MOVE_INCREMENT':
         draft.moveIncrement = action.payload.increment;
         break;
+      case 'SET_ZOOM':
+        draft.zoom = action.payload.zoom;
+        break;
+      case 'RESIZE_ELEMENT': {
+        if (draft.currentPageIndex === -1) break;
+        const { elementId, scale } = action.payload;
+        const page = draft.project.pages[draft.currentPageIndex];
+        const element = page.elements.find(el => el.id === elementId);
+        
+        if (element) {
+          const initialSize = draft.initialElementSizes[elementId];
+          if (!initialSize) { // Should not happen if ADD_ELEMENT is correct
+             draft.initialElementSizes[elementId] = element.size;
+          }
+
+          if (scale === 1) { // Reset to initial size
+            element.size = draft.initialElementSizes[elementId] || element.size;
+          } else {
+            element.size = {
+              width: element.size.width * scale,
+              height: element.size.height * scale,
+            };
+          }
+        }
+        break;
+      }
     }
   });
 };

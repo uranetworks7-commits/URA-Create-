@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useEditor } from '@/context/EditorContext';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import type { ButtonElement, ContainerElement, ImageElement, TextElement } from '@/lib/types';
-import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -100,6 +100,19 @@ export default function Toolbar() {
     dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, position: newPosition } });
   }
 
+  const handleResize = (scale: number) => {
+    if (!selectedElement) return;
+    dispatch({ type: 'RESIZE_ELEMENT', payload: { elementId: selectedElement.id, scale } });
+  };
+
+  const handleZoom = (direction: 'in' | 'out' | 'reset') => {
+    let newZoom = state.zoom;
+    if (direction === 'in') newZoom = Math.min(state.zoom + 0.1, 2);
+    else if (direction === 'out') newZoom = Math.max(state.zoom - 0.1, 0.2);
+    else newZoom = 1;
+    dispatch({ type: 'SET_ZOOM', payload: { zoom: newZoom } });
+  };
+
   return (
     <aside className="w-20 border-r bg-card flex flex-col items-center gap-2 py-4 z-10">
       <TooltipProvider>
@@ -135,6 +148,42 @@ export default function Toolbar() {
                 </div>
             </div>
           )}
+        </div>
+
+        <div className="w-10 my-1 border-t border-border" />
+        
+        <div className="flex flex-col items-center gap-1 w-full px-2">
+            <Tooltip>
+                <TooltipTrigger asChild><Button variant={isElementSelected ? "secondary" : "ghost"} size="icon" disabled={!isElementSelected}><Expand/></Button></TooltipTrigger>
+                <TooltipContent side="right"><p>Size Tool</p></TooltipContent>
+            </Tooltip>
+            {isElementSelected && (
+                 <div className='flex flex-col gap-2 items-center p-2 border-t mt-1 w-full'>
+                    <Button variant="outline" className='h-8 w-full' onClick={() => handleResize(2)}>2x</Button>
+                    <Button variant="outline" className='h-8 w-full' onClick={() => handleResize(0.5)}>0.5x</Button>
+                    <Button variant="outline" className='h-8 w-full' onClick={() => handleResize(1)}>1x Reset</Button>
+                 </div>
+            )}
+        </div>
+
+         <div className="w-10 my-1 border-t border-border" />
+
+        <div className="flex flex-col items-center gap-1 w-full px-2">
+            <Tooltip>
+                <TooltipTrigger asChild><Button variant="secondary" size="icon"><ZoomIn/></Button></TooltipTrigger>
+                <TooltipContent side="right"><p>Zoom Tool</p></TooltipContent>
+            </Tooltip>
+             <div className='flex flex-col gap-2 items-center p-2 border-t mt-1 w-full'>
+                <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleZoom('in')}><ZoomIn className='h-4 w-4'/></Button>
+                <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleZoom('out')}><ZoomOut className='h-4 w-4'/></Button>
+                 <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleZoom('reset')}><RotateCcw className='h-4 w-4'/></Button>
+                <div className="mt-2 space-y-1 text-center">
+                    <Label className="text-xs">Zoom</Label>
+                    <div className="w-14 h-8 text-center font-bold text-sm flex items-center justify-center">
+                        {Math.round(state.zoom * 100)}%
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div className="w-10 my-1 border-t border-border" />

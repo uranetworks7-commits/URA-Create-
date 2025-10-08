@@ -68,4 +68,6 @@ export interface EditorState {
   history: Project[];
   historyIndex: number;
   moveIncrement: number;
+  zoom: number;
+  initialElementSizes: { [elementId: string]: Size };
 }

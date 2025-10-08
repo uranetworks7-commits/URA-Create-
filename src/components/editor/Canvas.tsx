@@ -5,7 +5,7 @@ import Element from './Element';
 
 export default function Canvas() {
   const { state, dispatch } = useEditor();
-  const { project, currentPageIndex } = state;
+  const { project, currentPageIndex, zoom } = state;
 
   const currentPage = project.pages[currentPageIndex];
 
@@ -19,21 +19,36 @@ export default function Canvas() {
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     // Deselect if clicking on canvas itself
-    if (e.target === e.currentTarget) {
+    if (e.target === e.currentTarget || (e.target as HTMLElement).id === 'canvas-scaler') {
       dispatch({ type: 'SELECT_ELEMENT', payload: { elementId: null } });
     }
   };
 
   return (
     <div
-      id="canvas"
-      className="relative h-full w-full rounded-md shadow-inner overflow-hidden"
-      style={{ backgroundColor: currentPage.backgroundColor }}
+      id="canvas-container"
+      className="relative h-full w-full rounded-md shadow-inner overflow-auto"
       onClick={handleCanvasClick}
     >
-      {currentPage.elements.map(element => (
-        <Element key={element.id} element={element} />
-      ))}
+      <div
+        id="canvas-scaler"
+        className="relative origin-top-left transition-transform duration-200"
+        style={{ 
+          transform: `scale(${zoom})`,
+          width: `${100 / zoom}%`,
+          height: `${100 / zoom}%`,
+         }}
+      >
+        <div 
+          id="canvas"
+          className="relative h-full w-full"
+          style={{ backgroundColor: currentPage.backgroundColor }}
+        >
+          {currentPage.elements.map(element => (
+            <Element key={element.id} element={element} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
