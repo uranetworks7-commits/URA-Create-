@@ -100,7 +100,10 @@ export default function EditorView() {
   
   return (
     <div className="flex h-screen w-screen flex-col bg-muted/30 dark:bg-card/20 text-foreground font-sans">
-      <Header onStartNew={() => setIsStarted(false)} />
+      <Header onStartNew={() => {
+          dispatch({ type: 'LOAD_PROJECT', payload: { pages: [] } });
+          setIsStarted(false);
+        }} />
       <div className="flex flex-1 overflow-hidden">
         <Toolbar />
         <main className="flex-1 flex flex-col overflow-auto p-1 sm:p-2 gap-2">
