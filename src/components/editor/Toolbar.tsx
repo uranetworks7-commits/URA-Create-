@@ -3,9 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor } from '@/context/EditorContext';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import type { ButtonElement, ContainerElement, ImageElement, Project, TextElement, VideoElement } from '@/lib/types';
-import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud, Video } from 'lucide-react';
+import { Type, Square, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -19,6 +18,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Textarea } from '../ui/textarea';
 import PreviewDialog from './PreviewDialog';
 import { uploadImage } from '@/ai/flows/upload-image-flow';
+import { Separator } from '../ui/separator';
 
 
 export default function Toolbar() {
@@ -29,12 +29,15 @@ export default function Toolbar() {
 
   const [isShareDialogOpen, setShareIsDialogOpen] = useState(false);
   const [isQuickBuilderOpen, setQuickBuilderOpen] = useState(false);
-  const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
+  const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
   const [quickBuilderCode, setQuickBuilderCode] = useState('');
   const [projectId, setProjectId] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const [imageUrl, setImageUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
 
   const handleShare = async () => {
     if (projectId.length !== 6) {
@@ -86,7 +89,7 @@ export default function Toolbar() {
       }
   }
 
-  const addElement = (type: 'text' | 'button' | 'container' | 'video' | 'image') => {
+  const addElement = (type: 'text' | 'button' | 'container') => {
     const commonProps = {
       id: crypto.randomUUID(),
       position: { x: 50, y: 50 },
@@ -129,49 +132,58 @@ export default function Toolbar() {
         size: { width: 300, height: 200 },
       };
        dispatch({ type: 'ADD_ELEMENT', payload: { element } });
-    } else if (type === 'video') {
-        const src = window.prompt("Enter the video URL:");
-        if (src) {
-            addVideoElement(src);
-        }
-    } else if (type === 'image') {
-        setIsImageUploadOpen(true);
     }
   };
   
   const handleAddImageFromUrl = () => {
-    setIsImageUploadOpen(false);
-    const src = window.prompt("Enter the image URL:");
-    if (src) {
-      addImageElement(src);
+    if (imageUrl) {
+        addImageElement(imageUrl);
+        setImageUrl('');
+        setIsMediaDialogOpen(false);
+    } else {
+        toast({variant: 'destructive', title: 'Invalid URL', description: 'Please enter a valid image URL.'})
     }
   }
   
-  const handleAddImageFromDevice = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsImageUploadOpen(false);
+  const handleAddVideoFromUrl = () => {
+    if (videoUrl) {
+        addVideoElement(videoUrl);
+        setVideoUrl('');
+        setIsMediaDialogOpen(false);
+    } else {
+        toast({variant: 'destructive', title: 'Invalid URL', description: 'Please enter a valid video URL.'})
+    }
+  }
+  
+  const handleAddFromDevice = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) { // 2MB limit
-        toast({ variant: 'destructive', title: 'File too large', description: 'Please upload an image smaller than 2MB.' });
+        toast({ variant: 'destructive', title: 'File too large', description: 'Please upload a file smaller than 2MB.' });
         return;
     }
 
     const reader = new FileReader();
     reader.onload = async (e) => {
         const dataUrl = e.target?.result as string;
-        toast({ title: 'Uploading image...', description: 'Please wait a moment.' });
+        toast({ title: 'Uploading file...', description: 'Please wait a moment.' });
         try {
-            const result = await uploadImage({ imageDataUrl: dataUrl });
+            const result = await uploadImage({ imageDataUrl: dataUrl, contentType: file.type });
             if (result.imageUrl) {
-                addImageElement(result.imageUrl);
-                toast({ title: 'Image uploaded!', description: 'Your image has been added to the canvas.' });
+                if(file.type.startsWith('image/')) {
+                    addImageElement(result.imageUrl);
+                } else if (file.type.startsWith('video/')) {
+                    addVideoElement(result.imageUrl);
+                }
+                toast({ title: 'File uploaded!', description: 'Your file has been added to the canvas.' });
+                setIsMediaDialogOpen(false);
             } else {
                 throw new Error("Upload failed to return a URL.");
             }
         } catch (error) {
-            console.error('Image upload failed:', error);
-            toast({ variant: 'destructive', title: 'Upload Failed', description: 'Could not upload the image.' });
+            console.error('File upload failed:', error);
+            toast({ variant: 'destructive', title: 'Upload Failed', description: 'Could not upload the file.' });
         }
     };
     reader.readAsDataURL(file);
@@ -353,42 +365,47 @@ export default function Toolbar() {
           <TooltipContent side="right"><p>Add Button</p></TooltipContent>
         </Tooltip>
         
-        <Dialog open={isImageUploadOpen} onOpenChange={setIsImageUploadOpen}>
+        <Dialog open={isMediaDialogOpen} onOpenChange={setIsMediaDialogOpen}>
             <Tooltip>
             <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => addElement('image')}>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsMediaDialogOpen(true)}>
                     <Cloud />
                 </Button>
             </TooltipTrigger>
-            <TooltipContent side="right"><p>Add Image</p></TooltipContent>
+            <TooltipContent side="right"><p>Add Media</p></TooltipContent>
             </Tooltip>
-            <DialogContent className="sm:max-w-sm">
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Add Image</DialogTitle>
-                    <DialogDescription>Choose how to add your image to the canvas.</DialogDescription>
+                    <DialogTitle>Add Media</DialogTitle>
+                    <DialogDescription>Upload from your device, or add from a URL.</DialogDescription>
                 </DialogHeader>
-                <div className="grid grid-cols-2 gap-4 py-4">
-                    <Button variant="outline" onClick={handleAddImageFromUrl}>From URL</Button>
-                    <Button variant="outline" asChild>
+                <div className="space-y-4 py-4">
+                   <Button variant="outline" asChild className='w-full'>
                         <Label htmlFor="upload-device">
-                            From Device
-                            <Input id="upload-device" type="file" accept="image/*" className="sr-only" onChange={handleAddImageFromDevice} />
+                            Upload from Device
+                            <Input id="upload-device" type="file" accept="image/*,video/*" className="sr-only" onChange={handleAddFromDevice} />
                         </Label>
                     </Button>
+                    <Separator />
+                    <div className='space-y-2'>
+                        <Label>Image from URL</Label>
+                        <div className='flex gap-2'>
+                            <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://example.com/image.png" />
+                            <Button onClick={handleAddImageFromUrl}>Add</Button>
+                        </div>
+                    </div>
+                     <Separator />
+                    <div className='space-y-2'>
+                        <Label>Video from URL</Label>
+                         <div className='flex gap-2'>
+                            <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://example.com/video.mp4" />
+                            <Button onClick={handleAddVideoFromUrl}>Add</Button>
+                        </div>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>
         
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => addElement('video')}>
-              <Video />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="right"><p>Add Video</p></TooltipContent>
-        </Tooltip>
-
-
          <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => addElement('container')}>
