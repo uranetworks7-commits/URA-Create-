@@ -5,10 +5,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useEditor } from '@/context/EditorContext';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import type { ButtonElement, ContainerElement, ImageElement, TextElement } from '@/lib/types';
-import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal } from 'lucide-react';
+import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, Separator } from 'lucide-react';
+import { pageTemplates } from '@/lib/templates';
 
 export default function Toolbar() {
-  const { dispatch } = useEditor();
+  const { state, dispatch } = useEditor();
+  const isElementSelected = !!state.selectedElementId;
 
   const addElement = (type: 'text' | 'button' | 'image' | 'container') => {
     const commonProps = {
@@ -65,9 +67,25 @@ export default function Toolbar() {
     }
   };
 
+  const addTemplate = (templateId: string) => {
+    const template = pageTemplates.find(t => t.id === templateId);
+    if (template) {
+      dispatch({ type: 'ADD_ELEMENTS', payload: { elements: template.elements } });
+    }
+  }
+
   return (
     <aside className="w-16 border-r bg-card flex flex-col items-center gap-2 py-4 z-10">
       <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant={isElementSelected ? "secondary" : "ghost"} size="icon" disabled={!isElementSelected}>
+              <Move />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right"><p>Move Element (Drag)</p></TooltipContent>
+        </Tooltip>
+         <div className="w-10 my-1 border-t border-border" />
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" onClick={() => addElement('text')}>
@@ -100,13 +118,30 @@ export default function Toolbar() {
           </TooltipTrigger>
           <TooltipContent side="right"><p>Add Container</p></TooltipContent>
         </Tooltip>
+        <div className="w-10 my-1 border-t border-border" />
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={() => { /* Implement crop functionality */ }}>
-              <Crop />
+            <Button variant="ghost" size="icon" onClick={() => addTemplate('template-mcq')}>
+              <FileText />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="right"><p>Crop Image</p></TooltipContent>
+          <TooltipContent side="right"><p>Add MCQ Template</p></TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" onClick={() => addTemplate('template-table')}>
+              <Table />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right"><p>Add Table Template</p></TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" onClick={() => addTemplate('template-content')}>
+              <FileText />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right"><p>Add Content Template</p></TooltipContent>
         </Tooltip>
       </TooltipProvider>
     </aside>

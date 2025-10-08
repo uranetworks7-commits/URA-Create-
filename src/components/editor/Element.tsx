@@ -5,6 +5,7 @@ import type { ButtonElement, ContainerElement, EditorElement, ImageElement, Text
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 interface ElementProps {
   element: EditorElement;
@@ -30,6 +31,7 @@ export default function Element({ element }: ElementProps) {
   const handleDragStart = (e: React.MouseEvent) => {
     if (!isSelected) return;
     e.stopPropagation();
+    // prevent default to avoid text selection etc.
     e.preventDefault();
     setIsDragging(true);
   };
@@ -138,12 +140,7 @@ export default function Element({ element }: ElementProps) {
         return null;
     }
   };
-
-  const animationClass = state.selectedElementId === element.id && element.animation 
-      ? element.animation 
-      : (element.animation && !element.animation.includes('infinite') ? element.animation : '');
-
-
+  
   return (
     <div
       ref={ref}
@@ -156,15 +153,15 @@ export default function Element({ element }: ElementProps) {
         transform: `rotate(${element.rotation || 0}deg)`,
         outline: isSelected ? '2px solid hsl(var(--accent))' : 'none',
         outlineOffset: '2px',
-        cursor: isDragging ? 'grabbing' : (isSelected ? 'grab' : 'pointer'),
+        cursor: isSelected ? (isDragging ? 'grabbing' : 'grab') : 'pointer',
         transition: 'outline 0.1s ease-in-out',
         borderRadius: element.type === 'button' ? `${(element as ButtonElement).borderRadius}px` : '2px',
       }}
-      className={`${element.animation || ''}`}
+      className={cn(element.animation || '')}
       onClick={handleSelect}
       onMouseDown={handleDragStart}
     >
-      <div className="w-full h-full relative">
+      <div className="w-full h-full relative pointer-events-none">
         {renderSpecificElement()}
       </div>
       {isSelected && (
