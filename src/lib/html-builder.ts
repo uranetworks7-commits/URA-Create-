@@ -112,7 +112,7 @@ export const generateHtmlForProject = (project: Project): string => {
     <html lang="en">
     <head>
       <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
       <title>${project.name || 'URA Project'}</title>
       <style>
         body, html { margin: 0; padding: 0; font-family: sans-serif; overflow: hidden; }
@@ -367,7 +367,7 @@ export const generateHtmlForProject = (project: Project): string => {
                     else if (this.shotCounter === this.TIER_30_SHOT) { nextShotType = 'nuclear'; centerShot = true; }
                     
                     const launchX = centerShot ? this.canvas.width / 2 : Math.random() * this.canvas.width;
-                    this.rockets.push(new this.Rocket(launchX, this, nextShotType));
+                    this.rockets.push(new this.Rocket(launchX, this.canvas.height, this, nextShotType));
 
                     if (nextShotType !== 'normal') {
                         if (nextShotType === 'nuclear') this.shotCounter = 0;
@@ -447,10 +447,10 @@ export const generateHtmlForProject = (project: Project): string => {
               }
 
               Rocket = class {
-                constructor(x, instance, shotType = 'normal') {
+                constructor(x, y, instance, shotType = 'normal') {
                   this.instance = instance;
                   this.x = x;
-                  this.y = this.instance.canvas.parentElement.clientHeight;
+                  this.y = y;
                   this.shotType = shotType;
                   const config = {
                       normal: { speed: 7, colors: ['#FFD700', '#FFA500', '#ADD8E6', '#FFFFFF'], targetY: 0.4, tailLength: 15, headSize: 2.1, headShadow: 8 },
