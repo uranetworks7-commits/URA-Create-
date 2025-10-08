@@ -142,6 +142,16 @@ export default function PreviewPage() {
     );
   }
 
+  // Handle custom HTML page
+  if (currentPage.isCustomHtml) {
+    return (
+      <main className="h-screen w-screen overflow-auto">
+        <div dangerouslySetInnerHTML={{ __html: currentPage.customHtml || '' }} />
+        <audio ref={audioRef} />
+      </main>
+    );
+  }
+
   const canvasStyle: React.CSSProperties = {
     position: 'relative',
     width: '100%',
