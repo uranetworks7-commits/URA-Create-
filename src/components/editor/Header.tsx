@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2, Eye } from 'lucide-react';
+import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2 } from 'lucide-react';
 import { useEditor } from '@/context/EditorContext';
 import { useState } from 'react';
 import {
@@ -64,11 +64,6 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handlePreview = () => {
-    localStorage.setItem('ura-preview-project', JSON.stringify(state.project));
-    window.open('/preview', '_blank');
   };
 
   const canUndo = state.historyIndex > 0;

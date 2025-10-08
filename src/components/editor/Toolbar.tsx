@@ -5,17 +5,44 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useEditor } from '@/context/EditorContext';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import type { ButtonElement, ContainerElement, ImageElement, TextElement } from '@/lib/types';
-import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw, Monitor, Eye } from 'lucide-react';
+import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw, Monitor, Eye, Github, HardHat, Share2 } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { saveProjectToDb } from '@/lib/firebase';
+import { Loader2 } from 'lucide-react';
 
 export default function Toolbar() {
   const { state, dispatch } = useEditor();
   const isElementSelected = !!state.selectedElementId;
   const selectedElement = state.project.pages[state.currentPageIndex]?.elements.find(el => el.id === state.selectedElementId);
-  const [showPreviewIcon, setShowPreviewIcon] = useState(false);
+  const [showDigitalMenu, setShowDigitalMenu] = useState(false);
+
+  const [isShareDialogOpen, setShareIsDialogOpen] = useState(false);
+  const [projectId, setProjectId] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
+
+  const handleShare = async () => {
+    if (projectId.length !== 6) {
+      toast({ variant: 'destructive', title: 'Invalid ID', description: 'Project ID must be 6 digits.' });
+      return;
+    }
+    setIsSaving(true);
+    try {
+      await saveProjectToDb(projectId, state.project);
+      toast({ title: 'Project Shared!', description: `Your project is saved under ID: ${projectId}` });
+      setShareIsDialogOpen(false);
+    } catch (e) {
+      const error = e as Error;
+      toast({ variant: 'destructive', title: 'Share Failed', description: error.message });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const addElement = (type: 'text' | 'button' | 'image' | 'container') => {
     const commonProps = {
@@ -119,7 +146,11 @@ export default function Toolbar() {
   const handlePreview = () => {
     localStorage.setItem('ura-preview-project', JSON.stringify(state.project));
     window.open('/preview', '_blank');
-    setShowPreviewIcon(false);
+  };
+
+  const handleBuild = () => {
+    localStorage.setItem('ura-preview-project', JSON.stringify(state.project));
+    window.open('/build', '_blank');
   };
 
   return (
@@ -267,23 +298,60 @@ export default function Toolbar() {
 
         <div className="w-10 my-0.5 border-t border-border" />
 
-        {showPreviewIcon ? (
-            <Tooltip>
+        {showDigitalMenu ? (
+            <div className="flex flex-col items-center gap-0.5 w-full px-1">
+              <Tooltip>
                 <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handlePreview}>
-                        <Eye />
-                    </Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handlePreview}>
+                    <Eye />
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent side="right"><p>Preview Project</p></TooltipContent>
-            </Tooltip>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleBuild}>
+                    <HardHat />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right"><p>Build Project</p></TooltipContent>
+              </Tooltip>
+               <Dialog open={isShareDialogOpen} onOpenChange={setShareIsDialogOpen}>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShareIsDialogOpen(true)}>
+                            <Share2 />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right"><p>Share Project</p></TooltipContent>
+                </Tooltip>
+                <DialogContent className="sm:max-w-sm">
+                    <DialogHeader>
+                    <DialogTitle>Share Project</DialogTitle>
+                    <DialogDescription>Enter a 6-digit ID to save your project. Anyone with this ID can load it.</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                    <Label htmlFor="share-id">Project ID</Label>
+                    <Input id="share-id" value={projectId} onChange={(e) => setProjectId(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="e.g., 123456" maxLength={6} />
+                    </div>
+                    <DialogFooter>
+                    <Button onClick={handleShare} disabled={isSaving} size="sm">
+                        {isSaving && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
+                        Save & Share
+                    </Button>
+                    </DialogFooter>
+                </DialogContent>
+               </Dialog>
+
+            </div>
         ) : (
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowPreviewIcon(true)}>
-                        <Monitor />
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowDigitalMenu(true)}>
+                        <Github />
                     </Button>
                 </TooltipTrigger>
-                <TooltipContent side="right"><p>Digital Preview</p></TooltipContent>
+                <TooltipContent side="right"><p>Digital Menu</p></TooltipContent>
             </Tooltip>
         )}
 
