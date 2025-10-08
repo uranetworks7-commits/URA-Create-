@@ -15,19 +15,21 @@ import { pageTemplates } from '@/lib/templates';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import type { Page } from '@/lib/types';
+import { Label } from '../ui/label';
 
 export default function EditorView() {
   const { state, dispatch } = useEditor();
   const [isStarted, setIsStarted] = useState(false);
+  const [projectName, setProjectName] = useState('My URA Project');
   const [pageColor, setPageColor] = useState('#ffffff');
   const [selectedTemplate, setSelectedTemplate] = useState<Page | null>(null);
 
   const handleStartProject = (e: React.FormEvent) => {
     e.preventDefault();
     if(selectedTemplate) {
-        dispatch({ type: 'NEW_PROJECT_FROM_TEMPLATE', payload: { template: selectedTemplate } });
+        dispatch({ type: 'NEW_PROJECT_FROM_TEMPLATE', payload: { template: selectedTemplate, name: projectName } });
     } else {
-        dispatch({ type: 'NEW_PROJECT', payload: { backgroundColor: pageColor } });
+        dispatch({ type: 'NEW_PROJECT', payload: { backgroundColor: pageColor, name: projectName } });
     }
     setIsStarted(true);
     setSelectedTemplate(null);
@@ -48,6 +50,15 @@ export default function EditorView() {
           </CardHeader>
           <CardContent>
              <form onSubmit={handleStartProject} className="space-y-3">
+                 <div className="space-y-1">
+                    <Label htmlFor="project-name">Project Name</Label>
+                    <Input 
+                        id="project-name"
+                        value={projectName}
+                        onChange={(e) => setProjectName(e.target.value)}
+                        placeholder="Enter your project name"
+                    />
+                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                     <Card 
                         className={cn(
@@ -101,7 +112,7 @@ export default function EditorView() {
   return (
     <div className="flex h-screen w-screen flex-col bg-muted/30 dark:bg-card/20 text-foreground font-sans">
       <Header onStartNew={() => {
-          dispatch({ type: 'LOAD_PROJECT', payload: { pages: [] } });
+          dispatch({ type: 'LOAD_PROJECT', payload: { name: 'New Project', pages: [] } });
           setIsStarted(false);
         }} />
       <div className="flex flex-1 overflow-hidden">

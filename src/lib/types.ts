@@ -61,6 +61,7 @@ export interface Page {
 }
 
 export interface Project {
+  name: string;
   pages: Page[];
 }
 

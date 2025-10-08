@@ -6,8 +6,8 @@ import { produce } from 'immer';
 import type { EditorElement, Page, Project, EditorState } from '@/lib/types';
 
 type EditorAction =
-  | { type: 'NEW_PROJECT'; payload: { backgroundColor: string } }
-  | { type: 'NEW_PROJECT_FROM_TEMPLATE'; payload: { template: Page } }
+  | { type: 'NEW_PROJECT'; payload: { backgroundColor: string, name: string } }
+  | { type: 'NEW_PROJECT_FROM_TEMPLATE'; payload: { template: Page, name: string } }
   | { type: 'LOAD_PROJECT'; payload: Project }
   | { type: 'ADD_PAGE' }
   | { type: 'DELETE_PAGE'; payload: { pageId: string } }
@@ -34,6 +34,7 @@ const createNewPage = (name: string, backgroundColor: string): Page => ({
 
 const initialState: EditorState = {
   project: {
+    name: 'Untitled Project',
     pages: [],
   },
   currentPageIndex: -1,
@@ -53,7 +54,7 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
     switch (action.type) {
       case 'NEW_PROJECT': {
         const firstPage = createNewPage('Page 1', action.payload.backgroundColor);
-        draft.project = { pages: [firstPage] };
+        draft.project = { name: action.payload.name, pages: [firstPage] };
         draft.currentPageIndex = 0;
         draft.selectedElementId = null;
         draft.showSettings = false;
@@ -65,7 +66,7 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
             ...action.payload.template,
             id: crypto.randomUUID(), // ensure a unique ID for the new page
         };
-        draft.project = { pages: [newPage] };
+        draft.project = { name: action.payload.name, pages: [newPage] };
         draft.currentPageIndex = 0;
         draft.selectedElementId = null;
         draft.showSettings = false;

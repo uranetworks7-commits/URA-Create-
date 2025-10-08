@@ -5,152 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Code, Download, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { Project, Page, EditorElement, ButtonElement } from '@/lib/types';
+import type { Project } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
+import { generateHtmlForProject } from '@/lib/html-builder';
 
-const generateHtmlForProject = (project: Project): string => {
-  const getElementStyle = (element: EditorElement): string => {
-    let style = `position: absolute; left: ${element.position.x}px; top: ${element.position.y}px; width: ${element.size.width}px; height: ${element.size.height}px; transform: rotate(${element.rotation || 0}deg); overflow: hidden;`;
-    
-    // Add animation styles directly if they exist
-    if (element.animation) {
-        switch(element.animation) {
-            case 'anim-fade-in': style += ` animation: fadeIn 0.5s ease-out forwards;`; break;
-            case 'anim-slide-in-up': style += ` animation: slideInUp 0.5s ease-out forwards;`; break;
-            case 'anim-pulse': style += ` animation: pulse 1.5s infinite ease-in-out;`; break;
-            case 'anim-pop': style += ` animation: pop 0.3s ease-out forwards;`; break;
-            default: style += ` animation: ${element.animation.replace('anim-','')} 0.5s ease-out forwards;`
-        }
-    }
-    
-    return style;
-  };
-
-  const getClipPathForShape = (shape: ButtonElement['shape']): string | undefined => {
-    switch (shape) {
-      case 'triangle-up': return 'polygon(50% 0%, 0% 100%, 100% 100%)';
-      case 'triangle-down': return 'polygon(0% 0%, 100% 0%, 50% 100%)';
-      default: return undefined;
-    }
-  }
-
-  const generateElementHtml = (element: EditorElement): string => {
-    let content = '';
-    let style = getElementStyle(element);
-
-    switch (element.type) {
-      case 'text':
-        style += `font-size: ${element.fontSize}px; color: ${element.color}; font-weight: ${element.fontWeight}; display: flex; align-items: center; justify-content: center;`;
-        content = `<div style="${style}">${element.content}</div>`;
-        break;
-      case 'button':
-        const clipPath = getClipPathForShape(element.shape);
-        let borderRadius;
-        if (element.shape === 'circle') borderRadius = '50%';
-        else if (element.shape === 'pill') borderRadius = '9999px';
-        else borderRadius = `${element.borderRadius}px`;
-        
-        const buttonInnerStyle = `font-size: ${element.fontSize}px; color: ${element.color}; background-color: ${element.backgroundColor}; font-weight: ${element.fontWeight}; border-radius: ${borderRadius}; width: 100%; height: 100%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;`;
-        const buttonWrapperStyle = clipPath ? `clip-path: ${clipPath};` : '';
-        content = `
-          <div style="${style}">
-            <div style="${buttonWrapperStyle} width: 100%; height: 100%;">
-              <button style="${buttonInnerStyle}" ${element.linkToPageId ? `data-link-to="${element.linkToPageId}"` : ''}>${element.content}</button>
-            </div>
-          </div>
-        `;
-        break;
-      case 'image':
-        content = `<div style="${style}"><img src="${element.src}" alt="image" style="width: 100%; height: 100%; object-fit: cover;" /></div>`;
-        break;
-      case 'container':
-        style += `background-color: ${element.backgroundColor};`;
-        content = `<div style="${style}"></div>`;
-        break;
-    }
-    return content;
-  };
-
-  const pagesHtml = project.pages.map((page, index) => {
-    const pageStyle = `position: relative; width: 100vw; height: 100vh; background-color: ${page.backgroundColor}; ${page.backgroundImage ? `background-image: url(${page.backgroundImage}); background-size: cover; background-position: center;` : ''}`;
-    const elementsHtml = page.elements.map(generateElementHtml).join('');
-    const redirectAttr = page.redirect?.toPageId ? `data-redirect-to="${page.redirect.toPageId}" data-redirect-delay="${page.redirect.delay * 1000}"` : '';
-    // Show first page by default
-    const displayStyle = index === 0 ? 'block' : 'none';
-    return `<div id="${page.id}" class="page" style="${displayStyle}; ${pageStyle}" ${redirectAttr}>${elementsHtml}</div>`;
-  }).join('');
-
-  return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Project Preview</title>
-      <style>
-        body, html { margin: 0; padding: 0; overflow: hidden; }
-        .page { width: 100vw; height: 100vh; }
-        
-        /* Animations */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        @keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-      </style>
-    </head>
-    <body>
-      ${pagesHtml}
-      <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const pages = document.querySelectorAll('.page');
-            let currentPageId = pages.length > 0 ? pages[0].id : null;
-            let redirectTimer;
-
-            function navigateTo(pageId) {
-              const targetPage = document.getElementById(pageId);
-              if (targetPage) {
-                pages.forEach(p => p.style.display = 'none');
-                targetPage.style.display = 'block';
-                currentPageId = pageId;
-                handleRedirect(targetPage);
-              }
-            }
-
-            function handleRedirect(pageElement) {
-                clearTimeout(redirectTimer);
-                const redirectTo = pageElement.getAttribute('data-redirect-to');
-                const delay = pageElement.getAttribute('data-redirect-delay');
-                if (redirectTo && delay) {
-                    redirectTimer = setTimeout(() => {
-                        navigateTo(redirectTo);
-                    }, parseInt(delay, 10));
-                }
-            }
-
-            document.body.addEventListener('click', (e) => {
-              if (e.target && e.target.tagName === 'BUTTON') {
-                const linkTo = e.target.getAttribute('data-link-to');
-                if (linkTo) {
-                  navigateTo(linkTo);
-                }
-              }
-            });
-            
-            // Initial page load redirect handling
-            if (currentPageId) {
-                const initialPage = document.getElementById(currentPageId);
-                if(initialPage) {
-                    handleRedirect(initialPage);
-                }
-            }
-        });
-      </script>
-    </body>
-    </html>
-  `;
-};
 
 export default function BuildPage() {
   const [isBuilding, setIsBuilding] = useState(false);
@@ -200,7 +59,7 @@ export default function BuildPage() {
       } finally {
         setIsBuilding(false);
       }
-    }, 1500); // Reduced timeout
+    }, 1500);
   };
 
   const handleDownloadSrc = () => {
@@ -212,11 +71,13 @@ export default function BuildPage() {
       });
       return;
     }
+    const storedProject = localStorage.getItem('ura-preview-project');
+    const project: Project = storedProject ? JSON.parse(storedProject) : { name: 'ura-project' };
     const blob = new Blob([generatedCode], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'ura-project.html';
+    a.download = `${project.name.toLowerCase().replace(/\s/g, '-') || 'ura-project'}.html`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

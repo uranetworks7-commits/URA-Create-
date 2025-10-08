@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useEditor } from '@/context/EditorContext';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import type { ButtonElement, ContainerElement, ImageElement, TextElement } from '@/lib/types';
-import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw, Eye, Github, HardHat, Share2 } from 'lucide-react';
+import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw, Eye, Github, HardHat, Share2, Code } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -14,6 +14,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useToast } from '@/hooks/use-toast';
 import { saveProjectToDb } from '@/lib/firebase';
 import { Loader2 } from 'lucide-react';
+import { generateHtmlForProject } from '@/lib/html-builder';
+import { ScrollArea } from '../ui/scroll-area';
+import { Textarea } from '../ui/textarea';
 
 export default function Toolbar() {
   const { state, dispatch } = useEditor();
@@ -22,6 +25,8 @@ export default function Toolbar() {
   const [showDigitalMenu, setShowDigitalMenu] = useState(false);
 
   const [isShareDialogOpen, setShareIsDialogOpen] = useState(false);
+  const [isQuickBuilderOpen, setQuickBuilderOpen] = useState(false);
+  const [quickBuilderCode, setQuickBuilderCode] = useState('');
   const [projectId, setProjectId] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
@@ -151,6 +156,12 @@ export default function Toolbar() {
   const handleBuild = () => {
     localStorage.setItem('ura-preview-project', JSON.stringify(state.project));
     window.open('/build', '_blank');
+  };
+
+  const handleQuickBuild = () => {
+    const html = generateHtmlForProject(state.project);
+    setQuickBuilderCode(html);
+    setQuickBuilderOpen(true);
   };
 
   return (
@@ -316,6 +327,14 @@ export default function Toolbar() {
                 </TooltipTrigger>
                 <TooltipContent side="right"><p>Build Project</p></TooltipContent>
               </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleQuickBuild}>
+                    <Code />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right"><p>Quick Builder</p></TooltipContent>
+              </Tooltip>
                <Dialog open={isShareDialogOpen} onOpenChange={setShareIsDialogOpen}>
                 <Tooltip>
                     <TooltipTrigger asChild>
@@ -355,9 +374,22 @@ export default function Toolbar() {
             </Tooltip>
         )}
 
+        <Dialog open={isQuickBuilderOpen} onOpenChange={setQuickBuilderOpen}>
+            <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>Quick Builder - HTML Code</DialogTitle>
+                    <DialogDescription>This is the generated HTML for your project. You can copy it from here.</DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-96 rounded-md border">
+                    <Textarea readOnly value={quickBuilderCode} className="h-full w-full font-mono text-xs" />
+                </ScrollArea>
+                <DialogFooter>
+                    <Button onClick={() => navigator.clipboard.writeText(quickBuilderCode)}>Copy to Clipboard</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
       </TooltipProvider>
     </aside>
   );
 }
-
-    
