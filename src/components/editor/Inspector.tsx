@@ -30,8 +30,9 @@ import { Switch } from '../ui/switch';
 export default function Inspector() {
   const { state, dispatch } = useEditor();
   const { project, currentPageIndex, selectedElementId, showSettings } = state;
+  const currentPage = project.pages[currentPageIndex];
 
-  const selectedElement = currentPageIndex === -1 ? null : project.pages[currentPageIndex].elements.find(el => el.id === selectedElementId);
+  const selectedElement = currentPage?.elements.find(el => el.id === selectedElementId);
 
   const updateElement = (payload: Partial<EditorElement> & { name?: string }) => {
     if (!selectedElementId) return;
