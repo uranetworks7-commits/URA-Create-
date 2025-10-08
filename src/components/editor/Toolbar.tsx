@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor } from '@/context/EditorContext';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import type { ButtonElement, ContainerElement, ImageElement, Project, TextElement } from '@/lib/types';
-import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud } from 'lucide-react';
+import type { ButtonElement, ContainerElement, ImageElement, Project, TextElement, VideoElement } from '@/lib/types';
+import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud, Video } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -69,8 +69,24 @@ export default function Toolbar() {
         dispatch({ type: 'ADD_ELEMENT', payload: { element } });
       }
   }
+  
+  const addVideoElement = (src: string) => {
+     if (src) {
+        const element: VideoElement = {
+          id: crypto.randomUUID(),
+          position: { x: 50, y: 50 },
+          rotation: 0,
+          animation: '',
+          type: 'video',
+          name: 'Video',
+          src: src,
+          size: { width: 300, height: 200 },
+        };
+        dispatch({ type: 'ADD_ELEMENT', payload: { element } });
+      }
+  }
 
-  const addElement = (type: 'text' | 'button' | 'container') => {
+  const addElement = (type: 'text' | 'button' | 'container' | 'video') => {
     const commonProps = {
       id: crypto.randomUUID(),
       position: { x: 50, y: 50 },
@@ -113,13 +129,20 @@ export default function Toolbar() {
         size: { width: 300, height: 200 },
       };
        dispatch({ type: 'ADD_ELEMENT', payload: { element } });
+    } else if (type === 'video') {
+        const src = window.prompt("Enter the video URL:");
+        if (src) {
+            addVideoElement(src);
+        }
     }
   };
   
   const handleAddImageFromUrl = () => {
     setIsImageUploadOpen(false);
     const src = window.prompt("Enter the image URL:");
-    addImageElement(src || '');
+    if (src) {
+      addImageElement(src);
+    }
   }
   
   const handleAddImageFromDevice = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -353,6 +376,16 @@ export default function Toolbar() {
                 </div>
             </DialogContent>
         </Dialog>
+        
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => addElement('video')}>
+              <Video />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right"><p>Add Video</p></TooltipContent>
+        </Tooltip>
+
 
          <Tooltip>
           <TooltipTrigger asChild>

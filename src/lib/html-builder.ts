@@ -56,6 +56,9 @@ export const generateHtmlForProject = (project: Project): string => {
       case 'image':
         content = `<div style="${style}"><img src="${element.src}" alt="image" style="width: 100%; height: 100%; object-fit: cover;" /></div>`;
         break;
+      case 'video':
+        content = `<div style="${style}"><video src="${element.src}" muted autoplay loop style="width: 100%; height: 100%; object-fit: cover;"></video></div>`;
+        break;
       case 'container':
         style += `background-color: ${element.backgroundColor};`;
         content = `<div style="${style}"></div>`;

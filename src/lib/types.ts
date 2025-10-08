@@ -1,4 +1,4 @@
-export type ElementType = 'text' | 'button' | 'image' | 'container';
+export type ElementType = 'text' | 'button' | 'image' | 'container' | 'video';
 
 export type Position = { x: number; y: number };
 export type Size = { width: number; height: number };
@@ -40,12 +40,17 @@ export interface ImageElement extends BaseElement {
   src: string;
 }
 
+export interface VideoElement extends BaseElement {
+  type: 'video';
+  src: string;
+}
+
 export interface ContainerElement extends BaseElement {
     type: 'container',
     backgroundColor: string;
 }
 
-export type EditorElement = TextElement | ButtonElement | ImageElement | ContainerElement;
+export type EditorElement = TextElement | ButtonElement | ImageElement | ContainerElement | VideoElement;
 
 export interface Page {
   id:string;

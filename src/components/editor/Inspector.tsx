@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '../ui/button';
 import { Trash2, Copy, Palette, Link, Clock, Edit, Settings, FilePenLine, X, Pencil } from 'lucide-react';
-import type { ButtonElement, ButtonShape, ContainerElement, EditorElement, ImageElement, TextElement } from '@/lib/types';
+import type { ButtonElement, ButtonShape, ContainerElement, EditorElement, ImageElement, TextElement, VideoElement } from '@/lib/types';
 import { ScrollArea } from '../ui/scroll-area';
 import { Slider } from '../ui/slider';
 import { Separator } from '../ui/separator';
@@ -54,9 +54,9 @@ export default function Inspector() {
     dispatch({ type: 'DELETE_ELEMENT', payload: { elementId: selectedElementId } });
   };
   
-  const handleChangeImageUrl = () => {
-    if (!selectedElement || selectedElement.type !== 'image') return;
-    const newSrc = window.prompt("Enter the new image URL:", selectedElement.src);
+  const handleChangeMediaUrl = (type: 'image' | 'video') => {
+    if (!selectedElement || (selectedElement.type !== 'image' && selectedElement.type !== 'video')) return;
+    const newSrc = window.prompt(`Enter the new ${type} URL:`, selectedElement.src);
     if (newSrc !== null) { // prompt returns null on cancel
         updateElement({ src: newSrc });
     }
@@ -151,7 +151,7 @@ export default function Inspector() {
                     <div className="space-y-1">
                         <Label htmlFor="src">Image Source</Label>
                         <div className="flex items-center gap-2">
-                            <Button onClick={handleChangeImageUrl} variant="outline" className="w-full" size="sm">
+                            <Button onClick={() => handleChangeMediaUrl('image')} variant="outline" className="w-full" size="sm">
                                 <Pencil className="mr-2 h-3 w-3" /> Change Image URL
                             </Button>
                             <DropdownMenu>
@@ -173,6 +173,22 @@ export default function Inspector() {
                         value={(el as ImageElement).src} 
                         className="h-20 text-xs text-muted-foreground"
                         placeholder="Image URL will appear here"
+                    />
+                </div>
+            )}
+             {el.type === 'video' && (
+                <div className="space-y-2">
+                    <div className="space-y-1">
+                        <Label htmlFor="src">Video Source</Label>
+                        <Button onClick={() => handleChangeMediaUrl('video')} variant="outline" className="w-full" size="sm">
+                            <Pencil className="mr-2 h-3 w-3" /> Change Video URL
+                        </Button>
+                    </div>
+                     <Textarea 
+                        readOnly 
+                        value={(el as VideoElement).src} 
+                        className="h-20 text-xs text-muted-foreground"
+                        placeholder="Video URL will appear here"
                     />
                 </div>
             )}

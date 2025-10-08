@@ -1,7 +1,7 @@
 'use client';
 
 import { useEditor } from '@/context/EditorContext';
-import type { ButtonElement, ContainerElement, EditorElement, ImageElement, TextElement } from '@/lib/types';
+import type { ButtonElement, ContainerElement, EditorElement, ImageElement, TextElement, VideoElement } from '@/lib/types';
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import Image from 'next/image';
@@ -19,15 +19,15 @@ export default function Element({ element }: ElementProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [resizeCorner, setResizeCorner] = useState<'br' | 'tl' | 'tr' | 'bl' | null>(null);
-  const [imageError, setImageError] = useState(false);
+  const [mediaError, setMediaError] = useState(false);
 
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (element.type === 'image') {
-      setImageError(false);
+    if (element.type === 'image' || element.type === 'video') {
+      setMediaError(false);
     }
-  }, [element.type, (element as ImageElement).src]);
+  }, [element.type, (element as ImageElement | VideoElement).src]);
 
 
   const handleSelect = (e: React.MouseEvent) => {
@@ -136,6 +136,15 @@ export default function Element({ element }: ElementProps) {
         return undefined;
     }
   }
+  
+  const renderErrorState = (mediaType: 'Image' | 'Video') => {
+    return (
+        <div className="w-full h-full bg-destructive/20 flex flex-col items-center justify-center gap-2 text-destructive">
+            <AlertTriangle className="h-8 w-8" />
+            <p className="text-xs font-semibold text-center">Invalid {mediaType} URL</p>
+        </div>
+    )
+  }
 
   const renderSpecificElement = () => {
     const el = element;
@@ -180,13 +189,8 @@ export default function Element({ element }: ElementProps) {
         );
       case 'image':
         const imageSrc = (el as ImageElement).src;
-        if (imageError || !imageSrc) {
-            return (
-                <div className="w-full h-full bg-destructive/20 flex flex-col items-center justify-center gap-2 text-destructive">
-                    <AlertTriangle className="h-8 w-8" />
-                    <p className="text-xs font-semibold text-center">Invalid Image URL</p>
-                </div>
-            )
+        if (mediaError || !imageSrc) {
+            return renderErrorState('Image');
         }
         return <Image 
                     src={imageSrc} 
@@ -194,8 +198,21 @@ export default function Element({ element }: ElementProps) {
                     layout="fill" 
                     objectFit="cover" 
                     className="pointer-events-none" 
-                    onError={() => setImageError(true)}
+                    onError={() => setMediaError(true)}
                 />;
+      case 'video':
+        const videoSrc = (el as VideoElement).src;
+        if (mediaError || !videoSrc) {
+            return renderErrorState('Video');
+        }
+        return <video
+                  src={videoSrc}
+                  className="w-full h-full object-cover pointer-events-none"
+                  autoPlay
+                  muted
+                  loop
+                  onError={() => setMediaError(true)}
+                />
       case 'container':
         return <div style={{backgroundColor: (el as ContainerElement).backgroundColor}} className="w-full h-full"></div>
       default:
