@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '../ui/button';
-import { Trash2, Copy, Palette, Link, Clock, Edit, Settings, FilePenLine, X } from 'lucide-react';
+import { Trash2, Copy, Palette, Link, Clock, Edit, Settings, FilePenLine, X, Pencil } from 'lucide-react';
 import type { ButtonElement, ButtonShape, ContainerElement, EditorElement, ImageElement, TextElement } from '@/lib/types';
 import { ScrollArea } from '../ui/scroll-area';
 import { Slider } from '../ui/slider';
@@ -24,6 +24,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { Textarea } from '../ui/textarea';
 
 
 export default function Inspector() {
@@ -52,6 +53,14 @@ export default function Inspector() {
     if (!selectedElementId) return;
     dispatch({ type: 'DELETE_ELEMENT', payload: { elementId: selectedElementId } });
   };
+  
+  const handleChangeImageUrl = () => {
+    if (!selectedElement || selectedElement.type !== 'image') return;
+    const newSrc = window.prompt("Enter the new image URL:", selectedElement.src);
+    if (newSrc !== null) { // prompt returns null on cancel
+        updateElement({ src: newSrc });
+    }
+  }
 
   const renderElementProperties = () => {
     if (!selectedElement) return null;
@@ -138,23 +147,33 @@ export default function Inspector() {
                 </>
             )}
             {el.type === 'image' && (
-                <div className="space-y-1">
-                    <Label htmlFor="src">Image Source (URL)</Label>
-                    <div className="flex items-center gap-2">
-                        <Input id="src" value={(el as ImageElement).src} onChange={e => updateElement({ src: e.target.value })} placeholder="https://..."/>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="icon" className="h-7 w-7"><Palette className="h-3 w-3" /></Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                {PlaceHolderImages.map(img => (
-                                    <DropdownMenuItem key={img.id} onClick={() => updateElement({src: img.imageUrl})}>
-                                        {img.description}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                <div className="space-y-2">
+                    <div className="space-y-1">
+                        <Label htmlFor="src">Image Source</Label>
+                        <div className="flex items-center gap-2">
+                            <Button onClick={handleChangeImageUrl} variant="outline" className="w-full" size="sm">
+                                <Pencil className="mr-2 h-3 w-3" /> Change Image URL
+                            </Button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="icon" className="h-7 w-7 flex-shrink-0"><Palette className="h-3 w-3" /></Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    {PlaceHolderImages.map(img => (
+                                        <DropdownMenuItem key={img.id} onClick={() => updateElement({src: img.imageUrl})}>
+                                            {img.description}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     </div>
+                     <Textarea 
+                        readOnly 
+                        value={(el as ImageElement).src} 
+                        className="h-20 text-xs text-muted-foreground"
+                        placeholder="Image URL will appear here"
+                    />
                 </div>
             )}
              <div className="space-y-1">
@@ -191,7 +210,7 @@ export default function Inspector() {
   
   return (
       <Sheet open={showSettings && !!selectedElement} onOpenChange={(open) => !open && dispatch({type: 'TOGGLE_SETTINGS'})}>
-        <SheetContent className="w-60 p-0" side="right">
+        <SheetContent className="w-72 p-0" side="right">
           {selectedElement && (
             <>
               <SheetHeader className="p-2 border-b">
