@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor } from '@/context/EditorContext';
 import type { ButtonElement, ContainerElement, ImageElement, Project, TextElement, VideoElement } from '@/lib/types';
-import { Type, Square, Video, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud, RectangleVertical, FileText, Table } from 'lucide-react';
+import { Type, Square, Video, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud, RectangleVertical, FileText, Table, Sparkles } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -382,7 +382,7 @@ export default function Toolbar() {
                 <div className="space-y-4 py-4">
                    <Button variant="outline" asChild className='w-full'>
                         <Label htmlFor="upload-device">
-                            Upload from Device
+                            Upload from Device (Max 1MB)
                             <Input id="upload-device" type="file" accept="image/*,video/*" className="sr-only" onChange={handleAddFromDevice} />
                         </Label>
                     </Button>
@@ -405,6 +405,15 @@ export default function Toolbar() {
                 </div>
             </DialogContent>
         </Dialog>
+        
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7" disabled>
+              <Sparkles />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right"><p>Animations (Coming Soon)</p></TooltipContent>
+        </Tooltip>
         
          <Tooltip>
           <TooltipTrigger asChild>
@@ -530,5 +539,7 @@ export default function Toolbar() {
     </>
   );
 }
+
+    
 
     
