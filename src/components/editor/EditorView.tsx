@@ -52,7 +52,7 @@ export default function EditorView() {
                     <Card 
                         className={cn(
                             "cursor-pointer hover:border-primary", 
-                            !selectedTemplate && 'border-primary'
+                            selectedTemplate === null && 'border-primary'
                         )} 
                         onClick={() => setSelectedTemplate(null)}
                     >
