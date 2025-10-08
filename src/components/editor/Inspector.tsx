@@ -155,6 +155,21 @@ export default function Inspector() {
                   </div>
                 </>
             )}
+            {(el.type === 'image' || el.type === 'video') && (
+                 <>
+                    <Separator />
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                            <Label>Width</Label>
+                            <Input type="number" value={el.size.width} onChange={e => updateElement({ size: { ...el.size, width: Number(e.target.value) } })} />
+                        </div>
+                        <div className="space-y-1">
+                            <Label>Height</Label>
+                            <Input type="number" value={el.size.height} onChange={e => updateElement({ size: { ...el.size, height: Number(e.target.value) } })} />
+                        </div>
+                    </div>
+                 </>
+            )}
             {el.type === 'image' && (
                 <div className="space-y-2">
                     <div className="space-y-1">
