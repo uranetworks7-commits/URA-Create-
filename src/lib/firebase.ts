@@ -1,6 +1,7 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { getDatabase, ref, set, get, type Database } from 'firebase/database';
 import type { Project } from './types';
+import { generateHtmlForProject } from './html-builder';
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3g6LG1FNoNFgET2zMubovKNSHpoFGh74",
@@ -34,7 +35,13 @@ export const saveProjectToDb = async (id: string, projectData: Project): Promise
   if (!id.match(/^\d{6}$/)) {
     throw new Error("Invalid ID format. Must be a 6-digit number.");
   }
-  await set(getProjectRef(id), projectData);
+  const html = generateHtmlForProject(projectData);
+  await set(getProjectRef(id), {
+      name: projectData.name,
+      html,
+      // We also save the project data itself to allow re-loading it into the editor
+      project: projectData
+    });
 };
 
 export const loadProjectFromDb = async (id: string): Promise<Project | null> => {
@@ -43,7 +50,10 @@ export const loadProjectFromDb = async (id: string): Promise<Project | null> => 
   }
   const snapshot = await get(getProjectRef(id));
   if (snapshot.exists()) {
-    return snapshot.val() as Project;
+    const data = snapshot.val();
+    // For backwards compatibility, if project data exists, return that.
+    // Otherwise, return null as we can't reconstruct the project from just HTML.
+    return data.project ? (data.project as Project) : null;
   }
   return null;
 };

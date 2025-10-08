@@ -65,12 +65,21 @@ export const generateHtmlForProject = (project: Project): string => {
   };
 
   const pagesHtml = project.pages.map((page, index) => {
-    const pageStyle = `position: relative; width: 100vw; height: 100vh; background-color: ${page.backgroundColor}; ${page.backgroundImage ? `background-image: url(${page.backgroundImage}); background-size: cover; background-position: center;` : ''}`;
-    const elementsHtml = page.elements.map(generateElementHtml).join('');
+    let pageContent;
+    let pageStyle;
+
+    if (page.isCustomHtml) {
+        pageContent = page.customHtml || '';
+        pageStyle = ''; // Custom HTML takes full control
+    } else {
+        pageContent = page.elements.map(generateElementHtml).join('');
+        pageStyle = `position: relative; width: 100vw; height: 100vh; background-color: ${page.backgroundColor}; ${page.backgroundImage ? `background-image: url(${page.backgroundImage}); background-size: cover; background-position: center;` : ''}`;
+    }
+
     const redirectAttr = page.redirect?.toPageId ? `data-redirect-to="${page.redirect.toPageId}" data-redirect-delay="${page.redirect.delay * 1000}"` : '';
-    // Show first page by default
     const displayStyle = index === 0 ? 'block' : 'none';
-    return `<div id="${page.id}" class="page" style="overflow: hidden; ${displayStyle}; ${pageStyle}" ${redirectAttr}>${elementsHtml}</div>`;
+    
+    return `<div id="${page.id}" class="page" style="overflow: hidden; ${displayStyle}; ${pageStyle}" ${redirectAttr}>${pageContent}</div>`;
   }).join('');
 
   return `
@@ -81,7 +90,7 @@ export const generateHtmlForProject = (project: Project): string => {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>${project.name || 'URA Project'}</title>
       <style>
-        body, html { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; }
+        body, html { margin: 0; padding: 0; font-family: sans-serif; }
         .page { width: 100vw; height: 100vh; }
         
         /* Animations */

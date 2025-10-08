@@ -58,6 +58,8 @@ export interface Page {
     toPageId: string;
     delay: number;
   };
+  isCustomHtml?: boolean;
+  customHtml?: string;
 }
 
 export interface Project {
