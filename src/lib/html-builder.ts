@@ -4,16 +4,13 @@ export const generateHtmlForProject = (project: Project): string => {
   const getElementStyle = (element: EditorElement): string => {
     let style = `position: absolute; left: ${element.position.x}px; top: ${element.position.y}px; width: ${element.size.width}px; height: ${element.size.height}px; transform: rotate(${element.rotation || 0}deg); overflow: hidden;`;
     
-    if (element.animation) {
-      style += ` animation: ${element.animation.replace('anim-','')} 0.5s ease-out forwards;`;
-      
-      // Manually add keyframes for specific animations if they are simple
-      // This is a simple approach. For complex animations, a CSS file is better.
-      if (element.animation === 'anim-fade-in') {
-        // Keyframe is already in the global style block
-      } else if (element.animation === 'anim-slide-in-up') {
-        // Keyframe is already in the global style block
+    if (element.animation && element.animation !== 'none') {
+      const animationName = element.animation.startsWith('anim-') ? element.animation.substring(5) : element.animation;
+      let iterationCount = '1';
+      if (animationName === 'pulse') {
+        iterationCount = 'infinite';
       }
+      style += ` animation: ${animationName} 1.5s ${iterationCount} ease-in-out;`;
     }
     
     return style;
@@ -100,13 +97,13 @@ export const generateHtmlForProject = (project: Project): string => {
         
         /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideInUp { from { transform: translateY(20px) scale(1); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        @keyframes pop { 0% { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
         .fade-in { animation-name: fadeIn; }
         .slide-in-up { animation-name: slideInUp; }
-        .pulse { animation-name: pulse; animation-iteration-count: infinite; }
+        .pulse { animation-name: pulse; }
         .pop { animation-name: pop; }
       </style>
     </head>
