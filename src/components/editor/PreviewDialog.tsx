@@ -106,9 +106,6 @@ export default function PreviewDialog({ isOpen, onOpenChange }: { isOpen: boolea
       <DialogContent className="w-[90vw] h-[80vh] max-w-[1200px] p-0 flex flex-col">
         <DialogHeader className="p-2 border-b flex-row items-center justify-between shrink-0">
             <DialogTitle className="text-sm">Project Preview</DialogTitle>
-             <DialogClose asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6"><X className="h-4 w-4" /></Button>
-            </DialogClose>
         </DialogHeader>
         <div className="w-full flex-1 bg-background">
             {project ? (
