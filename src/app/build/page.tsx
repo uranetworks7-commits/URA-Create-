@@ -12,7 +12,20 @@ import { Textarea } from '@/components/ui/textarea';
 
 const generateHtmlForProject = (project: Project): string => {
   const getElementStyle = (element: EditorElement): string => {
-    return `position: absolute; left: ${element.position.x}px; top: ${element.position.y}px; width: ${element.size.width}px; height: ${element.size.height}px; transform: rotate(${element.rotation || 0}deg); overflow: hidden;`;
+    let style = `position: absolute; left: ${element.position.x}px; top: ${element.position.y}px; width: ${element.size.width}px; height: ${element.size.height}px; transform: rotate(${element.rotation || 0}deg); overflow: hidden;`;
+    
+    // Add animation styles directly if they exist
+    if (element.animation) {
+        switch(element.animation) {
+            case 'anim-fade-in': style += ` animation: fadeIn 0.5s ease-out forwards;`; break;
+            case 'anim-slide-in-up': style += ` animation: slideInUp 0.5s ease-out forwards;`; break;
+            case 'anim-pulse': style += ` animation: pulse 1.5s infinite ease-in-out;`; break;
+            case 'anim-pop': style += ` animation: pop 0.3s ease-out forwards;`; break;
+            default: style += ` animation: ${element.animation.replace('anim-','')} 0.5s ease-out forwards;`
+        }
+    }
+    
+    return style;
   };
 
   const getClipPathForShape = (shape: ButtonElement['shape']): string | undefined => {
@@ -30,7 +43,7 @@ const generateHtmlForProject = (project: Project): string => {
     switch (element.type) {
       case 'text':
         style += `font-size: ${element.fontSize}px; color: ${element.color}; font-weight: ${element.fontWeight}; display: flex; align-items: center; justify-content: center;`;
-        content = `<p style="${style}">${element.content}</p>`;
+        content = `<div style="${style}">${element.content}</div>`;
         break;
       case 'button':
         const clipPath = getClipPathForShape(element.shape);
@@ -39,7 +52,7 @@ const generateHtmlForProject = (project: Project): string => {
         else if (element.shape === 'pill') borderRadius = '9999px';
         else borderRadius = `${element.borderRadius}px`;
         
-        const buttonInnerStyle = `font-size: ${element.fontSize}px; color: ${element.color}; background-color: ${element.backgroundColor}; font-weight: ${element.fontWeight}; border-radius: ${borderRadius}; width: 100%; height: 100%; border: none; cursor: pointer;`;
+        const buttonInnerStyle = `font-size: ${element.fontSize}px; color: ${element.color}; background-color: ${element.backgroundColor}; font-weight: ${element.fontWeight}; border-radius: ${borderRadius}; width: 100%; height: 100%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;`;
         const buttonWrapperStyle = clipPath ? `clip-path: ${clipPath};` : '';
         content = `
           <div style="${style}">
@@ -57,14 +70,16 @@ const generateHtmlForProject = (project: Project): string => {
         content = `<div style="${style}"></div>`;
         break;
     }
-    return `<div class="${element.animation || ''}">${content}</div>`;
+    return content;
   };
 
-  const pagesHtml = project.pages.map(page => {
+  const pagesHtml = project.pages.map((page, index) => {
     const pageStyle = `position: relative; width: 100vw; height: 100vh; background-color: ${page.backgroundColor}; ${page.backgroundImage ? `background-image: url(${page.backgroundImage}); background-size: cover; background-position: center;` : ''}`;
     const elementsHtml = page.elements.map(generateElementHtml).join('');
     const redirectAttr = page.redirect?.toPageId ? `data-redirect-to="${page.redirect.toPageId}" data-redirect-delay="${page.redirect.delay * 1000}"` : '';
-    return `<div id="${page.id}" class="page" style="display: none; ${pageStyle}" ${redirectAttr}>${elementsHtml}</div>`;
+    // Show first page by default
+    const displayStyle = index === 0 ? 'block' : 'none';
+    return `<div id="${page.id}" class="page" style="${displayStyle}; ${pageStyle}" ${redirectAttr}>${elementsHtml}</div>`;
   }).join('');
 
   return `
@@ -83,59 +98,54 @@ const generateHtmlForProject = (project: Project): string => {
         @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         @keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-
-        .anim-fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        .anim-slide-in-up { animation: slideInUp 0.5s ease-out forwards; }
-        .anim-pulse { animation: pulse 1.5s infinite ease-in-out; }
-        .anim-pop { animation: pop 0.3s ease-out forwards; }
       </style>
     </head>
     <body>
       ${pagesHtml}
       <script>
-        const pages = document.querySelectorAll('.page');
-        let currentPageId = pages.length > 0 ? pages[0].id : null;
-        let redirectTimer;
+        document.addEventListener('DOMContentLoaded', () => {
+            const pages = document.querySelectorAll('.page');
+            let currentPageId = pages.length > 0 ? pages[0].id : null;
+            let redirectTimer;
 
-        function navigateTo(pageId) {
-          const targetPage = document.getElementById(pageId);
-          if (targetPage) {
-            pages.forEach(p => p.style.display = 'none');
-            targetPage.style.display = 'block';
-            currentPageId = pageId;
-            handleRedirect(targetPage);
-          }
-        }
-
-        function handleRedirect(pageElement) {
-            clearTimeout(redirectTimer);
-            const redirectTo = pageElement.getAttribute('data-redirect-to');
-            const delay = pageElement.getAttribute('data-redirect-delay');
-            if (redirectTo && delay) {
-                redirectTimer = setTimeout(() => {
-                    navigateTo(redirectTo);
-                }, parseInt(delay, 10));
+            function navigateTo(pageId) {
+              const targetPage = document.getElementById(pageId);
+              if (targetPage) {
+                pages.forEach(p => p.style.display = 'none');
+                targetPage.style.display = 'block';
+                currentPageId = pageId;
+                handleRedirect(targetPage);
+              }
             }
-        }
 
-        document.addEventListener('click', (e) => {
-          const target = e.target;
-          if (target.tagName === 'BUTTON') {
-            const linkTo = target.getAttribute('data-link-to');
-            if (linkTo) {
-              navigateTo(linkTo);
+            function handleRedirect(pageElement) {
+                clearTimeout(redirectTimer);
+                const redirectTo = pageElement.getAttribute('data-redirect-to');
+                const delay = pageElement.getAttribute('data-redirect-delay');
+                if (redirectTo && delay) {
+                    redirectTimer = setTimeout(() => {
+                        navigateTo(redirectTo);
+                    }, parseInt(delay, 10));
+                }
             }
-          }
+
+            document.body.addEventListener('click', (e) => {
+              if (e.target && e.target.tagName === 'BUTTON') {
+                const linkTo = e.target.getAttribute('data-link-to');
+                if (linkTo) {
+                  navigateTo(linkTo);
+                }
+              }
+            });
+            
+            // Initial page load redirect handling
+            if (currentPageId) {
+                const initialPage = document.getElementById(currentPageId);
+                if(initialPage) {
+                    handleRedirect(initialPage);
+                }
+            }
         });
-        
-        // Initial page load
-        if (currentPageId) {
-            const initialPage = document.getElementById(currentPageId);
-            if(initialPage) {
-                initialPage.style.display = 'block';
-                handleRedirect(initialPage);
-            }
-        }
       </script>
     </body>
     </html>
@@ -170,6 +180,7 @@ export default function BuildPage() {
     setIsBuilding(true);
     setGeneratedCode(null);
 
+    // Simulate build time
     setTimeout(() => {
       try {
         const project: Project = JSON.parse(storedProject);
@@ -180,6 +191,7 @@ export default function BuildPage() {
           description: 'Your project code is ready.',
         });
       } catch (e) {
+        console.error(e);
         toast({
           variant: 'destructive',
           title: 'Generation Failed',
@@ -188,7 +200,7 @@ export default function BuildPage() {
       } finally {
         setIsBuilding(false);
       }
-    }, 30000); // 30 seconds
+    }, 1500); // Reduced timeout
   };
 
   const handleDownloadSrc = () => {
