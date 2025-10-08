@@ -6,11 +6,18 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '../ui/button';
-import { Trash2, Copy, Palette, Link, Clock } from 'lucide-react';
-import type { ButtonElement, EditorElement, TextElement } from '@/lib/types';
+import { Trash2, Copy, Palette, Link, Clock, Edit, Settings, FilePenLine } from 'lucide-react';
+import type { ButtonElement, EditorElement, ImageElement, TextElement } from '@/lib/types';
 import { ScrollArea } from '../ui/scroll-area';
 import { Slider } from '../ui/slider';
 import { Separator } from '../ui/separator';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function Inspector() {
   const { state, dispatch } = useEditor();
@@ -61,7 +68,14 @@ export default function Inspector() {
             {(el.type === 'text' || el.type === 'button') && (
                 <div className="space-y-2">
                     <Label htmlFor="content">Text</Label>
-                    <Input id="content" value={(el as TextElement | ButtonElement).content} onChange={e => updateElement({ content: e.target.value })}/>
+                    <div className="relative">
+                        <Input id="content" value={(el as TextElement | ButtonElement).content} onChange={e => updateElement({ content: e.target.value })} className="pr-24"/>
+                        <div className="absolute top-1/2 right-1 -translate-y-1/2 flex items-center">
+                            <Button variant="ghost" size="icon" className="h-7 w-7"><Edit className="h-4 w-4"/></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7"><FilePenLine className="h-4 w-4"/></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7"><Settings className="h-4 w-4"/></Button>
+                        </div>
+                    </div>
                 </div>
             )}
              {(el.type === 'text' || el.type === 'button') && (
@@ -113,8 +127,22 @@ export default function Inspector() {
             )}
             {el.type === 'image' && (
                 <div className="space-y-2">
-                    <Label htmlFor="src">Image URL</Label>
-                    <Input id="src" value={(el as any).src} onChange={e => updateElement({ src: e.target.value })}/>
+                    <Label htmlFor="src">Image Source</Label>
+                    <div className="flex items-center gap-2">
+                        <Input id="src" value={(el as any).src} onChange={e => updateElement({ src: e.target.value })}/>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="icon"><Palette className="h-4 w-4" /></Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                {PlaceHolderImages.map(img => (
+                                    <DropdownMenuItem key={img.id} onClick={() => updateElement({src: img.imageUrl})}>
+                                        {img.description}
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
             )}
              <div className="space-y-2">
@@ -183,3 +211,5 @@ export default function Inspector() {
     </aside>
   );
 }
+
+    
