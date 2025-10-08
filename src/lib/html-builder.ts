@@ -6,11 +6,12 @@ export const generateHtmlForProject = (project: Project): string => {
     
     if (element.animation && element.animation !== 'none') {
       const animationName = element.animation.startsWith('anim-') ? element.animation.substring(5) : element.animation;
-      let iterationCount = '1';
-      if (animationName === 'pulse') {
-        iterationCount = 'infinite';
-      }
-      style += ` animation: ${animationName} 1.5s ${iterationCount} ease-in-out;`;
+      let duration = '1.5s';
+      if (['shake', 'explode', 'bounce'].includes(animationName)) duration = '1s';
+      if (animationName === 'glow') duration = '2s';
+
+      const iterationCount = element.loopAnimation ? 'infinite' : '1';
+      style += ` animation: ${animationName} ${duration} ${iterationCount} ease-in-out;`;
     }
     
     return style;
@@ -100,11 +101,26 @@ export const generateHtmlForProject = (project: Project): string => {
         @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         @keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-
-        .fade-in { animation-name: fadeIn; }
-        .slide-in-up { animation-name: slideInUp; }
-        .pulse { animation-name: pulse; }
-        .pop { animation-name: pop; }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+          20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        @keyframes explode {
+          0% { transform: scale(0); opacity: 1; }
+          50% { transform: scale(1.5); opacity: 0.5; }
+          100% { transform: scale(1); opacity: 0; }
+        }
+        @keyframes glow {
+          0%, 100% { box-shadow: 0 0 5px #A0CFEC; }
+          50% { box-shadow: 0 0 20px #A0CFEC, 0 0 30px #A0CFEC; }
+        }
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-15px); }
+          60% { transform: translateY(-7px); }
+        }
+        
       </style>
     </head>
     <body>

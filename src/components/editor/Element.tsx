@@ -251,7 +251,7 @@ export default function Element({ element }: ElementProps) {
     <div
       ref={ref}
       style={getElementStyle()}
-      className={cn(element.animation || '')}
+      className={cn(element.animation || '', element.loopAnimation && 'anim-loop')}
       onClick={handleSelect}
       onMouseDown={handleDragStart}
     >

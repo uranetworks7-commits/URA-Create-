@@ -11,6 +11,7 @@ export interface BaseElement {
   size: Size;
   rotation: number;
   animation: string;
+  loopAnimation?: boolean;
 }
 
 export interface TextElement extends BaseElement {

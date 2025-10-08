@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '../ui/button';
-import { Trash2, Copy, Palette, Link, Clock, Edit, Settings, FilePenLine, X, Pencil } from 'lucide-react';
+import { Trash2, Copy, Palette, Link, Clock, Edit, Settings, FilePenLine, X, Pencil, Sparkles } from 'lucide-react';
 import type { ButtonElement, ButtonShape, ContainerElement, EditorElement, ImageElement, TextElement, VideoElement } from '@/lib/types';
 import { ScrollArea } from '../ui/scroll-area';
 import { Slider } from '../ui/slider';
@@ -17,7 +17,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import AiSuggestions from './AiSuggestions';
 import {
   Sheet,
   SheetContent,
@@ -25,6 +24,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Textarea } from '../ui/textarea';
+import { Switch } from '../ui/switch';
 
 
 export default function Inspector() {
@@ -199,7 +199,8 @@ export default function Inspector() {
                     <Input type="number" value={el.rotation} onChange={e => updateElement({ rotation: Number(e.target.value) })} className="w-14" />
                  </div>
             </div>
-             <div className="space-y-1">
+            <Separator />
+             <div className="space-y-2">
                 <Label>Animation</Label>
                 <Select value={el.animation || 'none'} onValueChange={v => updateElement({ animation: v === 'none' ? '' : v })}>
                     <SelectTrigger><SelectValue placeholder="Select animation..." /></SelectTrigger>
@@ -209,11 +210,17 @@ export default function Inspector() {
                         <SelectItem value="anim-slide-in-up">Slide In Up</SelectItem>
                         <SelectItem value="anim-pulse">Pulse</SelectItem>
                         <SelectItem value="anim-pop">Pop</SelectItem>
+                        <SelectItem value="anim-shake">Shake</SelectItem>
+                        <SelectItem value="anim-explode">Explode</SelectItem>
+                        <SelectItem value="anim-glow">Glow</SelectItem>
+                        <SelectItem value="anim-bounce">Bounce</SelectItem>
                     </SelectContent>
                 </Select>
+                <div className="flex items-center space-x-2">
+                    <Switch id="animation-loop" checked={el.loopAnimation} onCheckedChange={(checked) => updateElement({ loopAnimation: checked })}/>
+                    <Label htmlFor="animation-loop" className="text-xs">Loop Animation</Label>
+                </div>
             </div>
-            <Separator />
-            <AiSuggestions element={el} />
              <Separator />
              <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" className="w-full" onClick={duplicateElement}><Copy className="mr-1 h-3 w-3"/>Duplicate</Button>
