@@ -22,17 +22,17 @@ export default function EditorView() {
   const [isStarted, setIsStarted] = useState(false);
   const [projectName, setProjectName] = useState('My URA Project');
   const [pageColor, setPageColor] = useState('#ffffff');
-  const [selectedTemplate, setSelectedTemplate] = useState<Page | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('blank');
 
   const handleStartProject = (e: React.FormEvent) => {
     e.preventDefault();
+    const selectedTemplate = pageTemplates.find(t => t.id === selectedTemplateId);
     if(selectedTemplate) {
         dispatch({ type: 'NEW_PROJECT_FROM_TEMPLATE', payload: { template: selectedTemplate, name: projectName } });
-    } else {
+    } else { // 'blank'
         dispatch({ type: 'NEW_PROJECT', payload: { backgroundColor: pageColor, name: projectName } });
     }
     setIsStarted(true);
-    setSelectedTemplate(null);
   };
   
   if (!isStarted && state.project.pages.length === 0) {
@@ -60,43 +60,43 @@ export default function EditorView() {
                     />
                  </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <Card 
+                    <div 
                         className={cn(
-                            "cursor-pointer hover:border-primary", 
-                            selectedTemplate === null && 'border-primary'
+                            "cursor-pointer rounded-lg border bg-card text-card-foreground shadow-sm hover:border-primary", 
+                            selectedTemplateId === 'blank' && 'border-primary'
                         )} 
-                        onClick={() => setSelectedTemplate(null)}
+                        onClick={() => setSelectedTemplateId('blank')}
                     >
-                         <CardHeader className="p-3">
+                         <div className="flex flex-col space-y-0.5 p-3">
                             <File className="h-4 w-4 mx-auto mb-1 text-accent"/>
-                            <CardTitle className="text-sm">Blank Page</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-3 pt-0">
+                            <div className="text-sm font-semibold leading-none tracking-tight">Blank Page</div>
+                        </div>
+                        <div className="p-3 pt-0">
                              <div className="flex items-center gap-2 border p-1 rounded-md">
                                 <label htmlFor="page-color" className="text-xs font-medium flex items-center gap-1"><Palette className="h-3 w-3"/> Color:</label>
                                 <Input type="color" id="page-color" value={pageColor} onChange={(e) => setPageColor(e.target.value)} className="w-10 h-5 p-0.5"/>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                     {pageTemplates.map(template => (
-                        <Card 
+                        <div 
                             key={template.id} 
                             className={cn(
-                                "cursor-pointer hover:border-primary",
-                                selectedTemplate?.id === template.id && 'border-primary'
+                                "cursor-pointer rounded-lg border bg-card text-card-foreground shadow-sm hover:border-primary",
+                                selectedTemplateId === template.id && 'border-primary'
                             )} 
-                            onClick={() => setSelectedTemplate(template)}
+                            onClick={() => setSelectedTemplateId(template.id)}
                         >
-                            <CardHeader className="p-3">
+                            <div className="flex flex-col space-y-0.5 p-3">
                                 {template.name === 'MCQ Page' && <FileText className="h-4 w-4 mx-auto mb-1 text-accent"/>}
                                 {template.name === 'Table Page' && <Table className="h-4 w-4 mx-auto mb-1 text-accent"/>}
                                 {template.name === 'Content Page' && <FileText className="h-4 w-4 mx-auto mb-1 text-accent"/>}
-                                <CardTitle className="text-sm">{template.name}</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-3 pt-0">
+                                <div className="text-sm font-semibold leading-none tracking-tight">{template.name}</div>
+                            </div>
+                            <div className="p-3 pt-0">
                                 <p className="text-[10px] text-muted-foreground">{template.description}</p>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     ))}
                 </div>
                 <Button type="submit" size="sm" className="w-full">
