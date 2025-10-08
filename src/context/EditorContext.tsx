@@ -215,7 +215,8 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
        case 'UNDO': {
         if (draft.historyIndex > 0) {
           draft.historyIndex--;
-          draft.project = draft.history[draft.historyIndex];
+          const newProject = JSON.parse(JSON.stringify(draft.history[draft.historyIndex]));
+          draft.project = newProject;
           draft.selectedElementId = null;
           draft.showSettings = false;
         }
@@ -224,7 +225,8 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
       case 'REDO': {
         if (draft.historyIndex < draft.history.length - 1) {
           draft.historyIndex++;
-          draft.project = draft.history[draft.historyIndex];
+          const newProject = JSON.parse(JSON.stringify(draft.history[draft.historyIndex]));
+          draft.project = newProject;
           draft.selectedElementId = null;
           draft.showSettings = false;
         }
@@ -236,14 +238,15 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
   return produce(newState, draft => {
     // This second produce call handles history updates after the main state change.
     if (!nonHistoryActions.has(action.type)) {
+       const newProjectState = JSON.parse(JSON.stringify(draft.project));
       if (action.type === 'NEW_PROJECT' || action.type === 'NEW_PROJECT_FROM_TEMPLATE' || action.type === 'LOAD_PROJECT') {
         // For project-level changes, reset history
-        draft.history = [draft.project];
+        draft.history = [newProjectState];
         draft.historyIndex = 0;
       } else {
         // For other actions, add a new history state
         const newHistory = draft.history.slice(0, draft.historyIndex + 1);
-        newHistory.push(draft.project);
+        newHistory.push(newProjectState);
         draft.history = newHistory;
         draft.historyIndex = newHistory.length - 1;
       }

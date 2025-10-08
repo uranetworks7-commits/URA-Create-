@@ -6,6 +6,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { AlertTriangle } from 'lucide-react';
 
 interface ElementProps {
   element: EditorElement;
@@ -18,8 +19,16 @@ export default function Element({ element }: ElementProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [resizeCorner, setResizeCorner] = useState<'br' | 'tl' | 'tr' | 'bl' | null>(null);
+  const [imageError, setImageError] = useState(false);
 
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (element.type === 'image') {
+      setImageError(false);
+    }
+  }, [element.type, (element as ImageElement).src]);
+
 
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -51,8 +60,8 @@ export default function Element({ element }: ElementProps) {
           payload: {
             id: element.id,
             position: {
-              x: element.position.x + e.movementX,
-              y: element.position.y + e.movementY,
+              x: element.position.x + e.movementX / state.zoom,
+              y: element.position.y + e.movementY / state.zoom,
             },
           },
         });
@@ -64,23 +73,26 @@ export default function Element({ element }: ElementProps) {
         let newY = element.position.y;
         
         const minSize = 20;
+        const movementX = e.movementX / state.zoom;
+        const movementY = e.movementY / state.zoom;
+
 
         if (resizeCorner === 'br') {
-          newWidth = Math.max(minSize, element.size.width + e.movementX);
-          newHeight = Math.max(minSize, element.size.height + e.movementY);
+          newWidth = Math.max(minSize, element.size.width + movementX);
+          newHeight = Math.max(minSize, element.size.height + movementY);
         } else if (resizeCorner === 'tl') {
-          newWidth = Math.max(minSize, element.size.width - e.movementX);
-          newHeight = Math.max(minSize, element.size.height - e.movementY);
-          newX = element.position.x + e.movementX;
-          newY = element.position.y + e.movementY;
+          newWidth = Math.max(minSize, element.size.width - movementX);
+          newHeight = Math.max(minSize, element.size.height - movementY);
+          newX = element.position.x + movementX;
+          newY = element.position.y + movementY;
         } else if (resizeCorner === 'tr') {
-          newWidth = Math.max(minSize, element.size.width + e.movementX);
-          newHeight = Math.max(minSize, element.size.height - e.movementY);
-          newY = element.position.y + e.movementY;
+          newWidth = Math.max(minSize, element.size.width + movementX);
+          newHeight = Math.max(minSize, element.size.height - movementY);
+          newY = element.position.y + movementY;
         } else if (resizeCorner === 'bl') {
-           newWidth = Math.max(minSize, element.size.width - e.movementX);
-          newHeight = Math.max(minSize, element.size.height + e.movementY);
-          newX = element.position.x + e.movementX;
+           newWidth = Math.max(minSize, element.size.width - movementX);
+          newHeight = Math.max(minSize, element.size.height + movementY);
+          newX = element.position.x + movementX;
         }
 
         dispatch({
@@ -109,7 +121,7 @@ export default function Element({ element }: ElementProps) {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, resizeCorner, dispatch, element.id, element.position, element.size]);
+  }, [isDragging, isResizing, resizeCorner, dispatch, element.id, element.position, element.size, state.zoom]);
 
   const getClipPathForShape = (shape: ButtonElement['shape'], size: { width: number, height: number }): string | undefined => {
     switch (shape) {
@@ -167,7 +179,22 @@ export default function Element({ element }: ElementProps) {
           </div>
         );
       case 'image':
-        return <Image src={(el as ImageElement).src} alt="canvas image" layout="fill" objectFit="cover" className="pointer-events-none" />;
+        if (imageError) {
+            return (
+                <div className="w-full h-full bg-destructive/20 flex flex-col items-center justify-center gap-2 text-destructive">
+                    <AlertTriangle className="h-8 w-8" />
+                    <p className="text-xs font-semibold text-center">Invalid Image URL</p>
+                </div>
+            )
+        }
+        return <Image 
+                    src={(el as ImageElement).src} 
+                    alt="canvas image" 
+                    layout="fill" 
+                    objectFit="cover" 
+                    className="pointer-events-none" 
+                    onError={() => setImageError(true)}
+                />;
       case 'container':
         return <div style={{backgroundColor: (el as ContainerElement).backgroundColor}} className="w-full h-full"></div>
       default:
