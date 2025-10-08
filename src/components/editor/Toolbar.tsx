@@ -149,12 +149,8 @@ export default function Toolbar() {
   };
   
   const handlePreview = () => {
-    const html = generateHtmlForProject(state.project);
-    const newWindow = window.open();
-    if (newWindow) {
-      newWindow.document.write('<pre>' + html.replace(/</g, "&lt;").replace(/>/g, "&gt;") + '</pre>');
-      newWindow.document.close();
-    }
+    localStorage.setItem('ura-preview-project', JSON.stringify(state.project));
+    window.open('/preview', '_blank');
   };
 
   const handleBuild = () => {
