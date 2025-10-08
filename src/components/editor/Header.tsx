@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2 } from 'lucide-react';
+import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2, Cloud, Trash2 } from 'lucide-react';
 import { useEditor } from '@/context/EditorContext';
 import { useState } from 'react';
 import {
@@ -16,7 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { loadProjectsFromDb, saveProjectToDb, type ProjectWithId } from '@/lib/firebase';
+import { loadProjectsFromDb, saveProjectToDb, type ProjectWithId, deleteProjectFromDb } from '@/lib/firebase';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import type { Project } from '@/lib/types';
 import {
@@ -29,127 +29,99 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../ui/alert-dialog';
-
+import { ScrollArea } from '../ui/scroll-area';
+import { Separator } from '../ui/separator';
 
 export default function Header({ onStartNew }: { onStartNew: () => void }) {
   const { state, dispatch } = useEditor();
   const { toast } = useToast();
-  const [projectId, setProjectId] = useState('');
+  const [isCloudDialogOpen, setIsCloudDialogOpen] = useState(false);
+  const [accessId, setAccessId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState<'save' | 'load' | null>(null);
-
-  // For conflict resolution
-  const [conflictingProjects, setConflictingProjects] = useState<ProjectWithId[]>([]);
-  const [selectedProjectToLoad, setSelectedProjectToLoad] = useState<string | null>(null);
-  const [showLoadConflictDialog, setShowLoadConflictDialog] = useState(false);
-
-  const [saveConflict, setSaveConflict] = useState<ProjectWithId | null>(null);
-  const [showSaveConflictDialog, setShowSaveConflictDialog] = useState(false);
-  const [newProjectName, setNewProjectName] = useState('');
-
-
-  const handleSave = async () => {
-    if (projectId.length !== 6) {
-      toast({ variant: 'destructive', title: 'Invalid ID', description: 'Project ID must be 6 digits.' });
+  const [cloudProjects, setCloudProjects] = useState<ProjectWithId[]>([]);
+  const [selectedCloudProject, setSelectedCloudProject] = useState<ProjectWithId | null>(null);
+  const [showOverwriteAlert, setShowOverwriteAlert] = useState(false);
+  
+  const handleAccessIdSubmit = async () => {
+    if (accessId.length !== 6) {
+      toast({ variant: 'destructive', title: 'Invalid ID', description: 'Access ID must be 6 digits.' });
       return;
     }
     setIsLoading(true);
     try {
-      const result = await saveProjectToDb(projectId, state.project);
-      if (result.status === 'conflict') {
-        setSaveConflict(result.conflictingProject!);
-        setNewProjectName(state.project.name);
-        setShowSaveConflictDialog(true);
-      } else {
-        toast({ title: 'Project Saved!', description: `Your project is saved under ID: ${projectId}` });
-        setIsDialogOpen(null);
+      const projects = await loadProjectsFromDb(accessId);
+      setCloudProjects(projects);
+      if(projects.length === 0) {
+        toast({ title: 'No projects found', description: 'This ID is empty. You can save a new project here.' });
       }
     } catch (e) {
-      const error = e as Error;
-      toast({ variant: 'destructive', title: 'Save Failed', description: error.message });
+      toast({ variant: 'destructive', title: 'Error', description: (e as Error).message });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleLoad = async () => {
-    if (projectId.length !== 6) {
-      toast({ variant: 'destructive', title: 'Invalid ID', description: 'Project ID must be 6 digits.' });
-      return;
-    }
+  const handleLoadProject = () => {
+    if (!selectedCloudProject) return;
+    dispatch({ type: 'LOAD_PROJECT', payload: selectedCloudProject.project });
+    toast({ title: 'Project Loaded!', description: `Loaded "${selectedCloudProject.project.name}"` });
+    setIsCloudDialogOpen(false);
+    resetCloudState();
+  };
+  
+  const handleSaveProject = () => {
+      const projectToSave = state.project;
+      const existingProject = cloudProjects.find(p => p.project.name === projectToSave.name);
+
+      if (existingProject) {
+          setSelectedCloudProject(existingProject);
+          setShowOverwriteAlert(true);
+      } else {
+          executeSave(projectToSave);
+      }
+  }
+
+  const executeSave = async (project: Project, overwrite = false, existingId?: string) => {
     setIsLoading(true);
     try {
-      const projects = await loadProjectsFromDb(projectId);
-      if (projects.length === 0) {
-        toast({ variant: 'destructive', title: 'Not Found', description: 'No project found with that ID.' });
-      } else if (projects.length === 1) {
-        dispatch({ type: 'LOAD_PROJECT', payload: projects[0].project });
-        toast({ title: 'Project Loaded!', description: `Successfully loaded project ID: ${projectId}` });
-        setIsDialogOpen(null);
-      } else {
-        // Multiple projects found, show selection dialog
-        setConflictingProjects(projects);
-        setSelectedProjectToLoad(projects[0].id);
-        setShowLoadConflictDialog(true);
-      }
+      const savedProject = await saveProjectToDb(accessId, project, existingId, overwrite);
+      toast({ title: 'Project Saved!', description: `Saved "${savedProject.project.name}"` });
+      
+      // Refresh project list
+      const projects = await loadProjectsFromDb(accessId);
+      setCloudProjects(projects);
+
     } catch (e) {
-      const error = e as Error;
-      toast({ variant: 'destructive', title: 'Load Failed', description: error.message });
+       toast({ variant: 'destructive', title: 'Save Failed', description: (e as Error).message });
     } finally {
       setIsLoading(false);
+      setShowOverwriteAlert(false);
+      setSelectedCloudProject(null);
     }
-  };
+  }
   
-  const handleConfirmLoadConflict = () => {
-    if (selectedProjectToLoad) {
-      const projectToLoad = conflictingProjects.find(p => p.id === selectedProjectToLoad);
-      if (projectToLoad) {
-        dispatch({ type: 'LOAD_PROJECT', payload: projectToLoad.project });
-        toast({ title: 'Project Loaded!', description: `Successfully loaded project ID: ${projectId}` });
-      }
-    }
-    setShowLoadConflictDialog(false);
-    setConflictingProjects([]);
-    setIsDialogOpen(null);
-  };
-  
-  const handleResolveSaveConflict = async (resolution: 'replace' | 'rename' | 'autoname') => {
+  const handleDeleteProject = async (project: ProjectWithId | null) => {
+    if (!project) return;
     setIsLoading(true);
-    let projectToSave: Project = { ...state.project };
-    let shouldReplace = false;
-
-    if (resolution === 'rename') {
-        if (!newProjectName || newProjectName.trim() === '') {
-            toast({ variant: 'destructive', title: 'Invalid Name', description: 'Project name cannot be empty.'});
-            setIsLoading(false);
-            return;
-        }
-        projectToSave.name = newProjectName;
-    } else if (resolution === 'replace') {
-        shouldReplace = true;
-    }
-    // Autoname is handled on the backend now
-
     try {
-        const result = await saveProjectToDb(projectId, projectToSave, resolution, saveConflict?.id);
-
-        if (result.status === 'success') {
-            toast({ title: 'Project Saved!', description: `Project was saved successfully to ID: ${projectId}` });
-            setShowSaveConflictDialog(false);
-            setSaveConflict(null);
-            setIsDialogOpen(null);
-        } else {
-             // This case should ideally not be hit if backend logic is correct
-            toast({ variant: 'destructive', title: 'Save Failed', description: 'Could not resolve save conflict.' });
-        }
+      await deleteProjectFromDb(accessId, project.id);
+      toast({ title: 'Project Deleted' });
+      const projects = await loadProjectsFromDb(accessId);
+      setCloudProjects(projects);
+      setSelectedCloudProject(null);
     } catch (e) {
-        const error = e as Error;
-        toast({ variant: 'destructive', title: 'Save Failed', description: error.message });
+       toast({ variant: 'destructive', title: 'Delete Failed', description: (e as Error).message });
     } finally {
         setIsLoading(false);
     }
   }
 
+  const resetCloudState = () => {
+    setAccessId('');
+    setCloudProjects([]);
+    setSelectedCloudProject(null);
+    setIsLoading(false);
+  }
 
   const canUndo = state.historyIndex > 0;
   const canRedo = state.historyIndex < state.history.length - 1;
@@ -196,110 +168,107 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
 
         <Button variant="outline" size="sm" onClick={onStartNew}><FilePlus className="mr-1 h-3 w-3" /> New</Button>
         
-        <Dialog open={isDialogOpen === 'save'} onOpenChange={(open) => !open && setIsDialogOpen(null)}>
+        <Dialog open={isCloudDialogOpen} onOpenChange={(open) => {
+            setIsCloudDialogOpen(open);
+            if (!open) resetCloudState();
+        }}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" onClick={() => setIsDialogOpen('save')}>
-              <Save className="mr-1 h-3 w-3" /> Save
+            <Button variant="outline" size="sm" onClick={() => setIsCloudDialogOpen(true)}>
+              <Cloud className="mr-1 h-3 w-3" /> Cloud
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-sm">
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Save Project</DialogTitle>
-              <DialogDescription>Enter a 6-digit ID to save your project. Anyone with this ID can access it.</DialogDescription>
+              <DialogTitle>Cloud Storage</DialogTitle>
+              <DialogDescription>Enter a 6-digit ID to access your projects.</DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <Label htmlFor="save-id">Project ID</Label>
-              <Input id="save-id" value={projectId} onChange={(e) => setProjectId(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="e.g., 123456" maxLength={6} />
-            </div>
-            <DialogFooter>
-              <Button onClick={handleSave} disabled={isLoading} size="sm">
-                {isLoading && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
-                Save
+            <div className="flex items-center gap-2">
+              <Input 
+                id="access-id" 
+                value={accessId} 
+                onChange={(e) => setAccessId(e.target.value.replace(/\D/g, '').slice(0, 6))} 
+                placeholder="e.g., 123456" 
+                maxLength={6} 
+                disabled={cloudProjects.length > 0}
+              />
+              <Button onClick={handleAccessIdSubmit} disabled={isLoading || cloudProjects.length > 0}>
+                {isLoading ? <Loader2 className="animate-spin" /> : 'Go'}
               </Button>
-            </DialogFooter>
+            </div>
+            
+            {accessId.length === 6 && (
+                 <div className="space-y-3 pt-2">
+                    <Separator/>
+                     <p className="text-sm font-medium">Projects at ID: {accessId}</p>
+                     <ScrollArea className="h-40 rounded-md border">
+                        <div className="p-2">
+                            {isLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
+                            {!isLoading && cloudProjects.length === 0 && (
+                                <p className="text-sm text-muted-foreground p-4 text-center">No projects found.</p>
+                            )}
+                            <RadioGroup value={selectedCloudProject?.id} onValueChange={(id) => setSelectedCloudProject(cloudProjects.find(p => p.id === id) || null)}>
+                                {cloudProjects.map(p => (
+                                    <div key={p.id} className="flex items-center justify-between text-sm p-1 rounded-md hover:bg-muted">
+                                        <Label htmlFor={p.id} className="flex-1 cursor-pointer">{p.project.name}</Label>
+                                        <RadioGroupItem value={p.id} id={p.id} />
+                                    </div>
+                                ))}
+                            </RadioGroup>
+                        </div>
+                     </ScrollArea>
+                    <DialogFooter className="!justify-between">
+                         <div className="flex gap-2">
+                            <Button onClick={handleLoadProject} disabled={!selectedCloudProject || isLoading} size="sm">Load</Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" size="icon" className="h-7 w-7" disabled={!selectedCloudProject || isLoading}><Trash2 /></Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This will permanently delete "{selectedCloudProject?.project.name}". This action cannot be undone.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleDeleteProject(selectedCloudProject)} className="bg-destructive hover:bg-destructive/90">
+                                            {isLoading ? <Loader2 className="animate-spin" /> : 'Delete'}
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                         </div>
+                         <Button onClick={handleSaveProject} disabled={isLoading} size="sm">Save Current Project</Button>
+                    </DialogFooter>
+                 </div>
+            )}
           </DialogContent>
         </Dialog>
-        
-        <Dialog open={isDialogOpen === 'load'} onOpenChange={(open) => !open && setIsDialogOpen(null)}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" onClick={() => setIsDialogOpen('load')}>
-              <FolderOpen className="mr-1 h-3 w-3" /> Load
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-sm">
-            <DialogHeader>
-              <DialogTitle>Load Project</DialogTitle>
-              <DialogDescription>Enter the 6-digit ID of the project you want to load.</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <Label htmlFor="load-id">Project ID</Label>
-              <Input id="load-id" value={projectId} onChange={(e) => setProjectId(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="e.g., 123456" maxLength={6} />
-            </div>
-            <DialogFooter>
-              <Button onClick={handleLoad} disabled={isLoading} size="sm">
-                {isLoading && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
-                Load
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
       </div>
     </header>
 
-    {/* Load Conflict Dialog */}
-    <Dialog open={showLoadConflictDialog} onOpenChange={setShowLoadConflictDialog}>
-        <DialogContent>
-            <DialogHeader>
-                <DialogTitle>Multiple Projects Found</DialogTitle>
-                <DialogDescription>Select which project you'd like to load from ID: {projectId}</DialogDescription>
-            </DialogHeader>
-            <RadioGroup value={selectedProjectToLoad || ''} onValueChange={setSelectedProjectToLoad} className="py-4">
-                {conflictingProjects.map(p => (
-                    <div key={p.id} className="flex items-center space-x-2">
-                        <RadioGroupItem value={p.id} id={p.id} />
-                        <Label htmlFor={p.id}>{p.project.name}</Label>
-                    </div>
-                ))}
-            </RadioGroup>
-            <DialogFooter>
-                <Button onClick={handleConfirmLoadConflict} disabled={!selectedProjectToLoad}>Load Selected</Button>
-            </DialogFooter>
-        </DialogContent>
-    </Dialog>
-    
-    {/* Save Conflict Dialog */}
-    <AlertDialog open={showSaveConflictDialog} onOpenChange={setShowSaveConflictDialog}>
+     <AlertDialog open={showOverwriteAlert} onOpenChange={setShowOverwriteAlert}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Project Name Conflict</AlertDialogTitle>
           <AlertDialogDescription>
-            A project named "{saveConflict?.project.name}" already exists at this ID. How would you like to proceed?
+            A project named "{state.project.name}" already exists. How would you like to proceed?
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <div className="py-4 space-y-4">
-            <Button className="w-full" onClick={() => handleResolveSaveConflict('replace')}>
-                {isLoading ? <Loader2 className="animate-spin" /> : 'Replace Existing Project'}
+        <div className="py-4 space-y-2">
+            <Button className="w-full" onClick={() => executeSave(state.project, true, selectedCloudProject?.id)}>
+                {isLoading ? <Loader2 className="animate-spin" /> : 'Overwrite Existing Project'}
             </Button>
-             <Button className="w-full" variant="secondary" onClick={() => handleResolveSaveConflict('autoname')}>
-                {isLoading ? <Loader2 className="animate-spin" /> : 'Save as New Version (Auto-name)'}
+             <Button className="w-full" variant="secondary" onClick={() => executeSave(state.project)}>
+                {isLoading ? <Loader2 className="animate-spin" /> : 'Save as a New Copy (Auto-Renamed)'}
             </Button>
-            <div className="space-y-2">
-                <Label htmlFor="new-name">Or rename your project:</Label>
-                <div className="flex gap-2">
-                    <Input id="new-name" value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} />
-                    <Button onClick={() => handleResolveSaveConflict('rename')} disabled={isLoading}>
-                         {isLoading ? <Loader2 className="animate-spin" /> : 'Save with New Name'}
-                    </Button>
-                </div>
-            </div>
         </div>
         <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
-import { getDatabase, ref, set, get, push, update, type Database } from 'firebase/database';
+import { getDatabase, ref, set, get, push, update, remove, type Database } from 'firebase/database';
 import type { Project } from './types';
 
 const firebaseConfig = {
@@ -27,61 +27,58 @@ const getProjectsRef = (id: string) => {
   return ref(db, `ura-projects/${id}`);
 };
 
+const getProjectPath = (id: string, projectId: string) => {
+    if (!db) throw new Error("Firebase is not initialized.");
+    return ref(db, `ura-projects/${id}/${projectId}`);
+}
+
 export type ProjectWithId = {
     id: string;
     project: Project;
 }
 
-type SaveResult = {
-    status: 'success' | 'conflict';
-    conflictingProject?: ProjectWithId;
-}
-
 export const saveProjectToDb = async (
-    id: string, 
+    accessId: string, 
     projectData: Project,
-    resolution?: 'replace' | 'rename' | 'autoname',
-    conflictId?: string,
-): Promise<SaveResult> => {
-  if (!id.match(/^\d{6}$/)) {
+    existingProjectId?: string | null,
+    overwrite: boolean = false,
+): Promise<ProjectWithId> => {
+  if (!accessId.match(/^\d{6}$/)) {
     throw new Error("Invalid ID format. Must be a 6-digit number.");
   }
-  const projectsRef = getProjectsRef(id);
-  const snapshot = await get(projectsRef);
-  const existingProjects: {[key: string]: Project} = snapshot.val() || {};
+  const projectsRef = getProjectsRef(accessId);
 
-  // Find a project with the same name
-  const conflictingEntry = Object.entries(existingProjects).find(
-    ([key, p]) => p.name === projectData.name
-  );
-  
-  if (conflictingEntry && !resolution) {
-      return { status: 'conflict', conflictingProject: { id: conflictingEntry[0], project: conflictingEntry[1] } };
+  // If we are overwriting an existing project
+  if (existingProjectId && overwrite) {
+      const projectRef = getProjectPath(accessId, existingProjectId);
+      await set(projectRef, projectData);
+      return { id: existingProjectId, project: projectData };
   }
+
+  // If we are saving as a new copy (or for the first time)
+  const allProjects = await loadProjectsFromDb(accessId);
+  const existingNames = allProjects.map(p => p.project.name);
+  let newName = projectData.name;
   
-  if (resolution === 'replace') {
-      if (!conflictId) throw new Error("Conflict ID is required for replacement.");
-      const updates: { [key: string]: Project } = {};
-      updates[conflictId] = projectData;
-      await update(projectsRef, updates);
-      return { status: 'success' };
-  }
-  
-  if (resolution === 'autoname') {
-      let newName = projectData.name;
+  if (existingNames.includes(newName)) {
       let counter = 1;
-      const existingNames = Object.values(existingProjects).map(p => p.name);
-      while(existingNames.includes(newName)) {
-          newName = `${projectData.name} (${counter})`;
+      let tempName = `${newName} (${counter})`;
+      while (existingNames.includes(tempName)) {
           counter++;
+          tempName = `${newName} (${counter})`;
       }
-      projectData.name = newName;
+      newName = tempName;
   }
   
-  // For 'rename', 'autoname', or no conflict, we push a new project
+  const newProjectData = { ...projectData, name: newName };
   const newProjectRef = push(projectsRef);
-  await set(newProjectRef, projectData);
-  return { status: 'success' };
+  await set(newProjectRef, newProjectData);
+  
+  if (!newProjectRef.key) {
+      throw new Error("Failed to get new project key from Firebase.");
+  }
+
+  return { id: newProjectRef.key, project: newProjectData };
 };
 
 export const loadProjectsFromDb = async (id: string): Promise<ProjectWithId[]> => {
@@ -95,7 +92,6 @@ export const loadProjectsFromDb = async (id: string): Promise<ProjectWithId[]> =
     const data = snapshot.val();
     // Handle legacy format where project was not nested
     if (data.name && data.pages) {
-      // It's a single legacy project
       const legacyProject = data as Project;
       const newProjectRef = push(projectsRef);
       await set(ref(db, `ura-projects/${id}`), {[newProjectRef.key!]: legacyProject}); // Overwrite with new structure
@@ -105,7 +101,19 @@ export const loadProjectsFromDb = async (id: string): Promise<ProjectWithId[]> =
     return Object.entries(data).map(([key, project]) => ({
       id: key,
       project: project as Project
-    }));
+    })).sort((a,b) => a.project.name.localeCompare(b.project.name)); // Sort alphabetically
   }
   return [];
 };
+
+
+export const deleteProjectFromDb = async (accessId: string, projectId: string): Promise<void> => {
+    if (!accessId.match(/^\d{6}$/)) {
+        throw new Error("Invalid Access ID format.");
+    }
+    if (!projectId) {
+        throw new Error("Project ID is required for deletion.");
+    }
+    const projectRef = getProjectPath(accessId, projectId);
+    await remove(projectRef);
+}
