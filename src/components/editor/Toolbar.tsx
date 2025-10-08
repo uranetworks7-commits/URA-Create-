@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor } from '@/context/EditorContext';
 import type { ButtonElement, ContainerElement, ImageElement, Project, TextElement, VideoElement } from '@/lib/types';
-import { Type, Square, Video, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud } from 'lucide-react';
+import { Type, Square, Video, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud, RectangleVertical, FileText, Table } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -409,7 +409,7 @@ export default function Toolbar() {
          <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => addElement('container')}>
-              <RectangleHorizontal />
+              <RectangleVertical />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right"><p>Add Container</p></TooltipContent>
@@ -530,3 +530,5 @@ export default function Toolbar() {
     </>
   );
 }
+
+    
