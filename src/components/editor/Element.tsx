@@ -179,7 +179,8 @@ export default function Element({ element }: ElementProps) {
           </div>
         );
       case 'image':
-        if (imageError) {
+        const imageSrc = (el as ImageElement).src;
+        if (imageError || !imageSrc) {
             return (
                 <div className="w-full h-full bg-destructive/20 flex flex-col items-center justify-center gap-2 text-destructive">
                     <AlertTriangle className="h-8 w-8" />
@@ -188,7 +189,7 @@ export default function Element({ element }: ElementProps) {
             )
         }
         return <Image 
-                    src={(el as ImageElement).src} 
+                    src={imageSrc} 
                     alt="canvas image" 
                     layout="fill" 
                     objectFit="cover" 
