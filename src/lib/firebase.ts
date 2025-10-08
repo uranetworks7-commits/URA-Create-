@@ -54,31 +54,22 @@ export const saveProjectToDb = async (
       await set(projectRef, projectData);
       return { id: existingProjectId, project: projectData };
   }
-
-  // If we are saving as a new copy (or for the first time)
-  const allProjects = await loadProjectsFromDb(accessId);
-  const existingNames = allProjects.map(p => p.project.name);
-  let newName = projectData.name;
   
-  if (existingNames.includes(newName)) {
-      let counter = 1;
-      let tempName = `${newName} (${counter})`;
-      while (existingNames.includes(tempName)) {
-          counter++;
-          tempName = `${newName} (${counter})`;
-      }
-      newName = tempName;
+  const allProjects = await loadProjectsFromDb(accessId);
+  const existingProject = allProjects.find(p => p.project.name === projectData.name);
+
+  if (existingProject) {
+    throw new Error('Project name already exists. Please choose another name or overwrite.');
   }
   
-  const newProjectData = { ...projectData, name: newName };
   const newProjectRef = push(projectsRef);
-  await set(newProjectRef, newProjectData);
+  await set(newProjectRef, projectData);
   
   if (!newProjectRef.key) {
       throw new Error("Failed to get new project key from Firebase.");
   }
 
-  return { id: newProjectRef.key, project: newProjectData };
+  return { id: newProjectRef.key, project: projectData };
 };
 
 export const loadProjectsFromDb = async (id: string): Promise<ProjectWithId[]> => {
