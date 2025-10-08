@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "canvas-placeholder-1",
+      "description": "A sample image for the web canvas.",
+      "imageUrl": "https://picsum.photos/seed/canvas1/400/300",
+      "imageHint": "abstract tech"
+    }
+  ]
 }
