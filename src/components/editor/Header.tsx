@@ -164,8 +164,8 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
     <>
     <header className="flex h-10 items-center justify-between border-b bg-card px-2 z-10 shadow-sm">
       <div className="flex items-center gap-1.5">
-        <Blocks className="h-5 w-5 text-accent" />
-        <h1 className="text-base font-bold tracking-tight">URA-Create</h1>
+        <Blocks className="h-4 w-4 text-accent" />
+        <h1 className="text-sm font-bold tracking-tight">URA-Create</h1>
       </div>
       <div className="flex items-center gap-1">
          <Button 
@@ -210,7 +210,7 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
             <Settings />
           </Button>
 
-        <Button variant="outline" size="sm" onClick={onStartNew}><FilePlus className="mr-1 h-3 w-3" /> New</Button>
+        <Button variant="outline" size="sm" onClick={onStartNew}><FilePlus className="mr-1" /> New</Button>
         
         {/* Load Dialog */}
         <Dialog open={isLoadDialogOpen} onOpenChange={(open) => {
@@ -219,7 +219,7 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
         }}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm">
-              <FolderOpen className="mr-1 h-3 w-3" /> Load
+              <FolderOpen className="mr-1" /> Load
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
@@ -275,7 +275,7 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
         <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <Save className="mr-1 h-3 w-3" /> Save
+                  <Save className="mr-1" /> Save
                 </Button>
             </DialogTrigger>
              <DialogContent className="sm:max-w-sm">
