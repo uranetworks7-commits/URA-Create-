@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2, Trash2, Grid } from 'lucide-react';
+import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2, Trash2, Grid, HelpCircle } from 'lucide-react';
 import { useEditor } from '@/context/EditorContext';
 import { useState, useEffect } from 'react';
 import {
@@ -31,6 +31,7 @@ import {
 } from '../ui/alert-dialog';
 import { ScrollArea } from '../ui/scroll-area';
 import { Checkbox } from '../ui/checkbox';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 export default function Header({ onStartNew }: { onStartNew: () => void }) {
   const { state, dispatch } = useEditor();
@@ -38,6 +39,7 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
   
   const [isLoadDialogOpen, setIsLoadDialogOpen] = useState(false);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   
   const [accessId, setAccessId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -166,6 +168,81 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
       <div className="flex items-center gap-1.5">
         <Blocks className="h-4 w-4 text-accent" />
         <h1 className="text-sm font-bold tracking-tight">URA-Create</h1>
+         <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
+            <DialogTrigger asChild>
+                 <Button variant="ghost" size="icon" className="h-7 w-7"><HelpCircle className="h-4 w-4 text-muted-foreground"/></Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+                 <DialogHeader>
+                    <DialogTitle>URA-Create User Manual</DialogTitle>
+                    <DialogDescription>A guide to all the tools and features in the editor.</DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-[60vh] p-2">
+                    <Accordion type="single" collapsible className="w-full">
+                        <AccordionItem value="item-1">
+                            <AccordionTrigger>Toolbar: Object & View Tools</AccordionTrigger>
+                            <AccordionContent className="space-y-2">
+                                <p><strong>Move Tool:</strong> Select an element on the canvas to enable this. Use the arrow buttons to move the element by the specified "Speed" increment.</p>
+                                <p><strong>Size Tool:</strong> Select an element to enable. Quickly resize the element to 2x or 0.5x its current size, or reset it to its original size.</p>
+                                <p><strong>Zoom Tool:</strong> Zoom in or out of the canvas for a better view. The current zoom level is displayed.</p>
+                            </AccordionContent>
+                        </AccordionItem>
+                        <AccordionItem value="item-2">
+                            <AccordionTrigger>Toolbar: Add Elements</AccordionTrigger>
+                            <AccordionContent className="space-y-2">
+                                <p><strong>Add Text:</strong> Adds a new text box to the canvas.</p>
+                                <p><strong>Add Button:</strong> Adds a new button to the canvas.</p>
+                                <p><strong>Add Media:</strong> Opens a dialog to add an image or video from your computer or a URL.</p>
+                                <p><strong>Add Animation:</strong> Adds a special effect like Fireworks, Confetti, or Sparks to the page.</p>
+                                <p><strong>Add Sticker:</strong> Opens a menu to add a fun emoji sticker to the canvas.</p>
+                                <p><strong>Add Container:</strong> Adds a basic rectangular shape that can be used for backgrounds or layout.</p>
+                            </AccordionContent>
+                        </AccordionItem>
+                        <AccordionItem value="item-3">
+                            <AccordionTrigger>Toolbar: Templates & Actions</AccordionTrigger>
+                            <AccordionContent className="space-y-2">
+                               <p><strong>Templates (MCQ, Table, Content):</strong> Adds a pre-built set of elements to the canvas to give you a head start on common layouts.</p>
+                               <p><strong>Preview Project:</strong> Opens a dialog to preview your interactive project exactly as a user would see it.</p>
+                               <p><strong>Build Project:</strong> Navigates to a page where your project is compiled and can be downloaded as a ZIP file or shared.</p>
+                               <p><strong>Quick Builder:</strong> Generates the complete HTML code for your project for you to copy or download.</p>
+                               <p><strong>Share Project:</strong> Allows you to save your project to the cloud with a 6-digit ID so you can share it or load it later.</p>
+                            </AccordionContent>
+                        </AccordionItem>
+                         <AccordionItem value="item-4">
+                            <AccordionTrigger>Page Management</AccordionTrigger>
+                            <AccordionContent className="space-y-2">
+                                <p><strong>Page Tabs:</strong> Click on a page name to switch to it. Click the '+' button to add a new blank page.</p>
+                                <p><strong>Page Settings (ellipsis button):</strong> Opens a popover with detailed settings for the currently selected page.</p>
+                            </AccordionContent>
+                        </AccordionItem>
+                         <AccordionItem value="item-5">
+                            <AccordionTrigger>Page Settings Panel</AccordionTrigger>
+                            <AccordionContent className="space-y-2">
+                                <p><strong>Page Name:</strong> Change the name of the current page.</p>
+                                <p><strong>Background Color/Image:</strong> Set a solid color or a background image URL for the page.</p>
+                                <p><strong>Background Audio:</strong> Add background music or sound effects from a URL. You can also set it to loop.</p>
+                                <p><strong>Apply to all pages:</strong> Copies the current page's background and audio settings to all other pages in your project.</p>
+                                <p><strong>Page Redirect:</strong> Automatically navigate to another page after a set delay (in seconds).</p>
+                                <p><strong>Custom HTML:</strong> Switch to a mode where you can input your own HTML for the page preview. This disables the visual editor for that page.</p>
+                                <p><strong>Build from HTML:</strong> Use this to provide a complete HTML document that will be used for this page in the final build, overriding all visual content.</p>
+                                <p><strong>Delete Page:</strong> Permanently deletes the current page. You cannot delete the last remaining page.</p>
+                            </AccordionContent>
+                        </AccordionItem>
+                        <AccordionItem value="item-6">
+                            <AccordionTrigger>Element Settings Panel</AccordionTrigger>
+                            <AccordionContent className="space-y-2">
+                               <p>When you select an element, a settings panel appears on the right (you may need to click the 'Settings' gear icon in the header to open it). This panel lets you fine-tune the selected element.</p>
+                                <p><strong>Common Settings:</strong> Name, Rotation, Animation (with loop toggle), Duplicate, Delete.</p>
+                                <p><strong>Text/Button Settings:</strong> Text content, font size, weight, and color.</p>
+                                <p><strong>Button/Container Settings:</strong> Background color.</p>
+                                <p><strong>Button-Specific Settings:</strong> Shape, border radius, and linking to another page.</p>
+                                <p><strong>Image/Video Settings:</strong> Change the source URL and see the element's dimensions.</p>
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                </ScrollArea>
+            </DialogContent>
+        </Dialog>
       </div>
       <div className="flex items-center gap-1">
          <Button 

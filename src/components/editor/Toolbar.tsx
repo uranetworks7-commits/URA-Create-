@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor } from '@/context/EditorContext';
 import type { ButtonElement, ContainerElement, ImageElement, Project, TextElement, VideoElement, AnimationElement } from '@/lib/types';
-import { Type, Square, Video, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud, RectangleVertical, FileText, Table, Sparkles, Zap, PartyPopper, FerrisWheel } from 'lucide-react';
+import { Type, Square, Video, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud, RectangleVertical, FileText, Table, Sparkles, Zap, PartyPopper, FerrisWheel, Smile } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -20,7 +20,7 @@ import PreviewDialog from './PreviewDialog';
 import { uploadImage } from '@/ai/flows/upload-image-flow';
 import { Separator } from '../ui/separator';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
-
+import { stickers } from '@/lib/stickers';
 
 export default function Toolbar() {
   const { state, dispatch } = useEditor();
@@ -58,7 +58,7 @@ export default function Toolbar() {
     }
   };
   
-  const addImageElement = (src: string) => {
+  const addImageElement = (src: string, size = { width: 300, height: 200 }) => {
      if (src) {
         const element: ImageElement = {
           id: crypto.randomUUID(),
@@ -68,7 +68,7 @@ export default function Toolbar() {
           type: 'image',
           name: 'Image',
           src: src,
-          size: { width: 300, height: 200 },
+          size: size,
         };
         dispatch({ type: 'ADD_ELEMENT', payload: { element } });
       }
@@ -445,6 +445,33 @@ export default function Toolbar() {
             </DropdownMenuContent>
         </DropdownMenu>
 
+        <DropdownMenu>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7">
+                            <Smile />
+                        </Button>
+                    </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="right"><p>Add Sticker</p></TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent side="right" className="w-64">
+                <ScrollArea className="h-64">
+                    <div className="p-2 grid grid-cols-5 gap-1">
+                        {stickers.map(sticker => (
+                            <div key={sticker.name} 
+                                 className="text-2xl cursor-pointer rounded-md hover:bg-accent/50 p-1"
+                                 onClick={() => addImageElement(sticker.url, { width: 64, height: 64 })}
+                                 title={sticker.name}
+                            >
+                                {sticker.emoji}
+                            </div>
+                        ))}
+                    </div>
+                </ScrollArea>
+            </DropdownMenuContent>
+        </DropdownMenu>
         
          <Tooltip>
           <TooltipTrigger asChild>
@@ -586,10 +613,3 @@ export default function Toolbar() {
     </>
   );
 }
-
-    
-
-    
-
-
-
