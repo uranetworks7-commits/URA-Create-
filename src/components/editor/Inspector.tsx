@@ -139,9 +139,9 @@ export default function Inspector() {
             )}
             {el.type === 'image' && (
                 <div className="space-y-1">
-                    <Label htmlFor="src">Image Source</Label>
+                    <Label htmlFor="src">Image Source (URL)</Label>
                     <div className="flex items-center gap-2">
-                        <Input id="src" value={(el as ImageElement).src} onChange={e => updateElement({ src: e.target.value })}/>
+                        <Input id="src" value={(el as ImageElement).src} onChange={e => updateElement({ src: e.target.value })} placeholder="https://..."/>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" size="icon" className="h-7 w-7"><Palette className="h-3 w-3" /></Button>
