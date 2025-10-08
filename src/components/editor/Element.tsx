@@ -16,12 +16,15 @@ export default function Element({ element }: ElementProps) {
 
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
-  
+  const [resizeCorner, setResizeCorner] = useState<'br' | 'tl' | 'tr' | 'bl' | null>(null);
+
   const ref = useRef<HTMLDivElement>(null);
 
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
-    dispatch({ type: 'SELECT_ELEMENT', payload: { elementId: element.id } });
+    if (!isSelected) {
+      dispatch({ type: 'SELECT_ELEMENT', payload: { elementId: element.id } });
+    }
   };
   
   const handleDragStart = (e: React.MouseEvent) => {
@@ -31,15 +34,14 @@ export default function Element({ element }: ElementProps) {
     setIsDragging(true);
   };
 
-  const handleResizeStart = (e: React.MouseEvent) => {
+  const handleResizeStart = (e: React.MouseEvent, corner: 'br' | 'tl' | 'tr' | 'bl') => {
     e.stopPropagation();
     e.preventDefault();
     setIsResizing(true);
+    setResizeCorner(corner);
   };
 
   useEffect(() => {
-    if (!isDragging && !isResizing) return;
-    
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         dispatch({
@@ -54,14 +56,37 @@ export default function Element({ element }: ElementProps) {
         });
       }
       if (isResizing) {
+        let newWidth = element.size.width;
+        let newHeight = element.size.height;
+        let newX = element.position.x;
+        let newY = element.position.y;
+        
+        const minSize = 20;
+
+        if (resizeCorner === 'br') {
+          newWidth = Math.max(minSize, element.size.width + e.movementX);
+          newHeight = Math.max(minSize, element.size.height + e.movementY);
+        } else if (resizeCorner === 'tl') {
+          newWidth = Math.max(minSize, element.size.width - e.movementX);
+          newHeight = Math.max(minSize, element.size.height - e.movementY);
+          newX = element.position.x + e.movementX;
+          newY = element.position.y + e.movementY;
+        } else if (resizeCorner === 'tr') {
+          newWidth = Math.max(minSize, element.size.width + e.movementX);
+          newHeight = Math.max(minSize, element.size.height - e.movementY);
+          newY = element.position.y + e.movementY;
+        } else if (resizeCorner === 'bl') {
+           newWidth = Math.max(minSize, element.size.width - e.movementX);
+          newHeight = Math.max(minSize, element.size.height + e.movementY);
+          newX = element.position.x + e.movementX;
+        }
+
         dispatch({
           type: 'UPDATE_ELEMENT',
           payload: {
             id: element.id,
-            size: {
-              width: Math.max(20, element.size.width + e.movementX),
-              height: Math.max(20, element.size.height + e.movementY),
-            },
+            position: { x: newX, y: newY },
+            size: { width: newWidth, height: newHeight },
           },
         });
       }
@@ -70,16 +95,19 @@ export default function Element({ element }: ElementProps) {
     const handleMouseUp = () => {
       setIsDragging(false);
       setIsResizing(false);
+      setResizeCorner(null);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    if (isDragging || isResizing) {
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp, { once: true });
+    }
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, dispatch, element.id, element.position, element.size]);
+  }, [isDragging, isResizing, resizeCorner, dispatch, element.id, element.position, element.size]);
 
   const renderSpecificElement = () => {
     const el = element;
@@ -140,19 +168,19 @@ export default function Element({ element }: ElementProps) {
         <>
           <div
             className="absolute -bottom-2 -right-2 h-4 w-4 cursor-nwse-resize rounded-full bg-accent border-2 border-background shadow-lg"
-            onMouseDown={handleResizeStart}
+            onMouseDown={(e) => handleResizeStart(e, 'br')}
           />
           <div
             className="absolute -top-2 -left-2 h-4 w-4 cursor-nwse-resize rounded-full bg-accent border-2 border-background shadow-lg"
-            onMouseDown={handleResizeStart}
+            onMouseDown={(e) => handleResizeStart(e, 'tl')}
           />
           <div
             className="absolute -top-2 -right-2 h-4 w-4 cursor-nesw-resize rounded-full bg-accent border-2 border-background shadow-lg"
-            onMouseDown={handleResizeStart}
+            onMouseDown={(e) => handleResizeStart(e, 'tr')}
           />
            <div
             className="absolute -bottom-2 -left-2 h-4 w-4 cursor-nesw-resize rounded-full bg-accent border-2 border-background shadow-lg"
-            onMouseDown={handleResizeStart}
+            onMouseDown={(e) => handleResizeStart(e, 'bl')}
           />
         </>
       )}
