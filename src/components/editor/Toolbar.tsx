@@ -28,10 +28,10 @@ export default function Toolbar() {
         type: 'text',
         name: 'Text',
         content: 'Your Text Here',
-        fontSize: 24,
+        fontSize: 16,
         color: '#000000',
         fontWeight: 'normal',
-        size: { width: 200, height: 50 },
+        size: { width: 150, height: 30 },
       };
       dispatch({ type: 'ADD_ELEMENT', payload: { element } });
     } else if (type === 'button') {
@@ -40,12 +40,12 @@ export default function Toolbar() {
         type: 'button',
         name: 'Button',
         content: 'Click Me',
-        fontSize: 16,
+        fontSize: 14,
         color: '#ffffff',
         backgroundColor: '#000000',
         fontWeight: 'normal',
-        borderRadius: 8,
-        size: { width: 120, height: 40 },
+        borderRadius: 4,
+        size: { width: 100, height: 32 },
         shape: 'rectangle'
       };
       dispatch({ type: 'ADD_ELEMENT', payload: { element } });
@@ -56,7 +56,7 @@ export default function Toolbar() {
         type: 'image',
         name: 'Image',
         src: placeholder.imageUrl,
-        size: { width: 400, height: 300 },
+        size: { width: 300, height: 200 },
       };
       dispatch({ type: 'ADD_ELEMENT', payload: { element } });
     } else if (type === 'container') {
@@ -65,7 +65,7 @@ export default function Toolbar() {
         type: 'container',
         name: 'Container',
         backgroundColor: 'transparent',
-        size: { width: 400, height: 300 },
+        size: { width: 300, height: 200 },
       };
        dispatch({ type: 'ADD_ELEMENT', payload: { element } });
     }
@@ -115,12 +115,12 @@ export default function Toolbar() {
   };
 
   return (
-    <aside className="w-20 border-r bg-card flex flex-col items-center gap-2 py-4 z-10">
+    <aside className="w-16 border-r bg-card flex flex-col items-center gap-1 py-3 z-10">
       <TooltipProvider>
-        <div className="flex flex-col items-center gap-1 w-full px-2">
+        <div className="flex flex-col items-center gap-0.5 w-full px-1">
           <Tooltip>
             <TooltipTrigger asChild>
-                <Button variant={isElementSelected ? "secondary" : "ghost"} size="icon" disabled={!isElementSelected}>
+                <Button variant={isElementSelected ? "secondary" : "ghost"} size="icon" className="h-8 w-8" disabled={!isElementSelected}>
                     <Move />
                 </Button>
             </TooltipTrigger>
@@ -128,22 +128,22 @@ export default function Toolbar() {
           </Tooltip>
 
           {isElementSelected && (
-            <div className='flex flex-col gap-2 items-center p-2 border-t mt-1 w-full'>
-                <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleMove('up')}><ArrowUp className='h-4 w-4'/></Button>
-                <div className='flex gap-2'>
-                    <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleMove('left')}><ArrowLeft className='h-4 w-4'/></Button>
-                    <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleMove('down')}><ArrowDown className='h-4 w-4'/></Button>
+            <div className='flex flex-col gap-1.5 items-center p-1.5 border-t mt-1 w-full'>
+                <Button variant="outline" size="icon" className='h-6 w-6' onClick={() => handleMove('up')}><ArrowUp className='h-3.5 w-3.5'/></Button>
+                <div className='flex gap-1.5'>
+                    <Button variant="outline" size="icon" className='h-6 w-6' onClick={() => handleMove('left')}><ArrowLeft className='h-3.5 w-3.5'/></Button>
+                    <Button variant="outline" size="icon" className='h-6 w-6' onClick={() => handleMove('down')}><ArrowDown className='h-3.5 w-3.5'/></Button>
                 </div>
-                <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleMove('right')}><ArrowRight className='h-4 w-4'/></Button>
+                <Button variant="outline" size="icon" className='h-6 w-6' onClick={() => handleMove('right')}><ArrowRight className='h-3.5 w-3.5'/></Button>
                 
-                <div className="mt-2 space-y-1 text-center">
-                    <Label htmlFor="move-speed" className="text-xs">Move Speed</Label>
+                <div className="mt-1 space-y-0.5 text-center">
+                    <Label htmlFor="move-speed" className="text-xs">Speed</Label>
                     <Input 
                         id="move-speed"
                         type="number"
                         value={state.moveIncrement}
                         onChange={(e) => dispatch({ type: 'SET_MOVE_INCREMENT', payload: { increment: Number(e.target.value) }})}
-                        className="w-14 h-8 text-center"
+                        className="w-12 h-6 text-center text-xs"
                         min="1"
                     />
                 </div>
@@ -151,47 +151,47 @@ export default function Toolbar() {
           )}
         </div>
 
-        <div className="w-10 my-1 border-t border-border" />
+        <div className="w-10 my-0.5 border-t border-border" />
         
-        <div className="flex flex-col items-center gap-1 w-full px-2">
+        <div className="flex flex-col items-center gap-0.5 w-full px-1">
             <Tooltip>
-                <TooltipTrigger asChild><Button variant={isElementSelected ? "secondary" : "ghost"} size="icon" disabled={!isElementSelected}><Expand/></Button></TooltipTrigger>
+                <TooltipTrigger asChild><Button variant={isElementSelected ? "secondary" : "ghost"} size="icon" className="h-8 w-8" disabled={!isElementSelected}><Expand/></Button></TooltipTrigger>
                 <TooltipContent side="right"><p>Size Tool</p></TooltipContent>
             </Tooltip>
             {isElementSelected && (
-                 <div className='flex flex-col gap-2 items-center p-2 border-t mt-1 w-full'>
-                    <Button variant="outline" className='h-8 w-full' onClick={() => handleResize(2)}>2x</Button>
-                    <Button variant="outline" className='h-8 w-full' onClick={() => handleResize(0.5)}>0.5x</Button>
-                    <Button variant="outline" className='h-8 w-full' onClick={() => handleResize(1)}>1x Reset</Button>
+                 <div className='flex flex-col gap-1.5 items-center p-1.5 border-t mt-1 w-full'>
+                    <Button variant="outline" className='h-6 w-full text-xs px-1' onClick={() => handleResize(2)}>2x</Button>
+                    <Button variant="outline" className='h-6 w-full text-xs px-1' onClick={() => handleResize(0.5)}>0.5x</Button>
+                    <Button variant="outline" className='h-6 w-full text-xs px-1' onClick={() => handleResize(1)}>Reset</Button>
                  </div>
             )}
         </div>
 
-         <div className="w-10 my-1 border-t border-border" />
+         <div className="w-10 my-0.5 border-t border-border" />
 
-        <div className="flex flex-col items-center gap-1 w-full px-2">
+        <div className="flex flex-col items-center gap-0.5 w-full px-1">
             <Tooltip>
-                <TooltipTrigger asChild><Button variant="secondary" size="icon"><ZoomIn/></Button></TooltipTrigger>
+                <TooltipTrigger asChild><Button variant="secondary" size="icon" className="h-8 w-8"><ZoomIn/></Button></TooltipTrigger>
                 <TooltipContent side="right"><p>Zoom Tool</p></TooltipContent>
             </Tooltip>
-             <div className='flex flex-col gap-2 items-center p-2 border-t mt-1 w-full'>
-                <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleZoom('in')}><ZoomIn className='h-4 w-4'/></Button>
-                <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleZoom('out')}><ZoomOut className='h-4 w-4'/></Button>
-                 <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleZoom('reset')}><RotateCcw className='h-4 w-4'/></Button>
-                <div className="mt-2 space-y-1 text-center">
+             <div className='flex flex-col gap-1.5 items-center p-1.5 border-t mt-1 w-full'>
+                <Button variant="outline" size="icon" className='h-6 w-6' onClick={() => handleZoom('in')}><ZoomIn className='h-3.5 w-3.5'/></Button>
+                <Button variant="outline" size="icon" className='h-6 w-6' onClick={() => handleZoom('out')}><ZoomOut className='h-3.5 w-3.5'/></Button>
+                 <Button variant="outline" size="icon" className='h-6 w-6' onClick={() => handleZoom('reset')}><RotateCcw className='h-3.5 w-3.5'/></Button>
+                <div className="mt-1 space-y-0.5 text-center">
                     <Label className="text-xs">Zoom</Label>
-                    <div className="w-14 h-8 text-center font-bold text-sm flex items-center justify-center">
+                    <div className="w-12 h-6 text-center font-bold text-xs flex items-center justify-center">
                         {Math.round(state.zoom * 100)}%
                     </div>
                 </div>
             </div>
         </div>
 
-        <div className="w-10 my-1 border-t border-border" />
+        <div className="w-10 my-0.5 border-t border-border" />
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={() => addElement('text')}>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => addElement('text')}>
               <Type />
             </Button>
           </TooltipTrigger>
@@ -199,7 +199,7 @@ export default function Toolbar() {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={() => addElement('button')}>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => addElement('button')}>
               <Square />
             </Button>
           </TooltipTrigger>
@@ -207,7 +207,7 @@ export default function Toolbar() {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={() => addElement('image')}>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => addElement('image')}>
               <ImageIcon />
             </Button>
           </TooltipTrigger>
@@ -215,17 +215,17 @@ export default function Toolbar() {
         </Tooltip>
          <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={() => addElement('container')}>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => addElement('container')}>
               <RectangleHorizontal />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right"><p>Add Container</p></TooltipContent>
         </Tooltip>
 
-        <div className="w-10 my-1 border-t border-border" />
+        <div className="w-10 my-0.5 border-t border-border" />
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={() => addTemplate('template-mcq')}>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => addTemplate('template-mcq')}>
               <FileText />
             </Button>
           </TooltipTrigger>
@@ -233,7 +233,7 @@ export default function Toolbar() {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={() => addTemplate('template-table')}>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => addTemplate('template-table')}>
               <Table />
             </Button>
           </TooltipTrigger>
@@ -241,16 +241,16 @@ export default function Toolbar() {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={() => addTemplate('template-content')}>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => addTemplate('template-content')}>
               <FileText />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right"><p>Add Content Template</p></TooltipContent>
         </Tooltip>
-        <div className="w-10 my-1 border-t border-border" />
+        <div className="w-10 my-0.5 border-t border-border" />
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" >
+            <Button variant="ghost" size="icon" className="h-8 w-8" >
                 <Crop />
             </Button>
           </TooltipTrigger>

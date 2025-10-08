@@ -96,7 +96,7 @@ export const pageTemplates: Page[] = [
         size: { width: 400, height: 50 },
         rotation: 0,
         content: 'User Information',
-        fontSize: 36,
+        fontSize: 24,
         fontWeight: 'bold',
         color: '#333333',
         animation: ''
@@ -112,17 +112,17 @@ export const pageTemplates: Page[] = [
         animation: ''
       },
       // Headers
-      { id: 'th-1', type: 'text', name: 'Header 1', position: { x: 70, y: 120 }, size: { width: 150, height: 40 }, rotation: 0, content: 'Name', fontSize: 18, fontWeight: 'bold', color: '#111827', animation: '' },
-      { id: 'th-2', type: 'text', name: 'Header 2', position: { x: 270, y: 120 }, size: { width: 150, height: 40 }, rotation: 0, content: 'Email', fontSize: 18, fontWeight: 'bold', color: '#111827', animation: '' },
-      { id: 'th-3', type: 'text', name: 'Header 3', position: { x: 520, y: 120 }, size: { width: 150, height: 40 }, rotation: 0, content: 'Role', fontSize: 18, fontWeight: 'bold', color: '#111827', animation: '' },
+      { id: 'th-1', type: 'text', name: 'Header 1', position: { x: 70, y: 120 }, size: { width: 150, height: 40 }, rotation: 0, content: 'Name', fontSize: 16, fontWeight: 'bold', color: '#111827', animation: '' },
+      { id: 'th-2', type: 'text', name: 'Header 2', position: { x: 270, y: 120 }, size: { width: 150, height: 40 }, rotation: 0, content: 'Email', fontSize: 16, fontWeight: 'bold', color: '#111827', animation: '' },
+      { id: 'th-3', type: 'text', name: 'Header 3', position: { x: 520, y: 120 }, size: { width: 150, height: 40 }, rotation: 0, content: 'Role', fontSize: 16, fontWeight: 'bold', color: '#111827', animation: '' },
       // Row 1
-      { id: 'tr1-td1', type: 'text', name: 'R1C1', position: { x: 70, y: 180 }, size: { width: 150, height: 40 }, rotation: 0, content: 'Jane Doe', fontSize: 16, fontWeight: 'normal', color: '#374151', animation: '' },
-      { id: 'tr1-td2', type: 'text', name: 'R1C2', position: { x: 270, y: 180 }, size: { width: 250, height: 40 }, rotation: 0, content: 'jane.doe@example.com', fontSize: 16, fontWeight: 'normal', color: '#374151', animation: '' },
-      { id: 'tr1-td3', type: 'text', name: 'R1C3', position: { x: 520, y: 180 }, size: { width: 150, height: 40 }, rotation: 0, content: 'Admin', fontSize: 16, fontWeight: 'normal', color: '#374151', animation: '' },
+      { id: 'tr1-td1', type: 'text', name: 'R1C1', position: { x: 70, y: 180 }, size: { width: 150, height: 40 }, rotation: 0, content: 'Jane Doe', fontSize: 14, fontWeight: 'normal', color: '#374151', animation: '' },
+      { id: 'tr1-td2', type: 'text', name: 'R1C2', position: { x: 270, y: 180 }, size: { width: 250, height: 40 }, rotation: 0, content: 'jane.doe@example.com', fontSize: 14, fontWeight: 'normal', color: '#374151', animation: '' },
+      { id: 'tr1-td3', type: 'text', name: 'R1C3', position: { x: 520, y: 180 }, size: { width: 150, height: 40 }, rotation: 0, content: 'Admin', fontSize: 14, fontWeight: 'normal', color: '#374151', animation: '' },
       // Row 2
-      { id: 'tr2-td1', type: 'text', name: 'R2C1', position: { x: 70, y: 240 }, size: { width: 150, height: 40 }, rotation: 0, content: 'John Smith', fontSize: 16, fontWeight: 'normal', color: '#374151', animation: '' },
-      { id: 'tr2-td2', type: 'text', name: 'R2C2', position: { x: 270, y: 240 }, size: { width: 250, height: 40 }, rotation: 0, content: 'john.smith@example.com', fontSize: 16, fontWeight: 'normal', color: '#374151', animation: '' },
-      { id: 'tr2-td3', type: 'text', name: 'R2C3', position: { x: 520, y: 240 }, size: { width: 150, height: 40 }, rotation: 0, content: 'User', fontSize: 16, fontWeight: 'normal', color: '#374151', animation: '' },
+      { id: 'tr2-td1', type: 'text', name: 'R2C1', position: { x: 70, y: 240 }, size: { width: 150, height: 40 }, rotation: 0, content: 'John Smith', fontSize: 14, fontWeight: 'normal', color: '#374151', animation: '' },
+      { id: 'tr2-td2', type: 'text', name: 'R2C2', position: { x: 270, y: 240 }, size: { width: 250, height: 40 }, rotation: 0, content: 'john.smith@example.com', fontSize: 14, fontWeight: 'normal', color: '#374151', animation: '' },
+      { id: 'tr2-td3', type: 'text', name: 'R2C3', position: { x: 520, y: 240 }, size: { width: 150, height: 40 }, rotation: 0, content: 'User', fontSize: 14, fontWeight: 'normal', color: '#374151', animation: '' },
     ]
   },
   {
@@ -139,7 +139,7 @@ export const pageTemplates: Page[] = [
         size: { width: 500, height: 60 },
         rotation: 0,
         content: 'My Awesome Content Page',
-        fontSize: 48,
+        fontSize: 36,
         fontWeight: 'bold',
         color: '#333',
         animation: ''
@@ -152,7 +152,7 @@ export const pageTemplates: Page[] = [
         size: { width: 600, height: 200 },
         rotation: 0,
         content: 'This is a paragraph of text that you can edit. It\'s a great starting point for a blog post, an article, or just a simple page with some information. Feel free to change the text, colors, and fonts to match your style.',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'normal',
         color: '#555',
         animation: ''

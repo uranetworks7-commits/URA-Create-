@@ -35,20 +35,20 @@ export default function EditorView() {
   
   if (!isStarted && state.project.pages.length === 0) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background p-8">
-        <Card className="w-full max-w-4xl anim-pop">
+      <div className="flex h-screen w-screen items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-3xl anim-pop">
           <CardHeader className="text-center">
-            <div className="mx-auto bg-accent/20 p-3 rounded-full w-fit mb-4">
-              <Blocks className="h-8 w-8 text-accent" />
+            <div className="mx-auto bg-accent/20 p-2 rounded-full w-fit mb-2">
+              <Blocks className="h-6 w-6 text-accent" />
             </div>
-            <CardTitle className="text-3xl font-bold">URA-Create</CardTitle>
-            <CardDescription className="text-lg">
+            <CardTitle className="text-2xl font-bold">URA-Create</CardTitle>
+            <CardDescription className="text-base">
               Start from a blank page or a pre-designed template.
             </CardDescription>
           </CardHeader>
           <CardContent>
-             <form onSubmit={handleStartProject} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+             <form onSubmit={handleStartProject} className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                     <Card 
                         className={cn(
                             "cursor-pointer hover:border-primary", 
@@ -56,14 +56,14 @@ export default function EditorView() {
                         )} 
                         onClick={() => setSelectedTemplate(null)}
                     >
-                         <CardHeader>
-                            <File className="h-6 w-6 mx-auto mb-2 text-accent"/>
-                            <CardTitle className="text-lg">Blank Page</CardTitle>
+                         <CardHeader className="p-4">
+                            <File className="h-5 w-5 mx-auto mb-1 text-accent"/>
+                            <CardTitle className="text-base">Blank Page</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                             <div className="flex items-center gap-2 border p-2 rounded-lg">
-                                <label htmlFor="page-color" className="text-sm font-medium flex items-center gap-2"><Palette className="h-4 w-4"/> Color:</label>
-                                <Input type="color" id="page-color" value={pageColor} onChange={(e) => setPageColor(e.target.value)} className="w-16 h-8 p-1"/>
+                        <CardContent className="p-4 pt-0">
+                             <div className="flex items-center gap-2 border p-1 rounded-md">
+                                <label htmlFor="page-color" className="text-xs font-medium flex items-center gap-1"><Palette className="h-3 w-3"/> Color:</label>
+                                <Input type="color" id="page-color" value={pageColor} onChange={(e) => setPageColor(e.target.value)} className="w-12 h-6 p-0.5"/>
                             </div>
                         </CardContent>
                     </Card>
@@ -76,19 +76,19 @@ export default function EditorView() {
                             )} 
                             onClick={() => setSelectedTemplate(template)}
                         >
-                            <CardHeader>
-                                {template.name === 'MCQ Page' && <FileText className="h-6 w-6 mx-auto mb-2 text-accent"/>}
-                                {template.name === 'Table Page' && <Table className="h-6 w-6 mx-auto mb-2 text-accent"/>}
-                                {template.name === 'Content Page' && <FileText className="h-6 w-6 mx-auto mb-2 text-accent"/>}
-                                <CardTitle className="text-lg">{template.name}</CardTitle>
+                            <CardHeader className="p-4">
+                                {template.name === 'MCQ Page' && <FileText className="h-5 w-5 mx-auto mb-1 text-accent"/>}
+                                {template.name === 'Table Page' && <Table className="h-5 w-5 mx-auto mb-1 text-accent"/>}
+                                {template.name === 'Content Page' && <FileText className="h-5 w-5 mx-auto mb-1 text-accent"/>}
+                                <CardTitle className="text-base">{template.name}</CardTitle>
                             </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-muted-foreground">{template.description}</p>
+                            <CardContent className="p-4 pt-0">
+                                <p className="text-xs text-muted-foreground">{template.description}</p>
                             </CardContent>
                         </Card>
                     ))}
                 </div>
-                <Button type="submit" size="lg" className="w-full">
+                <Button type="submit" size="sm" className="w-full">
                     Start Designing
                 </Button>
             </form>
@@ -103,9 +103,9 @@ export default function EditorView() {
       <Header onStartNew={() => setIsStarted(false)} />
       <div className="flex flex-1 overflow-hidden">
         <Toolbar />
-        <main className="flex-1 flex flex-col overflow-auto p-2 sm:p-4 gap-4">
+        <main className="flex-1 flex flex-col overflow-auto p-1 sm:p-2 gap-2">
           <PageManager />
-          <div className="flex-1 canvas-bg p-2 rounded-lg">
+          <div className="flex-1 canvas-bg p-1 rounded-md">
             <Canvas />
           </div>
         </main>

@@ -70,18 +70,19 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
   const canRedo = state.historyIndex < state.history.length - 1;
   
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6 z-10 shadow-sm">
-      <div className="flex items-center gap-3">
-        <Blocks className="h-7 w-7 text-accent" />
-        <h1 className="text-xl font-bold tracking-tight">URA-Create</h1>
-      </div>
+    <header className="flex h-12 items-center justify-between border-b bg-card px-2 md:px-4 z-10 shadow-sm">
       <div className="flex items-center gap-2">
+        <Blocks className="h-6 w-6 text-accent" />
+        <h1 className="text-lg font-bold tracking-tight">URA-Create</h1>
+      </div>
+      <div className="flex items-center gap-1">
          <Button 
             variant="ghost" 
             size="icon"
             onClick={() => dispatch({type: 'UNDO'})}
             disabled={!canUndo}
             aria-label="Undo"
+            className="h-8 w-8"
           >
             <Undo2 />
         </Button>
@@ -91,6 +92,7 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
             onClick={() => dispatch({type: 'REDO'})}
             disabled={!canRedo}
             aria-label="Redo"
+            className="h-8 w-8"
           >
             <Redo2 />
         </Button>
@@ -101,19 +103,20 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
             onClick={() => dispatch({type: 'TOGGLE_SETTINGS'})}
             disabled={!state.selectedElementId}
             aria-label="Element Settings"
+            className="h-8 w-8"
           >
             <Settings />
           </Button>
 
-        <Button variant="outline" size="sm" onClick={onStartNew}><FilePlus className="mr-2 h-4 w-4" /> New</Button>
+        <Button variant="outline" size="sm" onClick={onStartNew}><FilePlus className="mr-1.5 h-3.5 w-3.5" /> New</Button>
         
         <Dialog open={isDialogOpen === 'save'} onOpenChange={(open) => !open && setIsDialogOpen(null)}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" onClick={() => setIsDialogOpen('save')}>
-              <Save className="mr-2 h-4 w-4" /> Save
+              <Save className="mr-1.5 h-3.5 w-3.5" /> Save
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-sm">
             <DialogHeader>
               <DialogTitle>Save Project</DialogTitle>
               <DialogDescription>Enter a 6-digit ID to save your project. Anyone with this ID can access it.</DialogDescription>
@@ -123,8 +126,8 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
               <Input id="save-id" value={projectId} onChange={(e) => setProjectId(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="e.g., 123456" maxLength={6} />
             </div>
             <DialogFooter>
-              <Button onClick={handleSave} disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button onClick={handleSave} disabled={isLoading} size="sm">
+                {isLoading && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
                 Save
               </Button>
             </DialogFooter>
@@ -134,10 +137,10 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
         <Dialog open={isDialogOpen === 'load'} onOpenChange={(open) => !open && setIsDialogOpen(null)}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" onClick={() => setIsDialogOpen('load')}>
-              <FolderOpen className="mr-2 h-4 w-4" /> Load
+              <FolderOpen className="mr-1.5 h-3.5 w-3.5" /> Load
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-sm">
             <DialogHeader>
               <DialogTitle>Load Project</DialogTitle>
               <DialogDescription>Enter the 6-digit ID of the project you want to load.</DialogDescription>
@@ -147,8 +150,8 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
               <Input id="load-id" value={projectId} onChange={(e) => setProjectId(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="e.g., 123456" maxLength={6} />
             </div>
             <DialogFooter>
-              <Button onClick={handleLoad} disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button onClick={handleLoad} disabled={isLoading} size="sm">
+                {isLoading && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
                 Load
               </Button>
             </DialogFooter>

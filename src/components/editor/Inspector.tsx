@@ -59,29 +59,29 @@ export default function Inspector() {
 
     return (
       <ScrollArea className="h-full">
-        <div className="p-4 space-y-4">
-            <div className="space-y-2">
+        <div className="p-3 space-y-3">
+            <div className="space-y-1">
                 <Label htmlFor="element-name">Element Name</Label>
                 <Input id="element-name" value={el.name} onChange={e => updateElement({ name: e.target.value })}/>
             </div>
             
             {(el.type === 'text' || el.type === 'button') && (
-                <div className="space-y-2">
+                <div className="space-y-1">
                     <Label htmlFor="content">Text</Label>
                     <Input id="content" value={(el as TextElement | ButtonElement).content} onChange={e => updateElement({ content: e.target.value })} />
                 </div>
             )}
              {(el.type === 'text' || el.type === 'button') && (
-                <div className="space-y-2">
+                <div className="space-y-1">
                     <Label>Font Size</Label>
                     <div className="flex items-center gap-2">
                       <Slider value={[(el as TextElement | ButtonElement).fontSize]} onValueChange={([v]) => updateElement({ fontSize: v })} min={8} max={128} step={1} />
-                      <Input type="number" value={(el as TextElement | ButtonElement).fontSize} onChange={e => updateElement({ fontSize: Number(e.target.value) })} className="w-20" />
+                      <Input type="number" value={(el as TextElement | ButtonElement).fontSize} onChange={e => updateElement({ fontSize: Number(e.target.value) })} className="w-16" />
                     </div>
                 </div>
             )}
             {(el.type === 'text' || el.type === 'button') && (
-                 <div className="space-y-2">
+                 <div className="space-y-1">
                     <Label>Font Weight</Label>
                     <Select value={(el as TextElement | ButtonElement).fontWeight} onValueChange={(v: 'normal' | 'bold') => updateElement({ fontWeight: v })}>
                         <SelectTrigger><SelectValue/></SelectTrigger>
@@ -90,22 +90,22 @@ export default function Inspector() {
                 </div>
             )}
             {(el.type === 'text' || el.type === 'button') && (
-                <div className="space-y-2">
+                <div className="space-y-1">
                     <Label>Color</Label>
-                    <div className="flex items-center gap-2"><Input type="color" value={(el as TextElement | ButtonElement).color} onChange={e => updateElement({ color: e.target.value })} className="w-10 h-10 p-1"/>
+                    <div className="flex items-center gap-2"><Input type="color" value={(el as TextElement | ButtonElement).color} onChange={e => updateElement({ color: e.target.value })} className="w-8 h-8 p-0.5"/>
                     <Input value={(el as TextElement | ButtonElement).color} onChange={e => updateElement({ color: e.target.value })} /></div>
                 </div>
             )}
             {(el.type === 'button' || el.type === 'container') && (
-                <div className="space-y-2">
+                <div className="space-y-1">
                     <Label>Background Color</Label>
-                    <div className="flex items-center gap-2"><Input type="color" value={(el as ButtonElement | ContainerElement).backgroundColor} onChange={e => updateElement({ backgroundColor: e.target.value })} className="w-10 h-10 p-1"/>
+                    <div className="flex items-center gap-2"><Input type="color" value={(el as ButtonElement | ContainerElement).backgroundColor} onChange={e => updateElement({ backgroundColor: e.target.value })} className="w-8 h-8 p-0.5"/>
                     <Input value={(el as ButtonElement | ContainerElement).backgroundColor} onChange={e => updateElement({ backgroundColor: e.target.value })} /></div>
                 </div>
             )}
             {el.type === 'button' && (
                 <>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label>Shape</Label>
                     <Select value={(el as ButtonElement).shape || 'rectangle'} onValueChange={(v: ButtonShape) => updateElement({ shape: v })}>
                         <SelectTrigger><SelectValue/></SelectTrigger>
@@ -118,14 +118,14 @@ export default function Inspector() {
                         </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                       <Label>Border Radius</Label>
                        <div className="flex items-center gap-2">
                         <Slider value={[(el as ButtonElement).borderRadius]} onValueChange={([v]) => updateElement({ borderRadius: v })} min={0} max={50} step={1} />
-                        <Input type="number" value={(el as ButtonElement).borderRadius} onChange={e => updateElement({ borderRadius: Number(e.target.value) })} className="w-20" />
+                        <Input type="number" value={(el as ButtonElement).borderRadius} onChange={e => updateElement({ borderRadius: Number(e.target.value) })} className="w-16" />
                        </div>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label>Link to Page</Label>
                      <Select value={(el as ButtonElement).linkToPageId || "none"} onValueChange={(v) => updateElement({ linkToPageId: v === 'none' ? undefined : v })}>
                         <SelectTrigger><SelectValue placeholder="Select a page..."/></SelectTrigger>
@@ -138,13 +138,13 @@ export default function Inspector() {
                 </>
             )}
             {el.type === 'image' && (
-                <div className="space-y-2">
+                <div className="space-y-1">
                     <Label htmlFor="src">Image Source</Label>
                     <div className="flex items-center gap-2">
                         <Input id="src" value={(el as ImageElement).src} onChange={e => updateElement({ src: e.target.value })}/>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="icon"><Palette className="h-4 w-4" /></Button>
+                                <Button variant="outline" size="icon" className="h-8 w-8"><Palette className="h-3.5 w-3.5" /></Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 {PlaceHolderImages.map(img => (
@@ -157,14 +157,14 @@ export default function Inspector() {
                     </div>
                 </div>
             )}
-             <div className="space-y-2">
+             <div className="space-y-1">
                 <Label>Rotation</Label>
                  <div className="flex items-center gap-2">
                     <Slider value={[el.rotation]} onValueChange={([v]) => updateElement({ rotation: v })} min={0} max={360} step={1} />
-                    <Input type="number" value={el.rotation} onChange={e => updateElement({ rotation: Number(e.target.value) })} className="w-20" />
+                    <Input type="number" value={el.rotation} onChange={e => updateElement({ rotation: Number(e.target.value) })} className="w-16" />
                  </div>
             </div>
-             <div className="space-y-2">
+             <div className="space-y-1">
                 <Label>Animation</Label>
                 <Select value={el.animation || 'none'} onValueChange={v => updateElement({ animation: v === 'none' ? '' : v })}>
                     <SelectTrigger><SelectValue placeholder="Select animation..." /></SelectTrigger>
@@ -181,8 +181,8 @@ export default function Inspector() {
             <AiSuggestions element={el} />
              <Separator />
              <div className="flex items-center gap-2">
-                <Button variant="outline" className="w-full" onClick={duplicateElement}><Copy className="mr-2 h-4 w-4"/>Duplicate</Button>
-                <Button variant="destructive" className="w-full" onClick={deleteElement}><Trash2 className="mr-2 h-4 w-4"/>Delete</Button>
+                <Button variant="outline" size="sm" className="w-full" onClick={duplicateElement}><Copy className="mr-1.5 h-3.5 w-3.5"/>Duplicate</Button>
+                <Button variant="destructive" size="sm" className="w-full" onClick={deleteElement}><Trash2 className="mr-1.5 h-3.5 w-3.5"/>Delete</Button>
             </div>
         </div>
       </ScrollArea>
@@ -191,13 +191,13 @@ export default function Inspector() {
   
   return (
       <Sheet open={showSettings && !!selectedElement} onOpenChange={(open) => !open && dispatch({type: 'TOGGLE_SETTINGS'})}>
-        <SheetContent className="w-80 p-0" side="right">
+        <SheetContent className="w-72 p-0" side="right">
           {selectedElement && (
             <>
-              <SheetHeader className="p-4 border-b">
-                <SheetTitle className="capitalize flex items-center justify-between">
+              <SheetHeader className="p-3 border-b">
+                <SheetTitle className="capitalize flex items-center justify-between text-base">
                   {selectedElement.type} Settings
-                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => dispatch({type: 'TOGGLE_SETTINGS'})}><X className="h-4 w-4"/></Button>
+                   <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => dispatch({type: 'TOGGLE_SETTINGS'})}><X className="h-3.5 w-3.5"/></Button>
                 </SheetTitle>
               </SheetHeader>
               {renderElementProperties()}
