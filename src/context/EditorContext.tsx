@@ -3,7 +3,7 @@
 import type { Dispatch } from 'react';
 import React, { createContext, useContext, useReducer } from 'react';
 import type { EditorElement, Page, Project, EditorState } from '@/lib/types';
-import produce from 'immer';
+import { produce } from 'immer';
 
 type EditorAction =
   | { type: 'NEW_PROJECT'; payload: { backgroundColor: string } }
