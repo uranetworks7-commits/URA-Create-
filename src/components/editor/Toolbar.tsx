@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useEditor } from '@/context/EditorContext';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import type { ButtonElement, ContainerElement, ImageElement, Project, TextElement } from '@/lib/types';
-import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw, Eye, Github, HardHat, Share2, Code } from 'lucide-react';
+import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -18,6 +18,7 @@ import { generateHtmlForProject } from '@/lib/html-builder';
 import { ScrollArea } from '../ui/scroll-area';
 import { Textarea } from '../ui/textarea';
 import PreviewDialog from './PreviewDialog';
+import { uploadImage } from '@/ai/flows/upload-image-flow';
 
 
 export default function Toolbar() {
@@ -28,6 +29,7 @@ export default function Toolbar() {
 
   const [isShareDialogOpen, setShareIsDialogOpen] = useState(false);
   const [isQuickBuilderOpen, setQuickBuilderOpen] = useState(false);
+  const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
   const [quickBuilderCode, setQuickBuilderCode] = useState('');
   const [projectId, setProjectId] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -51,8 +53,24 @@ export default function Toolbar() {
       setIsSaving(false);
     }
   };
+  
+  const addImageElement = (src: string) => {
+     if (src) {
+        const element: ImageElement = {
+          id: crypto.randomUUID(),
+          position: { x: 50, y: 50 },
+          rotation: 0,
+          animation: '',
+          type: 'image',
+          name: 'Image',
+          src: src,
+          size: { width: 300, height: 200 },
+        };
+        dispatch({ type: 'ADD_ELEMENT', payload: { element } });
+      }
+  }
 
-  const addElement = (type: 'text' | 'button' | 'image' | 'container') => {
+  const addElement = (type: 'text' | 'button' | 'container') => {
     const commonProps = {
       id: crypto.randomUUID(),
       position: { x: 50, y: 50 },
@@ -86,18 +104,6 @@ export default function Toolbar() {
         shape: 'rectangle'
       };
       dispatch({ type: 'ADD_ELEMENT', payload: { element } });
-    } else if (type === 'image') {
-      const src = window.prompt("Enter the image URL:");
-      if (src) {
-        const element: ImageElement = {
-          ...commonProps,
-          type: 'image',
-          name: 'Image',
-          src: src,
-          size: { width: 300, height: 200 },
-        };
-        dispatch({ type: 'ADD_ELEMENT', payload: { element } });
-      }
     } else if (type === 'container') {
       const element: ContainerElement = {
         ...commonProps,
@@ -109,6 +115,45 @@ export default function Toolbar() {
        dispatch({ type: 'ADD_ELEMENT', payload: { element } });
     }
   };
+  
+  const handleAddImageFromUrl = () => {
+    setIsImageUploadOpen(false);
+    const src = window.prompt("Enter the image URL:");
+    addImageElement(src || '');
+  }
+  
+  const handleAddImageFromDevice = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsImageUploadOpen(false);
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        toast({ variant: 'destructive', title: 'File too large', description: 'Please upload an image smaller than 2MB.' });
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const dataUrl = e.target?.result as string;
+        toast({ title: 'Uploading image...', description: 'Please wait a moment.' });
+        try {
+            const result = await uploadImage({ imageDataUrl: dataUrl });
+            if (result.imageUrl) {
+                addImageElement(result.imageUrl);
+                toast({ title: 'Image uploaded!', description: 'Your image has been added to the canvas.' });
+            } else {
+                throw new Error("Upload failed to return a URL.");
+            }
+        } catch (error) {
+            console.error('Image upload failed:', error);
+            toast({ variant: 'destructive', title: 'Upload Failed', description: 'Could not upload the image.' });
+        }
+    };
+    reader.readAsDataURL(file);
+    // Reset file input
+    event.target.value = '';
+  }
+
 
   const addTemplate = (templateId: string) => {
     const template = pageTemplates.find(t => t.id === templateId);
@@ -282,14 +327,33 @@ export default function Toolbar() {
           </TooltipTrigger>
           <TooltipContent side="right"><p>Add Button</p></TooltipContent>
         </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => addElement('image')}>
-              <ImageIcon />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="right"><p>Add Image</p></TooltipContent>
-        </Tooltip>
+        
+        <Dialog open={isImageUploadOpen} onOpenChange={setIsImageUploadOpen}>
+            <Tooltip>
+            <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsImageUploadOpen(true)}>
+                    <Cloud />
+                </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right"><p>Add Image</p></TooltipContent>
+            </Tooltip>
+            <DialogContent className="sm:max-w-sm">
+                <DialogHeader>
+                    <DialogTitle>Add Image</DialogTitle>
+                    <DialogDescription>Choose how to add your image to the canvas.</DialogDescription>
+                </DialogHeader>
+                <div className="grid grid-cols-2 gap-4 py-4">
+                    <Button variant="outline" onClick={handleAddImageFromUrl}>From URL</Button>
+                    <Button variant="outline" asChild>
+                        <Label htmlFor="upload-device">
+                            From Device
+                            <Input id="upload-device" type="file" accept="image/*" className="sr-only" onChange={handleAddImageFromDevice} />
+                        </Label>
+                    </Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+
          <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => addElement('container')}>
@@ -423,5 +487,3 @@ export default function Toolbar() {
     </>
   );
 }
-
-    
