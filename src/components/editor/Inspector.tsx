@@ -123,10 +123,10 @@ export default function Inspector() {
             </div>
              <div className="space-y-2">
                 <Label>Animation</Label>
-                <Select value={el.animation} onValueChange={v => updateElement({ animation: v })}>
+                <Select value={el.animation} onValueChange={v => updateElement({ animation: v === 'none' ? '' : v })}>
                     <SelectTrigger><SelectValue placeholder="Select animation..." /></SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         <SelectItem value="anim-fade-in">Fade In</SelectItem>
                         <SelectItem value="anim-slide-in-up">Slide In Up</SelectItem>
                         <SelectItem value="anim-pulse">Pulse</SelectItem>
