@@ -21,6 +21,7 @@ type EditorAction =
   | { type: 'DELETE_ELEMENT'; payload: { elementId: string } }
   | { type: 'SELECT_ELEMENT'; payload: { elementId: string | null } }
   | { type: 'TOGGLE_SETTINGS' }
+  | { type: 'TOGGLE_GRID' }
   | { type: 'SET_MOVE_INCREMENT'; payload: { increment: number } }
   | { type: 'SET_ZOOM'; payload: { zoom: number } }
   | { type: 'RESIZE_ELEMENT'; payload: { elementId: string; scale: number } }
@@ -43,6 +44,7 @@ const initialState: EditorState = {
   currentPageIndex: -1,
   selectedElementId: null,
   showSettings: false,
+  showGrid: false,
   history: [],
   historyIndex: -1,
   moveIncrement: 10,
@@ -50,7 +52,7 @@ const initialState: EditorState = {
   initialElementSizes: {},
 };
 
-const nonHistoryActions = new Set(['SELECT_ELEMENT', 'TOGGLE_SETTINGS', 'SET_MOVE_INCREMENT', 'SET_ZOOM', 'UNDO', 'REDO']);
+const nonHistoryActions = new Set(['SELECT_ELEMENT', 'TOGGLE_SETTINGS', 'TOGGLE_GRID', 'SET_MOVE_INCREMENT', 'SET_ZOOM', 'UNDO', 'REDO']);
 
 const editorReducer = (state: EditorState, action: EditorAction): EditorState => {
   const newState = produce(state, draft => {
@@ -186,6 +188,9 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
         break;
       case 'TOGGLE_SETTINGS':
         draft.showSettings = !draft.showSettings;
+        break;
+      case 'TOGGLE_GRID':
+        draft.showGrid = !draft.showGrid;
         break;
       case 'SET_MOVE_INCREMENT':
         draft.moveIncrement = action.payload.increment;

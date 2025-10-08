@@ -3,10 +3,11 @@
 import { useEditor } from '@/context/EditorContext';
 import Element from './Element';
 import { Lock } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function Canvas() {
   const { state, dispatch } = useEditor();
-  const { project, currentPageIndex, zoom } = state;
+  const { project, currentPageIndex, zoom, showGrid } = state;
 
   const currentPage = project.pages[currentPageIndex];
 
@@ -53,7 +54,7 @@ export default function Canvas() {
       >
         <div 
           id="canvas"
-          className="relative h-full w-full"
+          className={cn("relative h-full w-full", showGrid && "grid-bg")}
           style={canvasStyle}
         >
           {currentPage.isCustomHtml ? (

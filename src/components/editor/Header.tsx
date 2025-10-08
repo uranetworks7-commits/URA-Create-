@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2, Trash2 } from 'lucide-react';
+import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2, Trash2, Grid } from 'lucide-react';
 import { useEditor } from '@/context/EditorContext';
 import { useState, useEffect } from 'react';
 import {
@@ -188,6 +188,16 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
           >
             <Redo2 />
         </Button>
+
+        <Button 
+            variant={state.showGrid ? 'secondary' : 'ghost'} 
+            size="icon"
+            onClick={() => dispatch({type: 'TOGGLE_GRID'})}
+            aria-label="Toggle Grid"
+            className="h-7 w-7"
+          >
+            <Grid />
+          </Button>
 
         <Button 
             variant="ghost" 

@@ -85,6 +85,7 @@ export interface EditorState {
   currentPageIndex: number;
   selectedElementId: string | null;
   showSettings: boolean;
+  showGrid: boolean;
   history: Project[];
   historyIndex: number;
   moveIncrement: number;
