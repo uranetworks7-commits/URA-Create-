@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import AiSuggestions from './AiSuggestions';
 
 export default function Inspector() {
   const { state, dispatch } = useEditor();
@@ -129,7 +130,7 @@ export default function Inspector() {
                 <div className="space-y-2">
                     <Label htmlFor="src">Image Source</Label>
                     <div className="flex items-center gap-2">
-                        <Input id="src" value={(el as any).src} onChange={e => updateElement({ src: e.target.value })}/>
+                        <Input id="src" value={(el as ImageElement).src} onChange={e => updateElement({ src: e.target.value })}/>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" size="icon"><Palette className="h-4 w-4" /></Button>
@@ -162,6 +163,8 @@ export default function Inspector() {
                     </SelectContent>
                 </Select>
             </div>
+            <Separator />
+            <AiSuggestions element={el} />
         </div>
       </>
     );
@@ -173,7 +176,9 @@ export default function Inspector() {
         <div className="p-4 space-y-4">
             <p className="text-sm font-medium">Page Properties</p>
              <div className="space-y-2">
-                <Label htmlFor="pageName">Page Name</Label>
+                <Label htmlFor="pageName" className="flex items-center gap-2">
+                    <FilePenLine className="h-4 w-4"/> Page Name
+                </Label>
                 <Input id="pageName" value={currentPage.name} onChange={e => updatePage({ name: e.target.value })}/>
             </div>
             <div className="space-y-2">
@@ -211,5 +216,3 @@ export default function Inspector() {
     </aside>
   );
 }
-
-    
