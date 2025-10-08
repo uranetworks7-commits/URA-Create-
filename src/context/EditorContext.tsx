@@ -21,7 +21,9 @@ type EditorAction =
   | { type: 'TOGGLE_SETTINGS' }
   | { type: 'SET_MOVE_INCREMENT'; payload: { increment: number } }
   | { type: 'SET_ZOOM'; payload: { zoom: number } }
-  | { type: 'RESIZE_ELEMENT'; payload: { elementId: string; scale: number } };
+  | { type: 'RESIZE_ELEMENT'; payload: { elementId: string; scale: number } }
+  | { type: 'UNDO' }
+  | { type: 'REDO' };
 
 const createNewPage = (name: string, backgroundColor: string): Page => ({
   id: crypto.randomUUID(),
@@ -44,8 +46,10 @@ const initialState: EditorState = {
   initialElementSizes: {},
 };
 
+const nonHistoryActions = new Set(['SELECT_ELEMENT', 'TOGGLE_SETTINGS', 'SET_MOVE_INCREMENT', 'SET_ZOOM', 'UNDO', 'REDO']);
+
 const editorReducer = (state: EditorState, action: EditorAction): EditorState => {
-  return produce(state, draft => {
+  const newState = produce(state, draft => {
     switch (action.type) {
       case 'NEW_PROJECT': {
         const firstPage = createNewPage('Page 1', action.payload.backgroundColor);
@@ -195,6 +199,41 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
           }
         }
         break;
+      }
+       case 'UNDO': {
+        if (draft.historyIndex > 0) {
+          draft.historyIndex--;
+          draft.project = draft.history[draft.historyIndex];
+          draft.selectedElementId = null;
+          draft.showSettings = false;
+        }
+        break;
+      }
+      case 'REDO': {
+        if (draft.historyIndex < draft.history.length - 1) {
+          draft.historyIndex++;
+          draft.project = draft.history[draft.historyIndex];
+          draft.selectedElementId = null;
+          draft.showSettings = false;
+        }
+        break;
+      }
+    }
+  });
+
+  return produce(newState, draft => {
+    // This second produce call handles history updates after the main state change.
+    if (!nonHistoryActions.has(action.type)) {
+      if (action.type === 'NEW_PROJECT' || action.type === 'NEW_PROJECT_FROM_TEMPLATE' || action.type === 'LOAD_PROJECT') {
+        // For project-level changes, reset history
+        draft.history = [draft.project];
+        draft.historyIndex = 0;
+      } else {
+        // For other actions, add a new history state
+        const newHistory = draft.history.slice(0, draft.historyIndex + 1);
+        newHistory.push(draft.project);
+        draft.history = newHistory;
+        draft.historyIndex = newHistory.length - 1;
       }
     }
   });
