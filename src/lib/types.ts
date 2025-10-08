@@ -54,6 +54,7 @@ export interface Page {
   elements: EditorElement[];
   backgroundColor: string;
   backgroundImage?: string;
+  audioUrl?: string;
   redirect?: {
     toPageId: string;
     delay: number;

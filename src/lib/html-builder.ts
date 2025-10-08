@@ -77,9 +77,10 @@ export const generateHtmlForProject = (project: Project): string => {
     }
 
     const redirectAttr = page.redirect?.toPageId ? `data-redirect-to="${page.redirect.toPageId}" data-redirect-delay="${page.redirect.delay * 1000}"` : '';
+    const audioAttr = page.audioUrl ? `data-audio-src="${page.audioUrl}"` : '';
     const displayStyle = index === 0 ? 'block' : 'none';
     
-    return `<div id="${page.id}" class="page" style="overflow: hidden; ${displayStyle}; ${pageStyle}" ${redirectAttr}>${pageContent}</div>`;
+    return `<div id="${page.id}" class="page" style="overflow: hidden; ${displayStyle}; ${pageStyle}" ${redirectAttr} ${audioAttr}>${pageContent}</div>`;
   }).join('');
 
   return `
@@ -107,9 +108,11 @@ export const generateHtmlForProject = (project: Project): string => {
     </head>
     <body>
       ${pagesHtml}
+      <audio id="background-audio" loop></audio>
       <script>
         document.addEventListener('DOMContentLoaded', () => {
             const pages = document.querySelectorAll('.page');
+            const audioPlayer = document.getElementById('background-audio');
             let currentPageId = pages.length > 0 ? pages[0].id : null;
             let redirectTimer;
 
@@ -119,18 +122,30 @@ export const generateHtmlForProject = (project: Project): string => {
                 pages.forEach(p => p.style.display = 'none');
                 targetPage.style.display = 'block';
                 currentPageId = pageId;
-                handleRedirect(targetPage);
+                handlePageChange(targetPage);
               }
             }
 
-            function handleRedirect(pageElement) {
+            function handlePageChange(pageElement) {
                 clearTimeout(redirectTimer);
+                
+                // Handle Redirect
                 const redirectTo = pageElement.getAttribute('data-redirect-to');
                 const delay = pageElement.getAttribute('data-redirect-delay');
                 if (redirectTo && delay) {
                     redirectTimer = setTimeout(() => {
                         navigateTo(redirectTo);
                     }, parseInt(delay, 10));
+                }
+
+                // Handle Audio
+                const audioSrc = pageElement.getAttribute('data-audio-src');
+                if (audioSrc && audioPlayer.src !== audioSrc) {
+                    audioPlayer.src = audioSrc;
+                    audioPlayer.play().catch(e => console.error("Audio play failed:", e));
+                } else if (!audioSrc) {
+                    audioPlayer.pause();
+                    audioPlayer.src = '';
                 }
             }
 
@@ -149,11 +164,11 @@ export const generateHtmlForProject = (project: Project): string => {
               }
             });
             
-            // Initial page load redirect handling
+            // Initial page load handling
             if (currentPageId) {
                 const initialPage = document.getElementById(currentPageId);
                 if(initialPage) {
-                    handleRedirect(initialPage);
+                    handlePageChange(initialPage);
                 }
             }
         });

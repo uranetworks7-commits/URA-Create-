@@ -2,7 +2,7 @@
 
 import { useEditor } from '@/context/EditorContext';
 import { Button } from '@/components/ui/button';
-import { FilePenLine, Plus, Trash2, Palette, Clock, Link as LinkIcon, MoreHorizontal, Image as ImageIcon, Code } from 'lucide-react';
+import { FilePenLine, Plus, Trash2, Palette, Clock, Link as LinkIcon, MoreHorizontal, Image as ImageIcon, Code, Music, Copy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '../ui/scroll-area';
 import {
@@ -23,10 +23,13 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Switch } from '../ui/switch';
 import { Textarea } from '../ui/textarea';
+import { Checkbox } from '../ui/checkbox';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PageManager() {
   const { state, dispatch } = useEditor();
   const { project, currentPageIndex } = state;
+  const { toast } = useToast();
 
   const currentPage = project.pages[currentPageIndex];
 
@@ -47,6 +50,25 @@ export default function PageManager() {
   const updatePage = (payload: Partial<typeof currentPage>) => {
     dispatch({ type: 'UPDATE_PAGE', payload: { id: currentPage.id, ...payload} });
   };
+
+  const handleApplyToAll = (checked: boolean) => {
+    if(checked) {
+       dispatch({
+         type: 'APPLY_SETTINGS_TO_ALL_PAGES',
+         payload: {
+           settings: {
+             backgroundColor: currentPage.backgroundColor,
+             backgroundImage: currentPage.backgroundImage,
+             audioUrl: currentPage.audioUrl,
+           }
+         }
+       });
+       toast({
+         title: "Settings Applied",
+         description: "The current page's background and audio settings have been applied to all pages."
+       })
+    }
+  }
 
   return (
     <div className="w-full bg-card/50 rounded-lg p-1 border flex items-center gap-1">
@@ -103,8 +125,17 @@ export default function PageManager() {
                             <Label htmlFor="pageBgImage" className="flex items-center gap-1 text-xs"><ImageIcon className="h-3 w-3" />Background Image URL</Label>
                             <Input id="pageBgImage" value={currentPage.backgroundImage || ''} onChange={e => updatePage({ backgroundImage: e.target.value })} placeholder="https://..." />
                         </div>
+                         <div className="space-y-1">
+                            <Label htmlFor="pageAudioUrl" className="flex items-center gap-1 text-xs"><Music className="h-3 w-3" />Background Audio URL</Label>
+                            <Input id="pageAudioUrl" value={currentPage.audioUrl || ''} onChange={e => updatePage({ audioUrl: e.target.value })} placeholder="https://..." />
+                        </div>
                       </>
                     )}
+                    <Separator/>
+                     <div className="flex items-center space-x-2">
+                        <Checkbox id="apply-all" onCheckedChange={handleApplyToAll} />
+                        <Label htmlFor="apply-all" className="text-xs font-medium flex items-center gap-1"><Copy className="h-3 w-3"/>Apply to all pages</Label>
+                    </div>
                     <Separator/>
                     <p className="text-xs font-medium flex items-center gap-1"><LinkIcon className="h-3 w-3"/>Page Redirect</p>
                     <div className="space-y-1">

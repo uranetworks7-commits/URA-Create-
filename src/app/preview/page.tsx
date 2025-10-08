@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import type { Project, Page, EditorElement, ButtonElement } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -86,6 +86,7 @@ function PreviewElement({ element, onButtonClick }: { element: EditorElement, on
 export default function PreviewPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [currentPage, setCurrentPage] = useState<Page | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     const storedProject = localStorage.getItem('ura-preview-project');
@@ -107,6 +108,19 @@ export default function PreviewPage() {
       return () => clearTimeout(timer);
     }
   }, [currentPage]);
+  
+  useEffect(() => {
+    if (audioRef.current) {
+        if (currentPage?.audioUrl) {
+            audioRef.current.src = currentPage.audioUrl;
+            audioRef.current.play().catch(e => console.error("Audio play failed:", e));
+        } else {
+            audioRef.current.pause();
+            audioRef.current.src = '';
+        }
+    }
+  }, [currentPage]);
+
 
   const handleNavigate = (pageId: string) => {
     const targetPage = project?.pages.find(p => p.id === pageId);
@@ -145,6 +159,7 @@ export default function PreviewPage() {
           <PreviewElement key={element.id} element={element} onButtonClick={handleNavigate} />
         ))}
       </div>
+       <audio ref={audioRef} loop />
     </main>
   );
 }
