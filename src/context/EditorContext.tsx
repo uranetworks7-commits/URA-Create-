@@ -88,9 +88,11 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
         draft.showSettings = false;
         draft.initialElementSizes = {};
         action.payload.pages.forEach(p => {
-            p.elements.forEach(el => {
-                draft.initialElementSizes[el.id] = el.size;
-            });
+            if (p.elements) { // Check if elements array exists
+                p.elements.forEach(el => {
+                    draft.initialElementSizes[el.id] = el.size;
+                });
+            }
         });
         break;
       case 'UPDATE_PROJECT_NAME':
