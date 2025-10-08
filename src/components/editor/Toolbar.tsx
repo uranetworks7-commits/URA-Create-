@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor } from '@/context/EditorContext';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import type { ButtonElement, ImageElement, TextElement } from '@/lib/types';
-import { Type, Square, Image as ImageIcon, Crop } from 'lucide-react';
+import type { ButtonElement, ContainerElement, ImageElement, TextElement } from '@/lib/types';
+import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal } from 'lucide-react';
 
 export default function Toolbar() {
   const { dispatch } = useEditor();
 
-  const addElement = (type: 'text' | 'button' | 'image') => {
+  const addElement = (type: 'text' | 'button' | 'image' | 'container') => {
     const commonProps = {
       id: crypto.randomUUID(),
       position: { x: 50, y: 50 },
@@ -53,6 +53,15 @@ export default function Toolbar() {
         size: { width: 400, height: 300 },
       };
       dispatch({ type: 'ADD_ELEMENT', payload: { element } });
+    } else if (type === 'container') {
+      const element: ContainerElement = {
+        ...commonProps,
+        type: 'container',
+        name: 'Container',
+        backgroundColor: 'transparent',
+        size: { width: 400, height: 300 },
+      };
+       dispatch({ type: 'ADD_ELEMENT', payload: { element } });
     }
   };
 
@@ -82,6 +91,14 @@ export default function Toolbar() {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right"><p>Add Image</p></TooltipContent>
+        </Tooltip>
+         <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" onClick={() => addElement('container')}>
+              <RectangleHorizontal />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right"><p>Add Container</p></TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>

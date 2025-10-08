@@ -1,13 +1,12 @@
 'use client';
 
 import { useEditor } from '@/context/EditorContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '../ui/button';
 import { Trash2, Copy, Palette, Link, Clock, Edit, Settings, FilePenLine, X } from 'lucide-react';
-import type { ButtonElement, EditorElement, ImageElement, TextElement } from '@/lib/types';
+import type { ButtonElement, ContainerElement, EditorElement, ImageElement, TextElement } from '@/lib/types';
 import { ScrollArea } from '../ui/scroll-area';
 import { Slider } from '../ui/slider';
 import { Separator } from '../ui/separator';
@@ -19,11 +18,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import AiSuggestions from './AiSuggestions';
-import { cn } from '@/lib/utils';
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
@@ -99,13 +96,15 @@ export default function Inspector() {
                     <Input value={(el as TextElement | ButtonElement).color} onChange={e => updateElement({ color: e.target.value })} /></div>
                 </div>
             )}
+            {(el.type === 'button' || el.type === 'container') && (
+                <div className="space-y-2">
+                    <Label>Background Color</Label>
+                    <div className="flex items-center gap-2"><Input type="color" value={(el as ButtonElement | ContainerElement).backgroundColor} onChange={e => updateElement({ backgroundColor: e.target.value })} className="w-10 h-10 p-1"/>
+                    <Input value={(el as ButtonElement | ContainerElement).backgroundColor} onChange={e => updateElement({ backgroundColor: e.target.value })} /></div>
+                </div>
+            )}
             {el.type === 'button' && (
                 <>
-                  <div className="space-y-2">
-                      <Label>Background Color</Label>
-                      <div className="flex items-center gap-2"><Input type="color" value={(el as ButtonElement).backgroundColor} onChange={e => updateElement({ backgroundColor: e.target.value })} className="w-10 h-10 p-1"/>
-                      <Input value={(el as ButtonElement).backgroundColor} onChange={e => updateElement({ backgroundColor: e.target.value })} /></div>
-                  </div>
                   <div className="space-y-2">
                       <Label>Border Radius</Label>
                        <div className="flex items-center gap-2">

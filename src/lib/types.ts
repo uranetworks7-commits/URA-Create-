@@ -1,4 +1,4 @@
-export type ElementType = 'text' | 'button' | 'image';
+export type ElementType = 'text' | 'button' | 'image' | 'container';
 
 export type Position = { x: number; y: number };
 export type Size = { width: number; height: number };
@@ -37,11 +37,17 @@ export interface ImageElement extends BaseElement {
   src: string;
 }
 
-export type EditorElement = TextElement | ButtonElement | ImageElement;
+export interface ContainerElement extends BaseElement {
+    type: 'container',
+    backgroundColor: string;
+}
+
+export type EditorElement = TextElement | ButtonElement | ImageElement | ContainerElement;
 
 export interface Page {
   id:string;
   name: string;
+  description?: string;
   elements: EditorElement[];
   backgroundColor: string;
   redirect?: {

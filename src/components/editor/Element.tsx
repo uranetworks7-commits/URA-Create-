@@ -1,7 +1,7 @@
 'use client';
 
 import { useEditor } from '@/context/EditorContext';
-import type { ButtonElement, EditorElement, ImageElement, TextElement } from '@/lib/types';
+import type { ButtonElement, ContainerElement, EditorElement, ImageElement, TextElement } from '@/lib/types';
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import Image from 'next/image';
@@ -132,6 +132,8 @@ export default function Element({ element }: ElementProps) {
         }}>{buttonEl.content}</Button>;
       case 'image':
         return <Image src={(el as ImageElement).src} alt="canvas image" layout="fill" objectFit="cover" className="pointer-events-none" />;
+      case 'container':
+        return <div style={{backgroundColor: (el as ContainerElement).backgroundColor}} className="w-full h-full"></div>
       default:
         return null;
     }
@@ -156,8 +158,9 @@ export default function Element({ element }: ElementProps) {
         outlineOffset: '2px',
         cursor: isDragging ? 'grabbing' : (isSelected ? 'grab' : 'pointer'),
         transition: 'outline 0.1s ease-in-out',
+        borderRadius: element.type === 'button' ? `${(element as ButtonElement).borderRadius}px` : '2px',
       }}
-      className={`rounded-sm ${element.animation || ''}`}
+      className={`${element.animation || ''}`}
       onClick={handleSelect}
       onMouseDown={handleDragStart}
     >
