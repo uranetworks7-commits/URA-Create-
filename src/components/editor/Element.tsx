@@ -156,6 +156,7 @@ export default function Element({ element }: ElementProps) {
         cursor: isSelected ? (isDragging ? 'grabbing' : 'grab') : 'pointer',
         transition: 'outline 0.1s ease-in-out',
         borderRadius: element.type === 'button' ? `${(element as ButtonElement).borderRadius}px` : '2px',
+        overflow: 'hidden',
       }}
       className={cn(element.animation || '')}
       onClick={handleSelect}
