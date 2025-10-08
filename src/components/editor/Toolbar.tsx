@@ -17,6 +17,8 @@ import { Loader2 } from 'lucide-react';
 import { generateHtmlForProject } from '@/lib/html-builder';
 import { ScrollArea } from '../ui/scroll-area';
 import { Textarea } from '../ui/textarea';
+import PreviewDialog from './PreviewDialog';
+
 
 export default function Toolbar() {
   const { state, dispatch } = useEditor();
@@ -30,6 +32,7 @@ export default function Toolbar() {
   const [projectId, setProjectId] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const handleShare = async () => {
     if (projectId.length !== 6) {
@@ -150,7 +153,7 @@ export default function Toolbar() {
   
   const handlePreview = () => {
     localStorage.setItem('ura-preview-project', JSON.stringify(state.project));
-    window.open('/preview', '_blank');
+    setIsPreviewOpen(true);
   };
 
   const handleBuild = () => {
@@ -186,6 +189,7 @@ export default function Toolbar() {
   };
 
   return (
+    <>
     <aside className="w-14 border-r bg-card flex flex-col items-center gap-0.5 py-2 z-10">
       <TooltipProvider>
         <div className="flex flex-col items-center gap-0.5 w-full px-1">
@@ -413,5 +417,7 @@ export default function Toolbar() {
 
       </TooltipProvider>
     </aside>
+    <PreviewDialog isOpen={isPreviewOpen} onOpenChange={setIsPreviewOpen} />
+    </>
   );
 }
