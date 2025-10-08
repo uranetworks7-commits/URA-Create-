@@ -38,8 +38,8 @@ export default function EditorView() {
       <div className="flex h-screen w-screen items-center justify-center bg-background p-8">
         <Card className="w-full max-w-4xl anim-pop">
           <CardHeader className="text-center">
-            <div className="mx-auto bg-primary/20 p-3 rounded-full w-fit mb-4">
-              <Blocks className="h-8 w-8 text-primary-foreground" />
+            <div className="mx-auto bg-accent/20 p-3 rounded-full w-fit mb-4">
+              <Blocks className="h-8 w-8 text-accent" />
             </div>
             <CardTitle className="text-3xl font-bold">URA-Create</CardTitle>
             <CardDescription className="text-lg">
