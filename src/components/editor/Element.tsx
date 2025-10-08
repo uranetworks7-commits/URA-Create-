@@ -111,6 +111,20 @@ export default function Element({ element }: ElementProps) {
     };
   }, [isDragging, isResizing, resizeCorner, dispatch, element.id, element.position, element.size]);
 
+  const getClipPathForShape = (shape: ButtonElement['shape'], size: { width: number, height: number }): string | undefined => {
+    switch (shape) {
+      case 'triangle-up':
+        return 'polygon(50% 0%, 0% 100%, 100% 100%)';
+      case 'triangle-down':
+        return 'polygon(0% 0%, 100% 0%, 50% 100%)';
+      case 'circle':
+        // clip-path for circle is not needed as borderRadius will handle it
+        return undefined;
+      default:
+        return undefined;
+    }
+  }
+
   const renderSpecificElement = () => {
     const el = element;
     switch (el.type) {
@@ -122,16 +136,36 @@ export default function Element({ element }: ElementProps) {
           width: '100%',
           height: '100%',
           overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>{(el as TextElement).content}</p>;
       case 'button':
         const buttonEl = el as ButtonElement;
-        return <Button variant="default" size="sm" className="w-full h-full pointer-events-none" style={{
-          fontSize: buttonEl.fontSize,
-          color: buttonEl.color,
-          backgroundColor: buttonEl.backgroundColor,
-          fontWeight: buttonEl.fontWeight,
-          borderRadius: buttonEl.borderRadius,
-        }}>{buttonEl.content}</Button>;
+        const clipPath = getClipPathForShape(buttonEl.shape, buttonEl.size);
+
+        let borderRadius;
+        if (buttonEl.shape === 'circle') {
+          borderRadius = '50%';
+        } else if (buttonEl.shape === 'pill') {
+          borderRadius = '9999px';
+        } else {
+          borderRadius = buttonEl.borderRadius;
+        }
+
+        return (
+          <div className="w-full h-full" style={{ clipPath }}>
+            <Button variant="default" size="sm" className="w-full h-full pointer-events-none" style={{
+              fontSize: buttonEl.fontSize,
+              color: buttonEl.color,
+              backgroundColor: buttonEl.backgroundColor,
+              fontWeight: buttonEl.fontWeight,
+              borderRadius: borderRadius,
+              // We reset clip-path on the inner button to avoid double clipping
+              clipPath: 'none',
+            }}>{buttonEl.content}</Button>
+          </div>
+        );
       case 'image':
         return <Image src={(el as ImageElement).src} alt="canvas image" layout="fill" objectFit="cover" className="pointer-events-none" />;
       case 'container':
@@ -141,23 +175,36 @@ export default function Element({ element }: ElementProps) {
     }
   };
   
+  const getElementStyle = (): React.CSSProperties => {
+    const style: React.CSSProperties = {
+      position: 'absolute',
+      left: element.position.x,
+      top: element.position.y,
+      width: element.size.width,
+      height: element.size.height,
+      transform: `rotate(${element.rotation || 0}deg)`,
+      outline: isSelected ? '2px solid hsl(var(--accent))' : 'none',
+      outlineOffset: '2px',
+      cursor: isSelected ? (isDragging ? 'grabbing' : 'grab') : 'pointer',
+      transition: 'outline 0.1s ease-in-out',
+    };
+
+    if (element.type === 'button') {
+      const buttonEl = element as ButtonElement;
+      if (buttonEl.shape === 'circle' || buttonEl.shape === 'pill') {
+        style.overflow = 'hidden';
+      }
+    } else {
+      style.overflow = 'hidden';
+    }
+
+    return style;
+  };
+  
   return (
     <div
       ref={ref}
-      style={{
-        position: 'absolute',
-        left: element.position.x,
-        top: element.position.y,
-        width: element.size.width,
-        height: element.size.height,
-        transform: `rotate(${element.rotation || 0}deg)`,
-        outline: isSelected ? '2px solid hsl(var(--accent))' : 'none',
-        outlineOffset: '2px',
-        cursor: isSelected ? (isDragging ? 'grabbing' : 'grab') : 'pointer',
-        transition: 'outline 0.1s ease-in-out',
-        borderRadius: element.type === 'button' ? `${(element as ButtonElement).borderRadius}px` : '2px',
-        overflow: 'hidden',
-      }}
+      style={getElementStyle()}
       className={cn(element.animation || '')}
       onClick={handleSelect}
       onMouseDown={handleDragStart}

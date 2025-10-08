@@ -21,6 +21,8 @@ export interface TextElement extends BaseElement {
   fontWeight: 'normal' | 'bold';
 }
 
+export type ButtonShape = 'rectangle' | 'pill' | 'circle' | 'triangle-up' | 'triangle-down';
+
 export interface ButtonElement extends BaseElement {
   type: 'button';
   content: string;
@@ -29,6 +31,7 @@ export interface ButtonElement extends BaseElement {
   backgroundColor: string;
   fontWeight: 'normal' | 'bold';
   borderRadius: number;
+  shape?: ButtonShape;
   linkToPageId?: string;
 }
 
@@ -50,6 +53,7 @@ export interface Page {
   description?: string;
   elements: EditorElement[];
   backgroundColor: string;
+  backgroundImage?: string;
   redirect?: {
     toPageId: string;
     delay: number;

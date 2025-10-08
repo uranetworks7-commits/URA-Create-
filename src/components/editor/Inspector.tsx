@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '../ui/button';
 import { Trash2, Copy, Palette, Link, Clock, Edit, Settings, FilePenLine, X } from 'lucide-react';
-import type { ButtonElement, ContainerElement, EditorElement, ImageElement, TextElement } from '@/lib/types';
+import type { ButtonElement, ButtonShape, ContainerElement, EditorElement, ImageElement, TextElement } from '@/lib/types';
 import { ScrollArea } from '../ui/scroll-area';
 import { Slider } from '../ui/slider';
 import { Separator } from '../ui/separator';
@@ -105,6 +105,19 @@ export default function Inspector() {
             )}
             {el.type === 'button' && (
                 <>
+                  <div className="space-y-2">
+                    <Label>Shape</Label>
+                    <Select value={(el as ButtonElement).shape || 'rectangle'} onValueChange={(v: ButtonShape) => updateElement({ shape: v })}>
+                        <SelectTrigger><SelectValue/></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="rectangle">Rectangle</SelectItem>
+                            <SelectItem value="pill">Pill</SelectItem>
+                            <SelectItem value="circle">Circle</SelectItem>
+                            <SelectItem value="triangle-up">Triangle Up</SelectItem>
+                            <SelectItem value="triangle-down">Triangle Down</SelectItem>
+                        </SelectContent>
+                    </Select>
+                  </div>
                   <div className="space-y-2">
                       <Label>Border Radius</Label>
                        <div className="flex items-center gap-2">

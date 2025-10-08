@@ -46,6 +46,7 @@ export default function Toolbar() {
         fontWeight: 'normal',
         borderRadius: 8,
         size: { width: 120, height: 40 },
+        shape: 'rectangle'
       };
       dispatch({ type: 'ADD_ELEMENT', payload: { element } });
     } else if (type === 'image') {

@@ -2,7 +2,7 @@
 
 import { useEditor } from '@/context/EditorContext';
 import { Button } from '@/components/ui/button';
-import { FilePenLine, Plus, Trash2, Palette, Clock, Link as LinkIcon, MoreHorizontal } from 'lucide-react';
+import { FilePenLine, Plus, Trash2, Palette, Clock, Link as LinkIcon, MoreHorizontal, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '../ui/scroll-area';
 import {
@@ -118,6 +118,10 @@ export default function PageManager() {
                         <Input id="pageBgColor" type="color" value={currentPage.backgroundColor} onChange={e => updatePage({ backgroundColor: e.target.value })} className="w-10 h-10 p-1"/>
                         <Input value={currentPage.backgroundColor} onChange={e => updatePage({ backgroundColor: e.target.value })}/>
                         </div>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="pageBgImage" className="flex items-center gap-2"><ImageIcon className="h-4 w-4" />Background Image URL</Label>
+                        <Input id="pageBgImage" value={currentPage.backgroundImage || ''} onChange={e => updatePage({ backgroundImage: e.target.value })} placeholder="https://..." />
                     </div>
                     <Separator/>
                     <p className="text-sm font-medium flex items-center gap-2"><LinkIcon className="h-4 w-4"/>Page Redirect</p>

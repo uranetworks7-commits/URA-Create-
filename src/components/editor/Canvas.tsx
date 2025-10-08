@@ -24,6 +24,16 @@ export default function Canvas() {
     }
   };
 
+  const canvasStyle: React.CSSProperties = {
+    backgroundColor: currentPage.backgroundColor,
+  };
+
+  if (currentPage.backgroundImage) {
+    canvasStyle.backgroundImage = `url(${currentPage.backgroundImage})`;
+    canvasStyle.backgroundSize = 'cover';
+    canvasStyle.backgroundPosition = 'center';
+  }
+
   return (
     <div
       id="canvas-container"
@@ -42,7 +52,7 @@ export default function Canvas() {
         <div 
           id="canvas"
           className="relative h-full w-full"
-          style={{ backgroundColor: currentPage.backgroundColor }}
+          style={canvasStyle}
         >
           {currentPage.elements.map(element => (
             <Element key={element.id} element={element} />
