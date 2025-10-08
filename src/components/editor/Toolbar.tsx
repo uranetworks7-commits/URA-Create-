@@ -86,7 +86,7 @@ export default function Toolbar() {
       }
   }
 
-  const addElement = (type: 'text' | 'button' | 'container' | 'video') => {
+  const addElement = (type: 'text' | 'button' | 'container' | 'video' | 'image') => {
     const commonProps = {
       id: crypto.randomUUID(),
       position: { x: 50, y: 50 },
@@ -134,6 +134,8 @@ export default function Toolbar() {
         if (src) {
             addVideoElement(src);
         }
+    } else if (type === 'image') {
+        setIsImageUploadOpen(true);
     }
   };
   
@@ -354,7 +356,7 @@ export default function Toolbar() {
         <Dialog open={isImageUploadOpen} onOpenChange={setIsImageUploadOpen}>
             <Tooltip>
             <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsImageUploadOpen(true)}>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => addElement('image')}>
                     <Cloud />
                 </Button>
             </TooltipTrigger>
