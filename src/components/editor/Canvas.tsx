@@ -50,13 +50,14 @@ export default function Canvas() {
     }
     
     if (currentPage.isBuildFromHtml) {
+       // When building from HTML, we generate the HTML for *just this page* to preview in the iframe.
        const pageHtml = generateHtmlForProject({ ...project, pages: [currentPage] });
        return (
          <iframe
             srcDoc={pageHtml}
             className="w-full h-full border-none pointer-events-none"
             title="HTML Build Preview"
-            style={{ transform: `scale(${zoom})`, transformOrigin: '0 0' }}
+            style={{ transform: `scale(1)`, transformOrigin: '0 0' }} // IMPORTANT: Override zoom for this view
          />
        );
     }
@@ -77,6 +78,7 @@ export default function Canvas() {
         id="canvas-scaler"
         className="relative origin-top-left transition-transform duration-200"
         style={{ 
+          // If it's a build-from-HTML page, it should ignore zoom and fill the container.
           transform: currentPage.isBuildFromHtml ? 'none' : `scale(${zoom})`,
           width: currentPage.isBuildFromHtml ? '100%' : `${100 / zoom}%`,
           height: currentPage.isBuildFromHtml ? '100%' : `${100 / zoom}%`,
@@ -84,8 +86,8 @@ export default function Canvas() {
       >
         <div 
           id="canvas"
-          className={cn("relative h-full w-full", showGrid && "grid-bg")}
-          style={canvasStyle}
+          className={cn("relative h-full w-full", showGrid && !currentPage.isBuildFromHtml && "grid-bg")}
+          style={currentPage.isBuildFromHtml ? {} : canvasStyle}
         >
           {renderContent()}
         </div>

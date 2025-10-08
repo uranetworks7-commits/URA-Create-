@@ -122,7 +122,7 @@ export default function PreviewPage() {
   useEffect(() => {
     if (audioRef.current) {
         if (currentPage?.audioUrl) {
-            audio.current.src = currentPage.audioUrl;
+            audioRef.current.src = currentPage.audioUrl;
             audioRef.current.loop = currentPage.audioLoop ?? true;
             audioRef.current.play().catch(e => console.error("Audio play failed:", e));
         } else {
@@ -150,7 +150,7 @@ export default function PreviewPage() {
     );
   }
 
-  // Handle custom HTML pages by rendering the full project in an iframe
+  // Handle custom HTML or build-from-HTML pages by rendering the full project in an iframe
   if (currentPage.isCustomHtml || currentPage.isBuildFromHtml) {
     return (
       <main className="h-screen w-screen overflow-auto">
