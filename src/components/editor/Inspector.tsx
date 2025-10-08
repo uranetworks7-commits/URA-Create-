@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '../ui/button';
-import { Trash2, Copy, Palette, Link, Clock, Edit, Settings, FilePenLine } from 'lucide-react';
+import { Trash2, Copy, Palette, Link, Clock, Edit, Settings, FilePenLine, X } from 'lucide-react';
 import type { ButtonElement, EditorElement, ImageElement, TextElement } from '@/lib/types';
 import { ScrollArea } from '../ui/scroll-area';
 import { Slider } from '../ui/slider';
@@ -19,21 +19,25 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import AiSuggestions from './AiSuggestions';
+import { cn } from '@/lib/utils';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+
 
 export default function Inspector() {
   const { state, dispatch } = useEditor();
-  const { project, currentPageIndex, selectedElementId } = state;
+  const { project, currentPageIndex, selectedElementId, showSettings } = state;
 
-  const currentPage = project.pages[currentPageIndex];
-  const selectedElement = currentPage?.elements.find(el => el.id === selectedElementId);
+  const selectedElement = currentPageIndex === -1 ? null : project.pages[currentPageIndex].elements.find(el => el.id === selectedElementId);
 
-  const updateElement = (payload: Partial<EditorElement>) => {
+  const updateElement = (payload: Partial<EditorElement> & { name?: string }) => {
     if (!selectedElementId) return;
     dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElementId, ...payload } });
-  };
-  
-  const updatePage = (payload: Partial<typeof currentPage>) => {
-    dispatch({ type: 'UPDATE_PAGE', payload });
   };
   
   const duplicateElement = () => {
@@ -42,6 +46,7 @@ export default function Inspector() {
       ...selectedElement,
       id: crypto.randomUUID(),
       position: { x: selectedElement.position.x + 20, y: selectedElement.position.y + 20 },
+      name: `${selectedElement.name} (copy)`
     };
     dispatch({ type: 'ADD_ELEMENT', payload: { element: newElement } });
   }
@@ -56,27 +61,17 @@ export default function Inspector() {
     const el = selectedElement;
 
     return (
-      <>
+      <ScrollArea className="h-full">
         <div className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
-                <p className="text-sm font-medium capitalize">{el.type} Properties</p>
-                 <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={duplicateElement}><Copy className="h-4 w-4"/></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={deleteElement}><Trash2 className="h-4 w-4"/></Button>
-                </div>
+            <div className="space-y-2">
+                <Label htmlFor="element-name">Element Name</Label>
+                <Input id="element-name" value={el.name} onChange={e => updateElement({ name: e.target.value })}/>
             </div>
             
             {(el.type === 'text' || el.type === 'button') && (
                 <div className="space-y-2">
                     <Label htmlFor="content">Text</Label>
-                    <div className="relative">
-                        <Input id="content" value={(el as TextElement | ButtonElement).content} onChange={e => updateElement({ content: e.target.value })} className="pr-24"/>
-                        <div className="absolute top-1/2 right-1 -translate-y-1/2 flex items-center">
-                            <Button variant="ghost" size="icon" className="h-7 w-7"><Edit className="h-4 w-4"/></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7"><FilePenLine className="h-4 w-4"/></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7"><Settings className="h-4 w-4"/></Button>
-                        </div>
-                    </div>
+                    <Input id="content" value={(el as TextElement | ButtonElement).content} onChange={e => updateElement({ content: e.target.value })} />
                 </div>
             )}
              {(el.type === 'text' || el.type === 'button') && (
@@ -113,13 +108,17 @@ export default function Inspector() {
                   </div>
                   <div className="space-y-2">
                       <Label>Border Radius</Label>
-                      <Slider value={[(el as ButtonElement).borderRadius]} onValueChange={([v]) => updateElement({ borderRadius: v })} min={0} max={50} step={1} />
+                       <div className="flex items-center gap-2">
+                        <Slider value={[(el as ButtonElement).borderRadius]} onValueChange={([v]) => updateElement({ borderRadius: v })} min={0} max={50} step={1} />
+                        <Input type="number" value={(el as ButtonElement).borderRadius} onChange={e => updateElement({ borderRadius: Number(e.target.value) })} className="w-20" />
+                       </div>
                   </div>
                   <div className="space-y-2">
                     <Label>Link to Page</Label>
-                     <Select value={(el as ButtonElement).linkToPageId} onValueChange={(v) => updateElement({ linkToPageId: v })}>
+                     <Select value={(el as ButtonElement).linkToPageId || "none"} onValueChange={(v) => updateElement({ linkToPageId: v === 'none' ? undefined : v })}>
                         <SelectTrigger><SelectValue placeholder="Select a page..."/></SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
                           {project.pages.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                         </SelectContent>
                     </Select>
@@ -148,14 +147,17 @@ export default function Inspector() {
             )}
              <div className="space-y-2">
                 <Label>Rotation</Label>
-                <Slider value={[el.rotation]} onValueChange={([v]) => updateElement({ rotation: v })} min={0} max={360} step={1} />
+                 <div className="flex items-center gap-2">
+                    <Slider value={[el.rotation]} onValueChange={([v]) => updateElement({ rotation: v })} min={0} max={360} step={1} />
+                    <Input type="number" value={el.rotation} onChange={e => updateElement({ rotation: Number(e.target.value) })} className="w-20" />
+                 </div>
             </div>
              <div className="space-y-2">
                 <Label>Animation</Label>
-                <Select value={el.animation} onValueChange={v => updateElement({ animation: v })}>
+                <Select value={el.animation || 'none'} onValueChange={v => updateElement({ animation: v === 'none' ? '' : v })}>
                     <SelectTrigger><SelectValue placeholder="Select animation..." /></SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         <SelectItem value="anim-fade-in">Fade In</SelectItem>
                         <SelectItem value="anim-slide-in-up">Slide In Up</SelectItem>
                         <SelectItem value="anim-pulse">Pulse</SelectItem>
@@ -165,54 +167,31 @@ export default function Inspector() {
             </div>
             <Separator />
             <AiSuggestions element={el} />
+             <Separator />
+             <div className="flex items-center gap-2">
+                <Button variant="outline" className="w-full" onClick={duplicateElement}><Copy className="mr-2 h-4 w-4"/>Duplicate</Button>
+                <Button variant="destructive" className="w-full" onClick={deleteElement}><Trash2 className="mr-2 h-4 w-4"/>Delete</Button>
+            </div>
         </div>
-      </>
+      </ScrollArea>
     );
   };
   
-  const renderPageProperties = () => {
-    if (!currentPage) return null;
-    return (
-        <div className="p-4 space-y-4">
-            <p className="text-sm font-medium">Page Properties</p>
-             <div className="space-y-2">
-                <Label htmlFor="pageName" className="flex items-center gap-2">
-                    <FilePenLine className="h-4 w-4"/> Page Name
-                </Label>
-                <Input id="pageName" value={currentPage.name} onChange={e => updatePage({ name: e.target.value })}/>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="pageBgColor" className="flex items-center gap-2"><Palette className="h-4 w-4" />Background Color</Label>
-                <div className="flex items-center gap-2">
-                  <Input id="pageBgColor" type="color" value={currentPage.backgroundColor} onChange={e => updatePage({ backgroundColor: e.target.value })} className="w-10 h-10 p-1"/>
-                  <Input value={currentPage.backgroundColor} onChange={e => updatePage({ backgroundColor: e.target.value })}/>
-                </div>
-            </div>
-            <Separator/>
-            <p className="text-sm font-medium flex items-center gap-2"><Link className="h-4 w-4"/>Page Redirect</p>
-            <div className="space-y-2">
-                <Label>Redirect to</Label>
-                <Select value={currentPage.redirect?.toPageId} onValueChange={(toPageId) => updatePage({ redirect: { ...currentPage.redirect, toPageId, delay: currentPage.redirect?.delay || 0 }})}>
-                    <SelectTrigger><SelectValue placeholder="Select a page..."/></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        {project.pages.filter(p => p.id !== currentPage.id).map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="space-y-2">
-                <Label className="flex items-center gap-2"><Clock className="h-4 w-4"/>Delay (seconds)</Label>
-                <Input type="number" value={currentPage.redirect?.delay || 0} onChange={e => updatePage({ redirect: { ...currentPage.redirect, delay: Number(e.target.value), toPageId: currentPage.redirect?.toPageId || '' }})} min="0" step="0.1"/>
-            </div>
-        </div>
-    );
-  }
-
   return (
-    <aside className="w-80 border-l bg-card hidden md:flex flex-col">
-        <ScrollArea className="flex-1">
-            {selectedElement ? renderElementProperties() : renderPageProperties()}
-        </ScrollArea>
-    </aside>
+      <Sheet open={showSettings && !!selectedElement} onOpenChange={(open) => !open && dispatch({type: 'TOGGLE_SETTINGS'})}>
+        <SheetContent className="w-80 p-0" side="right">
+          {selectedElement && (
+            <>
+              <SheetHeader className="p-4 border-b">
+                <SheetTitle className="capitalize flex items-center justify-between">
+                  {selectedElement.type} Settings
+                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => dispatch({type: 'TOGGLE_SETTINGS'})}><X className="h-4 w-4"/></Button>
+                </SheetTitle>
+              </SheetHeader>
+              {renderElementProperties()}
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
   );
 }

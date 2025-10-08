@@ -6,7 +6,7 @@ import Header from './Header';
 import Toolbar from './Toolbar';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
-import PageTabs from './PageTabs';
+import PageManager from './PageManager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Paintbrush, FileText, Blocks, Palette } from 'lucide-react';
@@ -70,10 +70,10 @@ export default function EditorView() {
       <div className="flex flex-1 overflow-hidden">
         <Toolbar />
         <main className="flex-1 flex flex-col overflow-auto p-2 sm:p-4 gap-4">
+          <PageManager />
           <div className="flex-1 canvas-bg p-2 rounded-lg">
             <Canvas />
           </div>
-          <PageTabs />
         </main>
         <Inspector />
       </div>

@@ -5,6 +5,7 @@ export type Size = { width: number; height: number };
 
 export interface BaseElement {
   id: string;
+  name: string;
   type: ElementType;
   position: Position;
   size: Size;
@@ -57,6 +58,7 @@ export interface EditorState {
   project: Project;
   currentPageIndex: number;
   selectedElementId: string | null;
+  showSettings: boolean;
   history: Project[];
   historyIndex: number;
 }

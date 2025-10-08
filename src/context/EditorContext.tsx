@@ -9,12 +9,14 @@ type EditorAction =
   | { type: 'NEW_PROJECT'; payload: { backgroundColor: string } }
   | { type: 'LOAD_PROJECT'; payload: Project }
   | { type: 'ADD_PAGE' }
+  | { type: 'DELETE_PAGE'; payload: { pageId: string } }
   | { type: 'SWITCH_PAGE'; payload: { pageIndex: number } }
-  | { type: 'UPDATE_PAGE'; payload: Partial<Page> }
+  | { type: 'UPDATE_PAGE'; payload: Partial<Page> & { id: string } }
   | { type: 'ADD_ELEMENT'; payload: { element: EditorElement } }
   | { type: 'UPDATE_ELEMENT'; payload: Partial<EditorElement> & { id: string } }
   | { type: 'DELETE_ELEMENT'; payload: { elementId: string } }
   | { type: 'SELECT_ELEMENT'; payload: { elementId: string | null } }
+  | { type: 'TOGGLE_SETTINGS' };
 
 const createNewPage = (name: string, backgroundColor: string): Page => ({
   id: crypto.randomUUID(),
@@ -29,6 +31,7 @@ const initialState: EditorState = {
   },
   currentPageIndex: -1,
   selectedElementId: null,
+  showSettings: false,
   history: [],
   historyIndex: -1,
 };
@@ -41,12 +44,14 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
         draft.project = { pages: [firstPage] };
         draft.currentPageIndex = 0;
         draft.selectedElementId = null;
+        draft.showSettings = false;
         break;
       }
       case 'LOAD_PROJECT':
         draft.project = action.payload;
         draft.currentPageIndex = 0;
         draft.selectedElementId = null;
+        draft.showSettings = false;
         break;
       case 'ADD_PAGE': {
         const newPage = createNewPage(`Page ${draft.project.pages.length + 1}`, '#ffffff');
@@ -55,14 +60,26 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
         draft.selectedElementId = null;
         break;
       }
+       case 'DELETE_PAGE': {
+        if (draft.project.pages.length <= 1) break; // Cannot delete the last page
+        const newPages = draft.project.pages.filter(p => p.id !== action.payload.pageId);
+        draft.project.pages = newPages;
+        if (draft.currentPageIndex >= newPages.length) {
+          draft.currentPageIndex = newPages.length - 1;
+        }
+        draft.selectedElementId = null;
+        break;
+      }
       case 'SWITCH_PAGE':
         draft.currentPageIndex = action.payload.pageIndex;
         draft.selectedElementId = null;
+        draft.showSettings = false;
         break;
       case 'UPDATE_PAGE': {
-        if (draft.currentPageIndex !== -1) {
-          const currentPage = draft.project.pages[draft.currentPageIndex];
-          Object.assign(currentPage, action.payload);
+        const pageIndex = draft.project.pages.findIndex(p => p.id === action.payload.id);
+        if (pageIndex !== -1) {
+          const page = draft.project.pages[pageIndex];
+          Object.assign(page, action.payload);
         }
         break;
       }
@@ -70,6 +87,7 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
         if (draft.currentPageIndex !== -1) {
           draft.project.pages[draft.currentPageIndex].elements.push(action.payload.element);
           draft.selectedElementId = action.payload.element.id;
+          draft.showSettings = true;
         }
         break;
       }
@@ -89,12 +107,19 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
           page.elements = page.elements.filter(el => el.id !== action.payload.elementId);
           if (draft.selectedElementId === action.payload.elementId) {
             draft.selectedElementId = null;
+            draft.showSettings = false;
           }
         }
         break;
       }
       case 'SELECT_ELEMENT':
         draft.selectedElementId = action.payload.elementId;
+        if (action.payload.elementId === null) {
+            draft.showSettings = false;
+        }
+        break;
+      case 'TOGGLE_SETTINGS':
+        draft.showSettings = !draft.showSettings;
         break;
     }
   });

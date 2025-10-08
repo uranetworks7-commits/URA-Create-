@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Blocks, FilePlus, Loader2, Save, FolderOpen } from 'lucide-react';
+import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings } from 'lucide-react';
 import { useEditor } from '@/context/EditorContext';
 import { useState } from 'react';
 import {
@@ -67,12 +67,22 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
   };
   
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6">
+    <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6 z-10 shadow-sm">
       <div className="flex items-center gap-3">
         <Blocks className="h-7 w-7 text-primary-foreground" />
         <h1 className="text-xl font-bold tracking-tight">URA Web Canvas</h1>
       </div>
       <div className="flex items-center gap-2">
+        <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => dispatch({type: 'TOGGLE_SETTINGS'})}
+            disabled={!state.selectedElementId}
+            aria-label="Element Settings"
+          >
+            <Settings />
+          </Button>
+
         <Button variant="outline" size="sm" onClick={onStartNew}><FilePlus className="mr-2 h-4 w-4" /> New</Button>
         
         <Dialog open={isDialogOpen === 'save'} onOpenChange={(open) => !open && setIsDialogOpen(null)}>

@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useEditor } from '@/context/EditorContext';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import type { ButtonElement, ImageElement, TextElement } from '@/lib/types';
-import { Type, Square, Image as ImageIcon } from 'lucide-react';
+import { Type, Square, Image as ImageIcon, Crop } from 'lucide-react';
 
 export default function Toolbar() {
   const { dispatch } = useEditor();
@@ -21,6 +21,7 @@ export default function Toolbar() {
       const element: TextElement = {
         ...commonProps,
         type: 'text',
+        name: 'Text',
         content: 'Your Text Here',
         fontSize: 24,
         color: '#000000',
@@ -32,6 +33,7 @@ export default function Toolbar() {
       const element: ButtonElement = {
         ...commonProps,
         type: 'button',
+        name: 'Button',
         content: 'Click Me',
         fontSize: 16,
         color: '#ffffff',
@@ -46,6 +48,7 @@ export default function Toolbar() {
       const element: ImageElement = {
         ...commonProps,
         type: 'image',
+        name: 'Image',
         src: placeholder.imageUrl,
         size: { width: 400, height: 300 },
       };
@@ -54,7 +57,7 @@ export default function Toolbar() {
   };
 
   return (
-    <aside className="w-16 border-r bg-card flex flex-col items-center gap-2 py-4">
+    <aside className="w-16 border-r bg-card flex flex-col items-center gap-2 py-4 z-10">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -79,6 +82,14 @@ export default function Toolbar() {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right"><p>Add Image</p></TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" onClick={() => { /* Implement crop functionality */ }}>
+              <Crop />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right"><p>Crop Image</p></TooltipContent>
         </Tooltip>
       </TooltipProvider>
     </aside>
