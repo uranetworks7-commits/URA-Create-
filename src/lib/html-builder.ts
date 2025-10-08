@@ -34,7 +34,7 @@ export const generateHtmlForProject = (project: Project): string => {
     const loopClass = element.loopAnimation ? 'loop' : '';
     switch (element.animationType) {
         case 'fireworks':
-            return `<div class="fireworks-container ${loopClass}" style="${style}"></div>`;
+            return `<div class="fireworks-container ${loopClass}" style="${style}"><canvas class="fireworks-canvas"></canvas></div>`;
         case 'confetti':
             return `<div class="confetti-container ${loopClass}" style="${style}"></div>`;
         case 'sparks':
@@ -144,11 +144,9 @@ export const generateHtmlForProject = (project: Project): string => {
         }
 
         /* Page Level Animations */
-        .fireworks-container, .confetti-container, .sparks-container { pointer-events: none; }
+        .fireworks-container, .confetti-container, .sparks-container { pointer-events: none; position: absolute; top:0; left: 0; width: 100%; height: 100%; }
+        .fireworks-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-        @keyframes firework-up { to { transform: translateY(-100%); opacity: 0; } }
-        @keyframes firework-explode { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
-        
         @keyframes confetti-fall {
             0% { transform: translateY(-10vh) rotate(0deg) rotateY(0deg); opacity: 1; }
             100% { transform: translateY(110vh) rotate(720deg) rotateY(360deg); opacity: 0; }
@@ -171,7 +169,7 @@ export const generateHtmlForProject = (project: Project): string => {
             const audioPlayer = document.getElementById('background-audio');
             let currentPageId = pages.length > 0 ? pages[0].id : null;
             let redirectTimer;
-            const animationIntervals = new Map();
+            const animationInstances = new Map();
 
             function navigateTo(pageId) {
               const targetPage = document.getElementById(pageId);
@@ -186,9 +184,9 @@ export const generateHtmlForProject = (project: Project): string => {
             function handlePageChange(pageElement) {
                 clearTimeout(redirectTimer);
                 
-                // Clear all running animation intervals
-                animationIntervals.forEach(interval => clearInterval(interval));
-                animationIntervals.clear();
+                // Clear all running animation instances
+                animationInstances.forEach(instance => instance.stop());
+                animationInstances.clear();
                 
                 // Handle Redirect
                 const redirectTo = pageElement.getAttribute('data-redirect-to');
@@ -219,10 +217,11 @@ export const generateHtmlForProject = (project: Project): string => {
             function startAnimationsForPage(pageElement) {
                 const fireworksContainers = pageElement.querySelectorAll('.fireworks-container');
                 fireworksContainers.forEach(container => {
-                    const run = () => createFireworks(container);
-                    run();
-                    if (container.classList.contains('loop')) {
-                        animationIntervals.set(container, setInterval(run, 3000));
+                    const canvas = container.querySelector('.fireworks-canvas');
+                    if (canvas) {
+                        const instance = new FireworksInstance(canvas, container.classList.contains('loop'));
+                        instance.start();
+                        animationInstances.set(container, instance);
                     }
                 });
 
@@ -231,7 +230,8 @@ export const generateHtmlForProject = (project: Project): string => {
                    const run = () => createConfetti(container);
                    run();
                    if (container.classList.contains('loop')) {
-                       animationIntervals.set(container, setInterval(run, 5000));
+                       const intervalId = setInterval(run, 5000);
+                       animationInstances.set(container, { stop: () => clearInterval(intervalId) });
                    }
                 });
 
@@ -240,51 +240,10 @@ export const generateHtmlForProject = (project: Project): string => {
                     const run = () => createSparks(container);
                     run();
                      if (container.classList.contains('loop')) {
-                        animationIntervals.set(container, setInterval(run, 200));
+                        const intervalId = setInterval(run, 200);
+                        animationInstances.set(container, { stop: () => clearInterval(intervalId) });
                     }
                 });
-            }
-
-            function createFireworks(container) {
-                for (let i = 0; i < 15; i++) {
-                    const firework = document.createElement('div');
-                    firework.style.position = 'absolute';
-                    firework.style.bottom = '0';
-                    firework.style.left = Math.random() * 100 + '%';
-                    firework.style.width = '2px';
-                    firework.style.height = '10px';
-                    firework.style.background = \`hsl(\${Math.random() * 360}, 100%, 50%)\`;
-                    firework.style.animation = \`firework-up \${1 + Math.random()}s ease-out\`;
-                    container.appendChild(firework);
-
-                    firework.addEventListener('animationend', () => {
-                        for (let j = 0; j < 30; j++) {
-                            const particle = document.createElement('div');
-                            particle.style.position = 'absolute';
-                            particle.style.left = firework.style.left;
-                            particle.style.top = firework.offsetTop + 'px'; // Explode from where rocket ended
-                            particle.style.width = '3px';
-                            particle.style.height = '3px';
-                            const color = \`hsl(\${Math.random() * 360}, 100%, 50%)\`;
-                            particle.style.background = color;
-                            particle.style.borderRadius = '50%';
-                            const angle = Math.random() * Math.PI * 2;
-                            const distance = Math.random() * 50;
-                            particle.style.transform = \`translate(\${Math.cos(angle) * distance}px, \${Math.sin(angle) * distance}px)\`;
-                            particle.style.transition = 'transform 1s, opacity 1s';
-                            particle.style.opacity = '1';
-                            
-                            setTimeout(() => {
-                                particle.style.transform += ' scale(0)';
-                                particle.style.opacity = '0';
-                            }, 10);
-
-                            container.appendChild(particle);
-                            setTimeout(() => particle.remove(), 1000);
-                        }
-                        firework.remove();
-                    });
-                }
             }
             
             function createConfetti(container) {
@@ -338,6 +297,196 @@ export const generateHtmlForProject = (project: Project): string => {
                 }
               }
             });
+
+            // --- ADVANCED FIREWORKS SCRIPT ---
+            class FireworksInstance {
+              constructor(canvas, loop = false) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext("2d");
+                this.loop = loop;
+                this.rockets = [];
+                this.particles = [];
+                this.shotCounter = 0;
+                this.launchIntervalId = null;
+                this.animationFrameId = null;
+                this.running = false;
+                
+                this.TIER_5_SHOT = 5;
+                this.TIER_10_SHOT = 10;
+                this.TIER_15_SHOT = 15;
+                this.TIER_20_SHOT = 20;
+                this.TIER_30_SHOT = 30;
+
+                window.addEventListener("resize", () => {
+                  if (this.running) {
+                    this.canvas.width = this.canvas.parentElement.clientWidth;
+                    this.canvas.height = this.canvas.parentElement.clientHeight;
+                  }
+                });
+              }
+
+              start() {
+                if (this.running) return;
+                this.running = true;
+                this.canvas.width = this.canvas.parentElement.clientWidth;
+                this.canvas.height = this.canvas.parentElement.clientHeight;
+                this.launchRockets();
+                this.animate();
+              }
+
+              stop() {
+                if (!this.running) return;
+                this.running = false;
+                clearInterval(this.launchIntervalId);
+                cancelAnimationFrame(this.animationFrameId);
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.rockets = [];
+                this.particles = [];
+              }
+
+              launchRockets() {
+                if (this.launchIntervalId) clearInterval(this.launchIntervalId);
+
+                this.rockets.push(new this.Rocket(Math.random() * this.canvas.width, this));
+
+                const intervalLogic = () => {
+                    let nextShotType = 'normal';
+                    let centerShot = false;
+
+                    if (this.shotCounter === this.TIER_5_SHOT) { nextShotType = 'bigRed'; centerShot = true; } 
+                    else if (this.shotCounter === this.TIER_10_SHOT) { nextShotType = 'superHeavy'; centerShot = true; }
+                    else if (this.shotCounter === this.TIER_15_SHOT) { nextShotType = 'vipGreenGold'; centerShot = true; }
+                    else if (this.shotCounter === this.TIER_20_SHOT) { nextShotType = 'ultraVIP'; centerShot = true; }
+                    else if (this.shotCounter === this.TIER_30_SHOT) { nextShotType = 'nuclear'; centerShot = true; }
+                    
+                    const launchX = centerShot ? this.canvas.width / 2 : Math.random() * this.canvas.width;
+                    this.rockets.push(new this.Rocket(launchX, this, nextShotType));
+
+                    if (nextShotType !== 'normal') {
+                        if (nextShotType === 'nuclear') this.shotCounter = 0;
+                    } else {
+                        this.shotCounter++;
+                    }
+
+                    if (this.shotCounter > this.TIER_30_SHOT) { this.shotCounter = 1; }
+                };
+
+                intervalLogic(); // Launch first rocket immediately
+                this.launchIntervalId = setInterval(intervalLogic, Math.random() * 500 + 500);
+                
+                if (!this.loop) {
+                    setTimeout(() => clearInterval(this.launchIntervalId), 5000); // Stop launching after 5s if not looping
+                }
+              }
+
+              animate() {
+                if (!this.running) return;
+                this.ctx.fillStyle = "rgba(0,0,0,0.3)";
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                for (let i = this.rockets.length - 1; i >= 0; i--) {
+                  const r = this.rockets[i];
+                  r.update();
+                  r.draw();
+                  if (r.exploded) this.rockets.splice(i, 1);
+                }
+
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                  const p = this.particles[i];
+                  p.update();
+                  p.draw();
+                  if (p.life <= 0) this.particles.splice(i, 1);
+                }
+
+                this.animationFrameId = requestAnimationFrame(() => this.animate());
+              }
+
+              Particle = class {
+                constructor(x, y, colors, instance, type = 'normal') {
+                  this.instance = instance;
+                  this.x = x; this.y = y;
+                  this.color = colors[Math.floor(Math.random() * colors.length)];
+                  this.type = type;
+                  const props = {
+                      normal: { radius: 0.7, speed: 6, life: 50, decay: 0.90, gravity: 0.1, shadow: 3, flicker: 0 },
+                      bigRed: { radius: 1.4, speed: 8, life: 75, decay: 0.92, gravity: 0.15, shadow: 5.6, flicker: 0.1 },
+                      superHeavy: { radius: 1.75, speed: 9, life: 90, decay: 0.93, gravity: 0.18, shadow: 7, flicker: 0.2 },
+                      vipGreenGold: { radius: 2.1, speed: 10, life: 100, decay: 0.94, gravity: 0.2, shadow: 8.4, flicker: 0.3 },
+                      ultraVIP: { radius: 2.8, speed: 12, life: 125, decay: 0.95, gravity: 0.25, shadow: 14, flicker: 0.4 },
+                      nuclear: { radius: 3.5, speed: 15, life: 150, decay: 0.96, gravity: 0.3, shadow: 21, flicker: 0.8 }
+                  };
+                  const p = props[type] || props.normal;
+                  this.radius = Math.random() * p.radius + 0.7; this.speed = Math.random() * p.speed + 2;
+                  this.life = p.life; this.decay = p.decay; this.gravity = p.gravity;
+                  this.shadow = p.shadow; this.flickerIntensity = p.flicker;
+                  this.angle = Math.random() * Math.PI * 2; this.originalColor = this.color;
+                }
+                update() {
+                  this.x += Math.cos(this.angle) * this.speed; this.y += Math.sin(this.angle) * this.speed + this.gravity;
+                  this.speed *= this.decay; this.life--;
+                }
+                draw() {
+                  const ctx = this.instance.ctx;
+                  ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                  let finalColor = this.originalColor; let opacity = 1;
+                  if (['nuclear', 'ultraVIP', 'vipGreenGold'].includes(this.type)) {
+                      const flicker = Math.random() * this.flickerIntensity; opacity = 1 - flicker;
+                      if (this.type === 'nuclear' && Math.random() < 0.5) finalColor = '#FFFF66';
+                      opacity *= (this.life / (this.type === 'nuclear' ? 150 : this.type === 'ultraVIP' ? 125 : 100));
+                  }
+                  ctx.fillStyle = finalColor; ctx.globalAlpha = opacity;
+                  ctx.shadowBlur = this.shadow; ctx.shadowColor = this.originalColor;
+                  ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+                }
+              }
+
+              Rocket = class {
+                constructor(x, instance, shotType = 'normal') {
+                  this.instance = instance;
+                  this.x = x; this.y = this.instance.canvas.height;
+                  this.shotType = shotType;
+                  const config = {
+                      normal: { speed: 7, colors: ['#FFD700', '#FFA500', '#ADD8E6', '#FFFFFF'], targetY: 0.4, tailLength: 15, headSize: 2.1, headShadow: 8 },
+                      bigRed: { speed: 10, colors: ['#FF0000', '#FF4500', '#FFFFFF'], targetY: 0.3, tailLength: 25, headSize: 2.8, headShadow: 11.2 },
+                      superHeavy: { speed: 11, colors: ['#A020F0', '#FFFFFF', '#DDA0DD'], targetY: 0.25, tailLength: 30, headSize: 3.5, headShadow: 14 },
+                      vipGreenGold: { speed: 12, colors: ['#FFD700', '#00FF00', '#FFFFFF'], targetY: 0.2, tailLength: 35, headSize: 4.2, headShadow: 16.8 },
+                      ultraVIP: { speed: 13, colors: ['#FF2400', '#FF8C00', '#FFFF00', '#FFFFFF'], targetY: 0.1, tailLength: 40, headSize: 4.9, headShadow: 19.6 },
+                      nuclear: { speed: 15, colors: ['#FFFF66', '#FFFFFF', '#FF8C00'], targetY: 0.05, tailLength: 50, headSize: 5.6, headShadow: 28 }
+                  };
+                  const c = config[shotType] || config.normal;
+                  this.speed = Math.random() * 4 + c.speed; this.colorSet = c.colors;
+                  this.targetY = Math.random() * (this.instance.canvas.height * c.targetY) + 20;
+                  this.tailLength = c.tailLength; this.headSize = c.headSize; this.headShadow = c.headShadow;
+                  this.history = []; this.exploded = false;
+                  this.color = this.colorSet[Math.floor(Math.random() * this.colorSet.length)];
+                }
+                update() {
+                  this.y -= this.speed;
+                  if (Math.random() < 0.8 || this.shotType === 'nuclear') this.history.push({ x: this.x, y: this.y });
+                  if (this.history.length > this.tailLength) this.history.shift();
+                  if (this.y < this.targetY) { this.explode(); this.exploded = true; }
+                }
+                draw() {
+                  const ctx = this.instance.ctx;
+                  ctx.beginPath(); ctx.arc(this.x, this.y, this.headSize, 0, Math.PI * 2);
+                  ctx.fillStyle = this.color; ctx.shadowBlur = this.headShadow; ctx.shadowColor = this.color; ctx.fill();
+                  ctx.beginPath(); ctx.moveTo(this.x, this.y);
+                  for (let i = this.history.length - 1; i >= 0; i--) {
+                    const point = this.history[i];
+                    ctx.lineTo(point.x, point.y);
+                  }
+                  ctx.strokeStyle = this.color; ctx.lineWidth = this.headSize / 2; ctx.stroke();
+                  ctx.shadowBlur = 0;
+                }
+                explode() {
+                  const particleCount = { normal: 100, bigRed: 150, superHeavy: 200, vipGreenGold: 250, ultraVIP: 350, nuclear: 600 };
+                  const count = particleCount[this.shotType] || 100;
+                  for (let i = 0; i < count; i++) {
+                    this.instance.particles.push(new this.instance.Particle(this.x, this.y, this.colorSet, this.instance, this.shotType));
+                  }
+                }
+              }
+            }
             
             // Initial page load handling
             if (currentPageId) {
