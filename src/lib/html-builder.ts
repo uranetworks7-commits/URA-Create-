@@ -122,7 +122,7 @@ export const generateHtmlForProject = (project: Project): string => {
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        @keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes pop { 0%, 100% { transform: scale(1); opacity: 0; } }
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
           10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
@@ -258,8 +258,8 @@ export const generateHtmlForProject = (project: Project): string => {
                     confetti.style.width = (Math.random() * 8 + 6) + 'px';
                     confetti.style.height = (Math.random() * 10 + 8) + 'px';
                     confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.transform = \`rotate(\${Math.random() * 360}deg)\`;
-                    confetti.style.animation = \`confetti-fall \${3 + Math.random() * 2}s \${Math.random() * 4}s linear\`;
+                    confetti.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+                    confetti.style.animation = 'confetti-fall ' + (3 + Math.random() * 2) + 's ' + (Math.random() * 4) + 's linear';
                     confetti.style.animationFillMode = 'forwards';
                     container.appendChild(confetti);
                     setTimeout(() => confetti.remove(), 7000);
@@ -278,7 +278,7 @@ export const generateHtmlForProject = (project: Project): string => {
                     spark.style.borderRadius = '50%';
                     spark.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
                     spark.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
-                    spark.style.animation = \`spark-flow \${0.5 + Math.random() * 0.5}s ease-out\`;
+                    spark.style.animation = 'spark-flow ' + (0.5 + Math.random() * 0.5) + 's ease-out';
                     container.appendChild(spark);
                     setTimeout(() => spark.remove(), 1000);
                  }
