@@ -5,6 +5,7 @@ import type { Project, Page, EditorElement, ButtonElement } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import { generateHtmlForProject } from '@/lib/html-builder';
 
 function PreviewElement({ element, onButtonClick }: { element: EditorElement, onButtonClick: (pageId: string) => void }) {
   const getElementStyle = (): React.CSSProperties => {
@@ -88,6 +89,7 @@ function PreviewElement({ element, onButtonClick }: { element: EditorElement, on
 export default function PreviewPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [currentPage, setCurrentPage] = useState<Page | null>(null);
+  const [generatedHtml, setGeneratedHtml] = useState<string>('');
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -100,6 +102,12 @@ export default function PreviewPage() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (project) {
+        setGeneratedHtml(generateHtmlForProject(project));
+    }
+  }, [project]);
 
   useEffect(() => {
     if (currentPage?.redirect?.toPageId && currentPage.redirect.delay > 0) {
@@ -142,12 +150,23 @@ export default function PreviewPage() {
     );
   }
 
-  // Handle custom HTML page
+  // Handle custom HTML page by rendering the full project in an iframe
   if (currentPage.isCustomHtml) {
     return (
       <main className="h-screen w-screen overflow-auto">
-        <div dangerouslySetInnerHTML={{ __html: currentPage.customHtml || '' }} />
-        <audio ref={audioRef} />
+        <iframe
+            srcDoc={generatedHtml}
+            className="w-full h-full border-none"
+            title="Project Preview"
+            // Set the initial visible page via a URL fragment
+            onLoad={(e) => {
+                const iframe = e.currentTarget;
+                if (iframe.contentWindow) {
+                    iframe.contentWindow.location.hash = currentPage.id;
+                    // The script inside the iframe should handle showing the correct page
+                }
+            }}
+        />
       </main>
     );
   }

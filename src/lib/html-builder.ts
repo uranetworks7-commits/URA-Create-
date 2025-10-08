@@ -102,9 +102,9 @@ export const generateHtmlForProject = (project: Project): string => {
     const redirectAttr = page.redirect?.toPageId ? `data-redirect-to="${page.redirect.toPageId}" data-redirect-delay="${page.redirect.delay * 1000}"` : '';
     const audioAttr = page.audioUrl ? `data-audio-src="${page.audioUrl}"` : '';
     const audioLoopAttr = page.audioLoop !== false ? `data-audio-loop="true"` : '';
-    const displayStyle = index === 0 ? 'block' : 'none';
+    const displayStyle = 'none'; // Initially hide all pages
     
-    return `<div id="${page.id}" class="page" style="overflow: hidden; ${displayStyle}; ${pageStyle}" ${redirectAttr} ${audioAttr} ${audioLoopAttr}>${pageContent}</div>`;
+    return `<div id="${page.id}" class="page" style="overflow: hidden; display: ${displayStyle}; ${pageStyle}" ${redirectAttr} ${audioAttr} ${audioLoopAttr}>${pageContent}</div>`;
   }).join('');
 
   return `
@@ -178,6 +178,8 @@ export const generateHtmlForProject = (project: Project): string => {
                 targetPage.style.display = 'block';
                 currentPageId = pageId;
                 handlePageChange(targetPage);
+                // Update hash without adding to history
+                history.replaceState(null, '', '#' + pageId);
               }
             }
 
@@ -296,6 +298,13 @@ export const generateHtmlForProject = (project: Project): string => {
                   navigateTo(linkTo);
                 }
               }
+            });
+            
+            window.addEventListener('hashchange', () => {
+                const pageId = window.location.hash.substring(1);
+                if (pageId) {
+                    navigateTo(pageId);
+                }
             });
 
             // --- ADVANCED FIREWORKS SCRIPT ---
@@ -441,7 +450,7 @@ export const generateHtmlForProject = (project: Project): string => {
                 constructor(x, instance, shotType = 'normal') {
                   this.instance = instance;
                   this.x = x;
-                  this.y = this.instance.canvas.height;
+                  this.y = this.instance.canvas.parentElement.clientHeight;
                   this.shotType = shotType;
                   const config = {
                       normal: { speed: 7, colors: ['#FFD700', '#FFA500', '#ADD8E6', '#FFFFFF'], targetY: 0.4, tailLength: 15, headSize: 2.1, headShadow: 8 },
@@ -487,11 +496,9 @@ export const generateHtmlForProject = (project: Project): string => {
             }
             
             // Initial page load handling
-            if (currentPageId) {
-                const initialPage = document.getElementById(currentPageId);
-                if(initialPage) {
-                    handlePageChange(initialPage);
-                }
+            const initialPageId = window.location.hash.substring(1) || (pages.length > 0 ? pages[0].id : null);
+            if (initialPageId) {
+                navigateTo(initialPageId);
             }
         });
       </script>
