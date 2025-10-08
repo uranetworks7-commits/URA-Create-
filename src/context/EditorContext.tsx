@@ -117,7 +117,7 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
       }
       case 'UPDATE_ELEMENT': {
         if (draft.currentPageIndex !== -1) {
-          const page = draft.pages[draft.currentPageIndex];
+          const page = draft.project.pages[draft.currentPageIndex];
           const elementIndex = page.elements.findIndex(el => el.id === action.payload.id);
           if (elementIndex !== -1) {
             Object.assign(page.elements[elementIndex], action.payload);
@@ -127,7 +127,7 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
       }
       case 'DELETE_ELEMENT': {
         if (draft.currentPageIndex !== -1) {
-          const page = draft.pages[draft.currentPageIndex];
+          const page = draft.project.pages[draft.currentPageIndex];
           page.elements = page.elements.filter(el => el.id !== action.payload.elementId);
           if (draft.selectedElementId === action.payload.elementId) {
             draft.selectedElementId = null;
