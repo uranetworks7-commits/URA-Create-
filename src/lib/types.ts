@@ -1,4 +1,4 @@
-export type ElementType = 'text' | 'button' | 'image' | 'container' | 'video';
+export type ElementType = 'text' | 'button' | 'image' | 'container' | 'video' | 'animation';
 
 export type Position = { x: number; y: number };
 export type Size = { width: number; height: number };
@@ -51,7 +51,12 @@ export interface ContainerElement extends BaseElement {
     backgroundColor: string;
 }
 
-export type EditorElement = TextElement | ButtonElement | ImageElement | ContainerElement | VideoElement;
+export interface AnimationElement extends BaseElement {
+  type: 'animation';
+  animationType: 'fireworks' | 'confetti' | 'sparks';
+}
+
+export type EditorElement = TextElement | ButtonElement | ImageElement | ContainerElement | VideoElement | AnimationElement;
 
 export interface Page {
   id:string;

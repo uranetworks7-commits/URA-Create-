@@ -3,8 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor } from '@/context/EditorContext';
-import type { ButtonElement, ContainerElement, ImageElement, Project, TextElement, VideoElement } from '@/lib/types';
-import { Type, Square, Video, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud, RectangleVertical, FileText, Table, Sparkles } from 'lucide-react';
+import type { ButtonElement, ContainerElement, ImageElement, Project, TextElement, VideoElement, AnimationElement } from '@/lib/types';
+import { Type, Square, Video, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud, RectangleVertical, FileText, Table, Sparkles, Zap, PartyPopper, FerrisWheel } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -19,6 +19,7 @@ import { Textarea } from '../ui/textarea';
 import PreviewDialog from './PreviewDialog';
 import { uploadImage } from '@/ai/flows/upload-image-flow';
 import { Separator } from '../ui/separator';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 
 export default function Toolbar() {
@@ -133,6 +134,20 @@ export default function Toolbar() {
       };
        dispatch({ type: 'ADD_ELEMENT', payload: { element } });
     }
+  };
+
+  const addAnimationElement = (animationType: 'fireworks' | 'confetti' | 'sparks') => {
+    const element: AnimationElement = {
+      id: crypto.randomUUID(),
+      position: { x: 200, y: 200 },
+      size: { width: 100, height: 100 }, // Placeholder size for the editor
+      rotation: 0,
+      animation: '',
+      type: 'animation',
+      name: `${animationType.charAt(0).toUpperCase() + animationType.slice(1)}`,
+      animationType: animationType,
+    };
+    dispatch({ type: 'ADD_ELEMENT', payload: { element } });
   };
   
   const handleAddImageFromUrl = () => {
@@ -406,14 +421,30 @@ export default function Toolbar() {
             </DialogContent>
         </Dialog>
         
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-7 w-7" disabled>
-              <Sparkles />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="right"><p>Animations (Coming Soon)</p></TooltipContent>
-        </Tooltip>
+        <DropdownMenu>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7">
+                            <Sparkles />
+                        </Button>
+                    </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="right"><p>Add Animation</p></TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent side="right">
+                <DropdownMenuItem onClick={() => addAnimationElement('fireworks')}>
+                    <FerrisWheel className="mr-2" /> Fireworks
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => addAnimationElement('confetti')}>
+                    <PartyPopper className="mr-2" /> Confetti
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => addAnimationElement('sparks')}>
+                    <Zap className="mr-2" /> Sparks
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+
         
          <Tooltip>
           <TooltipTrigger asChild>

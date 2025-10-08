@@ -1,12 +1,12 @@
 'use client';
 
 import { useEditor } from '@/context/EditorContext';
-import type { ButtonElement, ContainerElement, EditorElement, ImageElement, TextElement, VideoElement } from '@/lib/types';
+import type { ButtonElement, ContainerElement, EditorElement, ImageElement, TextElement, VideoElement, AnimationElement } from '@/lib/types';
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Zap, PartyPopper, FerrisWheel } from 'lucide-react';
 
 interface ElementProps {
   element: EditorElement;
@@ -216,6 +216,18 @@ export default function Element({ element }: ElementProps) {
                 />
       case 'container':
         return <div style={{backgroundColor: (el as ContainerElement).backgroundColor}} className="w-full h-full"></div>
+      case 'animation':
+        const animEl = el as AnimationElement;
+        const Icon = {
+            fireworks: FerrisWheel,
+            confetti: PartyPopper,
+            sparks: Zap
+        }[animEl.animationType];
+        return (
+            <div className="w-full h-full flex items-center justify-center bg-accent/10 border-2 border-dashed border-accent rounded-md">
+                <Icon className="h-1/2 w-1/2 text-accent opacity-70" />
+            </div>
+        );
       default:
         return null;
     }
@@ -240,26 +252,28 @@ export default function Element({ element }: ElementProps) {
       if (buttonEl.shape === 'circle' || buttonEl.shape === 'pill') {
         style.overflow = 'hidden';
       }
-    } else {
+    } else if (element.type !== 'animation') {
       style.overflow = 'hidden';
     }
 
     return style;
   };
   
+  const isAnimationElement = element.type === 'animation';
+  
   return (
     <div
       ref={ref}
       style={getElementStyle()}
-      className={cn(element.animation || '', element.loopAnimation && 'anim-loop')}
+      className={cn(element.animation || '', element.loopAnimation && !isAnimationElement && 'anim-loop')}
       onClick={handleSelect}
       onMouseDown={handleDragStart}
     >
       <div className="w-full h-full relative pointer-events-none">
         {renderSpecificElement()}
       </div>
-       {hasAnimation && (
-        <div className="absolute -top-1 -left-1 h-2.5 w-2.5 rounded-full bg-green-400 border border-background shadow" title={`Animation: ${element.animation}`}></div>
+       {(hasAnimation || isAnimationElement) && (
+        <div className="absolute -top-1 -left-1 h-2.5 w-2.5 rounded-full bg-green-400 border border-background shadow" title={`Animation: ${element.animation || (element as AnimationElement).animationType}`}></div>
       )}
       {isSelected && (
         <>

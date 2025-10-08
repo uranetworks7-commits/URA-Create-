@@ -1,10 +1,14 @@
-import type { Project, EditorElement, ButtonElement } from './types';
+import type { Project, EditorElement, ButtonElement, AnimationElement } from './types';
 
 export const generateHtmlForProject = (project: Project): string => {
   const getElementStyle = (element: EditorElement): string => {
-    let style = `position: absolute; left: ${element.position.x}px; top: ${element.position.y}px; width: ${element.size.width}px; height: ${element.size.height}px; transform: rotate(${element.rotation || 0}deg); overflow: hidden;`;
+    let style = `position: absolute; left: ${element.position.x}px; top: ${element.position.y}px; width: ${element.size.width}px; height: ${element.size.height}px; transform: rotate(${element.rotation || 0}deg);`;
     
-    if (element.animation && element.animation !== 'none') {
+    if (element.type !== 'animation') {
+       style += ' overflow: hidden;';
+    }
+
+    if (element.animation && element.animation !== 'none' && element.type !== 'animation') {
       const animationName = element.animation.startsWith('anim-') ? element.animation.substring(5) : element.animation;
       let duration = '1.5s';
       if (['shake', 'explode', 'bounce'].includes(animationName)) duration = '1s';
@@ -24,6 +28,21 @@ export const generateHtmlForProject = (project: Project): string => {
       default: return undefined;
     }
   }
+
+  const generateAnimationHtml = (element: AnimationElement): string => {
+    const style = getElementStyle(element);
+    const loopClass = element.loopAnimation ? 'loop' : '';
+    switch (element.animationType) {
+        case 'fireworks':
+            return `<div class="fireworks-container ${loopClass}" style="${style}"></div>`;
+        case 'confetti':
+            return `<div class="confetti-container ${loopClass}" style="${style}"></div>`;
+        case 'sparks':
+            return `<div class="sparks-container ${loopClass}" style="${style}"></div>`;
+    }
+    return '';
+  }
+
 
   const generateElementHtml = (element: EditorElement): string => {
     let content = '';
@@ -61,6 +80,9 @@ export const generateHtmlForProject = (project: Project): string => {
         style += `background-color: ${element.backgroundColor};`;
         content = `<div style="${style}"></div>`;
         break;
+      case 'animation':
+        content = generateAnimationHtml(element as AnimationElement);
+        break;
     }
     return content;
   };
@@ -93,7 +115,7 @@ export const generateHtmlForProject = (project: Project): string => {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>${project.name || 'URA Project'}</title>
       <style>
-        body, html { margin: 0; padding: 0; font-family: sans-serif; }
+        body, html { margin: 0; padding: 0; font-family: sans-serif; overflow: hidden; }
         .page { width: 100vw; height: 100vh; }
         
         /* Animations */
@@ -120,6 +142,23 @@ export const generateHtmlForProject = (project: Project): string => {
           40% { transform: translateY(-15px); }
           60% { transform: translateY(-7px); }
         }
+
+        /* Page Level Animations */
+        .fireworks-container, .confetti-container, .sparks-container { pointer-events: none; }
+
+        @keyframes firework-up { to { transform: translateY(-100%); opacity: 0; } }
+        @keyframes firework-explode { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+        
+        @keyframes confetti-fall {
+            0% { transform: translateY(-10vh) rotate(0deg) rotateY(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg) rotateY(360deg); opacity: 0; }
+        }
+
+        @keyframes spark-flow {
+            0% { transform: translate(0, 0) scale(0); opacity: 1; }
+            50% { opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1); opacity: 0; }
+        }
         
       </style>
     </head>
@@ -132,6 +171,7 @@ export const generateHtmlForProject = (project: Project): string => {
             const audioPlayer = document.getElementById('background-audio');
             let currentPageId = pages.length > 0 ? pages[0].id : null;
             let redirectTimer;
+            const animationIntervals = new Map();
 
             function navigateTo(pageId) {
               const targetPage = document.getElementById(pageId);
@@ -145,6 +185,10 @@ export const generateHtmlForProject = (project: Project): string => {
 
             function handlePageChange(pageElement) {
                 clearTimeout(redirectTimer);
+                
+                // Clear all running animation intervals
+                animationIntervals.forEach(interval => clearInterval(interval));
+                animationIntervals.clear();
                 
                 // Handle Redirect
                 const redirectTo = pageElement.getAttribute('data-redirect-to');
@@ -167,7 +211,118 @@ export const generateHtmlForProject = (project: Project): string => {
                         audioPlayer.src = '';
                     }
                 }
+                
+                // Start animations on new page
+                startAnimationsForPage(pageElement);
             }
+
+            function startAnimationsForPage(pageElement) {
+                const fireworksContainers = pageElement.querySelectorAll('.fireworks-container');
+                fireworksContainers.forEach(container => {
+                    const run = () => createFireworks(container);
+                    run();
+                    if (container.classList.contains('loop')) {
+                        animationIntervals.set(container, setInterval(run, 3000));
+                    }
+                });
+
+                const confettiContainers = pageElement.querySelectorAll('.confetti-container');
+                confettiContainers.forEach(container => {
+                   const run = () => createConfetti(container);
+                   run();
+                   if (container.classList.contains('loop')) {
+                       animationIntervals.set(container, setInterval(run, 5000));
+                   }
+                });
+
+                const sparksContainers = pageElement.querySelectorAll('.sparks-container');
+                sparksContainers.forEach(container => {
+                    const run = () => createSparks(container);
+                    run();
+                     if (container.classList.contains('loop')) {
+                        animationIntervals.set(container, setInterval(run, 200));
+                    }
+                });
+            }
+
+            function createFireworks(container) {
+                for (let i = 0; i < 15; i++) {
+                    const firework = document.createElement('div');
+                    firework.style.position = 'absolute';
+                    firework.style.bottom = '0';
+                    firework.style.left = Math.random() * 100 + '%';
+                    firework.style.width = '2px';
+                    firework.style.height = '10px';
+                    firework.style.background = \`hsl(\${Math.random() * 360}, 100%, 50%)\`;
+                    firework.style.animation = \`firework-up \${1 + Math.random()}s ease-out\`;
+                    container.appendChild(firework);
+
+                    firework.addEventListener('animationend', () => {
+                        for (let j = 0; j < 30; j++) {
+                            const particle = document.createElement('div');
+                            particle.style.position = 'absolute';
+                            particle.style.left = firework.style.left;
+                            particle.style.top = firework.offsetTop + 'px'; // Explode from where rocket ended
+                            particle.style.width = '3px';
+                            particle.style.height = '3px';
+                            const color = \`hsl(\${Math.random() * 360}, 100%, 50%)\`;
+                            particle.style.background = color;
+                            particle.style.borderRadius = '50%';
+                            const angle = Math.random() * Math.PI * 2;
+                            const distance = Math.random() * 50;
+                            particle.style.transform = \`translate(\${Math.cos(angle) * distance}px, \${Math.sin(angle) * distance}px)\`;
+                            particle.style.transition = 'transform 1s, opacity 1s';
+                            particle.style.opacity = '1';
+                            
+                            setTimeout(() => {
+                                particle.style.transform += ' scale(0)';
+                                particle.style.opacity = '0';
+                            }, 10);
+
+                            container.appendChild(particle);
+                            setTimeout(() => particle.remove(), 1000);
+                        }
+                        firework.remove();
+                    });
+                }
+            }
+            
+            function createConfetti(container) {
+                const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'];
+                for (let i = 0; i < 100; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.style.position = 'absolute';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = (-20 - Math.random() * 20) + 'px';
+                    confetti.style.width = (Math.random() * 8 + 6) + 'px';
+                    confetti.style.height = (Math.random() * 10 + 8) + 'px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.transform = \`rotate(\${Math.random() * 360}deg)\`;
+                    confetti.style.animation = \`confetti-fall \${3 + Math.random() * 2}s \${Math.random() * 4}s linear\`;
+                    confetti.style.animationFillMode = 'forwards';
+                    container.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 7000);
+                }
+            }
+
+            function createSparks(container) {
+                 for (let i = 0; i < 5; i++) {
+                    const spark = document.createElement('div');
+                    spark.style.position = 'absolute';
+                    spark.style.left = '50%';
+                    spark.style.top = '50%';
+                    spark.style.width = (Math.random() * 3 + 1) + 'px';
+                    spark.style.height = spark.style.width;
+                    spark.style.background = '#FFD700';
+                    spark.style.borderRadius = '50%';
+                    spark.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+                    spark.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
+                    spark.style.animation = \`spark-flow \${0.5 + Math.random() * 0.5}s ease-out\`;
+                    container.appendChild(spark);
+                    setTimeout(() => spark.remove(), 1000);
+                 }
+            }
+
 
             document.body.addEventListener('click', (e) => {
               // Traverse up the DOM to find the button if a child was clicked

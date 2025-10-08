@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '../ui/button';
 import { Trash2, Copy, Palette, Link, Clock, Edit, Settings, FilePenLine, X, Pencil, Sparkles } from 'lucide-react';
-import type { ButtonElement, ButtonShape, ContainerElement, EditorElement, ImageElement, TextElement, VideoElement } from '@/lib/types';
+import type { ButtonElement, ButtonShape, ContainerElement, EditorElement, ImageElement, TextElement, VideoElement, AnimationElement } from '@/lib/types';
 import { ScrollArea } from '../ui/scroll-area';
 import { Slider } from '../ui/slider';
 import { Separator } from '../ui/separator';
@@ -74,6 +74,15 @@ export default function Inspector() {
                 <Input id="element-name" value={el.name} onChange={e => updateElement({ name: e.target.value })}/>
             </div>
             
+            {el.type === 'animation' && (
+              <>
+                 <div className="flex items-center space-x-2">
+                    <Switch id="animation-loop" checked={el.loopAnimation} onCheckedChange={(checked) => updateElement({ loopAnimation: checked })}/>
+                    <Label htmlFor="animation-loop" className="text-xs">Loop Animation</Label>
+                </div>
+              </>
+            )}
+
             {(el.type === 'text' || el.type === 'button') && (
                 <div className="space-y-1">
                     <Label htmlFor="content">Text</Label>
@@ -200,27 +209,29 @@ export default function Inspector() {
                  </div>
             </div>
             <Separator />
-             <div className="space-y-2">
-                <Label>Animation</Label>
-                <Select value={el.animation || 'none'} onValueChange={v => updateElement({ animation: v === 'none' ? '' : v })}>
-                    <SelectTrigger><SelectValue placeholder="Select animation..." /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        <SelectItem value="anim-fade-in">Fade In</SelectItem>
-                        <SelectItem value="anim-slide-in-up">Slide In Up</SelectItem>
-                        <SelectItem value="anim-pulse">Pulse</SelectItem>
-                        <SelectItem value="anim-pop">Pop</SelectItem>
-                        <SelectItem value="anim-shake">Shake</SelectItem>
-                        <SelectItem value="anim-explode">Explode</SelectItem>
-                        <SelectItem value="anim-glow">Glow</SelectItem>
-                        <SelectItem value="anim-bounce">Bounce</SelectItem>
-                    </SelectContent>
-                </Select>
-                <div className="flex items-center space-x-2">
-                    <Switch id="animation-loop" checked={el.loopAnimation} onCheckedChange={(checked) => updateElement({ loopAnimation: checked })}/>
-                    <Label htmlFor="animation-loop" className="text-xs">Loop Animation</Label>
+             {el.type !== 'animation' && (
+                <div className="space-y-2">
+                    <Label>Animation</Label>
+                    <Select value={el.animation || 'none'} onValueChange={v => updateElement({ animation: v === 'none' ? '' : v })}>
+                        <SelectTrigger><SelectValue placeholder="Select animation..." /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="none">None</SelectItem>
+                            <SelectItem value="anim-fade-in">Fade In</SelectItem>
+                            <SelectItem value="anim-slide-in-up">Slide In Up</SelectItem>
+                            <SelectItem value="anim-pulse">Pulse</SelectItem>
+                            <SelectItem value="anim-pop">Pop</SelectItem>
+                            <SelectItem value="anim-shake">Shake</SelectItem>
+                            <SelectItem value="anim-explode">Explode</SelectItem>
+                            <SelectItem value="anim-glow">Glow</SelectItem>
+                            <SelectItem value="anim-bounce">Bounce</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <div className="flex items-center space-x-2">
+                        <Switch id="animation-loop" checked={el.loopAnimation} onCheckedChange={(checked) => updateElement({ loopAnimation: checked })}/>
+                        <Label htmlFor="animation-loop" className="text-xs">Loop Animation</Label>
+                    </div>
                 </div>
-            </div>
+             )}
              <Separator />
              <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" className="w-full" onClick={duplicateElement}><Copy className="mr-1 h-3 w-3"/>Duplicate</Button>
