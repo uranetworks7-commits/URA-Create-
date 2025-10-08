@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2, Trash2, Grid, HelpCircle } from 'lucide-react';
+import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2, Trash2, Grid, HelpCircle, AlertTriangle } from 'lucide-react';
 import { useEditor } from '@/context/EditorContext';
 import { useState, useEffect } from 'react';
 import {
@@ -28,6 +28,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from '../ui/alert-dialog';
 import { ScrollArea } from '../ui/scroll-area';
 import { Checkbox } from '../ui/checkbox';
@@ -166,8 +167,8 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
     <>
     <header className="flex h-10 items-center justify-between border-b bg-card px-2 z-10 shadow-sm">
       <div className="flex items-center gap-1">
-        <Blocks className="h-3 w-3 text-accent" />
-        <h1 className="text-[10px] font-bold tracking-tighter">URA-Create</h1>
+        <Blocks className="h-2.5 w-2.5 text-accent" />
+        <h1 className="text-[8px] font-bold tracking-tighter">URA-Create</h1>
          <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
             <DialogTrigger asChild>
                  <Button variant="ghost" size="icon" className="h-7 w-7"><HelpCircle className="h-4 w-4 text-muted-foreground"/></Button>
@@ -287,7 +288,23 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
             <Settings />
           </Button>
 
-        <Button variant="outline" size="sm" onClick={onStartNew}><FilePlus className="mr-1" /> New</Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="outline" size="sm"><FilePlus className="mr-1" /> New</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will delete your current work and start a new project.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={onStartNew}>Continue</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         
         {/* Load Dialog */}
         <Dialog open={isLoadDialogOpen} onOpenChange={(open) => {

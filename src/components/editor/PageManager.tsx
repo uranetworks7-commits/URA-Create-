@@ -25,11 +25,13 @@ import { Switch } from '../ui/switch';
 import { Textarea } from '../ui/textarea';
 import { Checkbox } from '../ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 export default function PageManager() {
   const { state, dispatch } = useEditor();
   const { project, currentPageIndex } = state;
   const { toast } = useToast();
+  const [isCustomHtmlAlertOpen, setIsCustomHtmlAlertOpen] = useState(false);
 
   const currentPage = project.pages[currentPageIndex];
 
@@ -71,7 +73,15 @@ export default function PageManager() {
     }
   }
 
+  const handleCustomHtmlToggle = (checked: boolean) => {
+    if (checked) {
+      setIsCustomHtmlAlertOpen(true);
+    }
+    updatePage({ isCustomHtml: checked });
+  };
+
   return (
+    <>
     <div className="w-full bg-card/50 rounded-lg p-1 border flex items-center gap-1">
         <ScrollArea className="w-full whitespace-nowrap">
             <div className="flex items-center gap-1">
@@ -163,7 +173,7 @@ export default function PageManager() {
                             <div className="flex items-center space-x-2">
                                 <Code className="h-3 w-3"/>
                                 <Label htmlFor="custom-html-switch" className="text-xs font-medium">Custom HTML (Preview)</Label>
-                                <Switch id="custom-html-switch" checked={currentPage.isCustomHtml} onCheckedChange={(checked) => updatePage({ isCustomHtml: checked })} />
+                                <Switch id="custom-html-switch" checked={currentPage.isCustomHtml} onCheckedChange={handleCustomHtmlToggle} />
                             </div>
                             {currentPage.isCustomHtml && (
                                 <div className="space-y-1">
@@ -225,5 +235,19 @@ export default function PageManager() {
             </PopoverContent>
         </Popover>
     </div>
+    <AlertDialog open={isCustomHtmlAlertOpen} onOpenChange={setIsCustomHtmlAlertOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Custom HTML Mode</AlertDialogTitle>
+          <AlertDialogDescription>
+            This Is show Your Code and For Manually Entered Fuction
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction onClick={() => setIsCustomHtmlAlertOpen(false)}>OK</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
