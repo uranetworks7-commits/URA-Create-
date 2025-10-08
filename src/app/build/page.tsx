@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Download, Share2, Copy } from 'lucide-react';
+import { FerrisWheel, Download, Share2, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Project } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
@@ -62,7 +62,6 @@ export default function BuildPage() {
         });
     }, 500);
 
-    // Simulate a 30-second build time
     buildAndShareProject({ project, forShare: false }).then(result => {
         setTimeout(() => {
             if(result.htmlContent) {
@@ -105,7 +104,7 @@ a.click();
 
   const handleShare = () => {
       setBuildState('sharing');
-      setStatusText('Uploading project to Catbox for sharing...');
+      setStatusText('Uploading project for sharing...');
       buildAndShareProject({ project: JSON.parse(localStorage.getItem('ura-preview-project')!), forShare: true, zip: true }).then(result => {
           if (result.shareUrl) {
               setShareUrl(result.shareUrl);
@@ -143,7 +142,7 @@ a.click();
         <CardContent className="space-y-4">
           {(buildState === 'building' || buildState === 'sharing') && (
             <div className="flex flex-col items-center justify-center space-y-4 rounded-md border p-8">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <FerrisWheel className="h-10 w-10 animate-spin text-primary" />
               <div className="w-full text-center space-y-2">
                 <p className="text-sm font-medium text-muted-foreground">{statusText}</p>
                 <Progress value={progress} className="w-full" />
