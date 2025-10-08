@@ -138,22 +138,22 @@ export default function PreviewDialog({ isOpen, onOpenChange }: { isOpen: boolea
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] h-[80vh] max-w-[1200px] p-0">
-        <DialogHeader className="p-2 border-b flex-row items-center justify-between">
-            <DialogTitle>Project Preview</DialogTitle>
+      <DialogContent className="w-[90vw] h-[80vh] max-w-[1200px] p-0 flex flex-col">
+        <DialogHeader className="p-2 border-b flex-row items-center justify-between shrink-0">
+            <DialogTitle className="text-sm">Project Preview</DialogTitle>
              <DialogClose asChild>
                 <Button variant="ghost" size="icon" className="h-6 w-6"><X className="h-4 w-4" /></Button>
             </DialogClose>
         </DialogHeader>
-        <div className="w-full h-full overflow-auto">
+        <div className="w-full flex-1 overflow-auto bg-background">
             {project && currentPage ? (
-                <div style={canvasStyle}>
+                <div style={canvasStyle} className="h-full w-full">
                     {currentPage.elements.map(element => (
                         <PreviewElement key={element.id} element={element} onButtonClick={handleNavigate} />
                     ))}
                 </div>
             ) : (
-                <div className="flex h-full w-full items-center justify-center bg-background">
+                <div className="flex h-full w-full items-center justify-center">
                     <p>Loading Preview...</p>
                 </div>
             )}
