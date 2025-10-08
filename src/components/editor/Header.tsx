@@ -73,7 +73,7 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
     <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6 z-10 shadow-sm">
       <div className="flex items-center gap-3">
         <Blocks className="h-7 w-7 text-primary-foreground" />
-        <h1 className="text-xl font-bold tracking-tight">URA Web Canvas</h1>
+        <h1 className="text-xl font-bold tracking-tight">URA-Create</h1>
       </div>
       <div className="flex items-center gap-2">
          <Button 

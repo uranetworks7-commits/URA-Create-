@@ -41,7 +41,7 @@ export default function EditorView() {
             <div className="mx-auto bg-primary/20 p-3 rounded-full w-fit mb-4">
               <Blocks className="h-8 w-8 text-primary-foreground" />
             </div>
-            <CardTitle className="text-3xl font-bold">URA Web Canvas</CardTitle>
+            <CardTitle className="text-3xl font-bold">URA-Create</CardTitle>
             <CardDescription className="text-lg">
               Start from a blank page or a pre-designed template.
             </CardDescription>
