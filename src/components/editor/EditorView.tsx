@@ -41,8 +41,8 @@ export default function EditorView() {
             <div className="mx-auto bg-accent/20 p-2 rounded-full w-fit mb-2">
               <Blocks className="h-6 w-6 text-accent" />
             </div>
-            <CardTitle className="text-2xl font-bold">URA-Create</CardTitle>
-            <CardDescription className="text-base">
+            <CardTitle className="text-xl font-bold">URA-Create</CardTitle>
+            <CardDescription className="text-sm">
               Start from a blank page or a pre-designed template.
             </CardDescription>
           </CardHeader>
@@ -56,14 +56,14 @@ export default function EditorView() {
                         )} 
                         onClick={() => setSelectedTemplate(null)}
                     >
-                         <CardHeader className="p-4">
-                            <File className="h-5 w-5 mx-auto mb-1 text-accent"/>
-                            <CardTitle className="text-base">Blank Page</CardTitle>
+                         <CardHeader className="p-3">
+                            <File className="h-4 w-4 mx-auto mb-1 text-accent"/>
+                            <CardTitle className="text-sm">Blank Page</CardTitle>
                         </CardHeader>
-                        <CardContent className="p-4 pt-0">
+                        <CardContent className="p-3 pt-0">
                              <div className="flex items-center gap-2 border p-1 rounded-md">
                                 <label htmlFor="page-color" className="text-xs font-medium flex items-center gap-1"><Palette className="h-3 w-3"/> Color:</label>
-                                <Input type="color" id="page-color" value={pageColor} onChange={(e) => setPageColor(e.target.value)} className="w-12 h-6 p-0.5"/>
+                                <Input type="color" id="page-color" value={pageColor} onChange={(e) => setPageColor(e.target.value)} className="w-10 h-5 p-0.5"/>
                             </div>
                         </CardContent>
                     </Card>
@@ -76,14 +76,14 @@ export default function EditorView() {
                             )} 
                             onClick={() => setSelectedTemplate(template)}
                         >
-                            <CardHeader className="p-4">
-                                {template.name === 'MCQ Page' && <FileText className="h-5 w-5 mx-auto mb-1 text-accent"/>}
-                                {template.name === 'Table Page' && <Table className="h-5 w-5 mx-auto mb-1 text-accent"/>}
-                                {template.name === 'Content Page' && <FileText className="h-5 w-5 mx-auto mb-1 text-accent"/>}
-                                <CardTitle className="text-base">{template.name}</CardTitle>
+                            <CardHeader className="p-3">
+                                {template.name === 'MCQ Page' && <FileText className="h-4 w-4 mx-auto mb-1 text-accent"/>}
+                                {template.name === 'Table Page' && <Table className="h-4 w-4 mx-auto mb-1 text-accent"/>}
+                                {template.name === 'Content Page' && <FileText className="h-4 w-4 mx-auto mb-1 text-accent"/>}
+                                <CardTitle className="text-sm">{template.name}</CardTitle>
                             </CardHeader>
-                            <CardContent className="p-4 pt-0">
-                                <p className="text-xs text-muted-foreground">{template.description}</p>
+                            <CardContent className="p-3 pt-0">
+                                <p className="text-[10px] text-muted-foreground">{template.description}</p>
                             </CardContent>
                         </Card>
                     ))}

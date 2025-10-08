@@ -70,10 +70,10 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
   const canRedo = state.historyIndex < state.history.length - 1;
   
   return (
-    <header className="flex h-12 items-center justify-between border-b bg-card px-2 md:px-4 z-10 shadow-sm">
-      <div className="flex items-center gap-2">
-        <Blocks className="h-6 w-6 text-accent" />
-        <h1 className="text-lg font-bold tracking-tight">URA-Create</h1>
+    <header className="flex h-10 items-center justify-between border-b bg-card px-2 z-10 shadow-sm">
+      <div className="flex items-center gap-1.5">
+        <Blocks className="h-5 w-5 text-accent" />
+        <h1 className="text-base font-bold tracking-tight">URA-Create</h1>
       </div>
       <div className="flex items-center gap-1">
          <Button 
@@ -82,7 +82,7 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
             onClick={() => dispatch({type: 'UNDO'})}
             disabled={!canUndo}
             aria-label="Undo"
-            className="h-8 w-8"
+            className="h-7 w-7"
           >
             <Undo2 />
         </Button>
@@ -92,7 +92,7 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
             onClick={() => dispatch({type: 'REDO'})}
             disabled={!canRedo}
             aria-label="Redo"
-            className="h-8 w-8"
+            className="h-7 w-7"
           >
             <Redo2 />
         </Button>
@@ -103,17 +103,17 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
             onClick={() => dispatch({type: 'TOGGLE_SETTINGS'})}
             disabled={!state.selectedElementId}
             aria-label="Element Settings"
-            className="h-8 w-8"
+            className="h-7 w-7"
           >
             <Settings />
           </Button>
 
-        <Button variant="outline" size="sm" onClick={onStartNew}><FilePlus className="mr-1.5 h-3.5 w-3.5" /> New</Button>
+        <Button variant="outline" size="sm" onClick={onStartNew}><FilePlus className="mr-1 h-3 w-3" /> New</Button>
         
         <Dialog open={isDialogOpen === 'save'} onOpenChange={(open) => !open && setIsDialogOpen(null)}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" onClick={() => setIsDialogOpen('save')}>
-              <Save className="mr-1.5 h-3.5 w-3.5" /> Save
+              <Save className="mr-1 h-3 w-3" /> Save
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-sm">
@@ -127,7 +127,7 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
             </div>
             <DialogFooter>
               <Button onClick={handleSave} disabled={isLoading} size="sm">
-                {isLoading && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+                {isLoading && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
                 Save
               </Button>
             </DialogFooter>
@@ -137,7 +137,7 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
         <Dialog open={isDialogOpen === 'load'} onOpenChange={(open) => !open && setIsDialogOpen(null)}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" onClick={() => setIsDialogOpen('load')}>
-              <FolderOpen className="mr-1.5 h-3.5 w-3.5" /> Load
+              <FolderOpen className="mr-1 h-3 w-3" /> Load
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-sm">
@@ -151,7 +151,7 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
             </div>
             <DialogFooter>
               <Button onClick={handleLoad} disabled={isLoading} size="sm">
-                {isLoading && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+                {isLoading && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
                 Load
               </Button>
             </DialogFooter>

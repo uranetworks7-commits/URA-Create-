@@ -71,9 +71,9 @@ export default function PageManager() {
   };
 
   return (
-    <div className="w-full bg-card/50 rounded-lg p-1.5 border flex items-center gap-2">
+    <div className="w-full bg-card/50 rounded-lg p-1 border flex items-center gap-1">
         <ScrollArea className="w-full whitespace-nowrap">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
                 {project.pages.map((page, index) => (
                     <Button
                         key={page.id}
@@ -81,51 +81,51 @@ export default function PageManager() {
                         size="sm"
                         onClick={() => handleSwitchPage(index)}
                         className={cn(
-                        'shrink-0 h-8 px-3 py-1 text-xs',
+                        'shrink-0 h-7 px-2 py-1 text-[10px]',
                         currentPageIndex === index && 'font-semibold'
                         )}
                     >
                         {page.name}
                     </Button>
                 ))}
-                <Button variant="outline" size="icon" className="h-7 w-7 shrink-0" onClick={handleAddPage}>
-                    <Plus className="h-3.5 w-3.5" />
+                <Button variant="outline" size="icon" className="h-6 w-6 shrink-0" onClick={handleAddPage}>
+                    <Plus className="h-3 w-3" />
                 </Button>
             </div>
             <ScrollBar orientation="horizontal" />
         </ScrollArea>
         <Popover>
             <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4"/></Button>
+                <Button variant="ghost" size="icon" className="h-6 w-6"><MoreHorizontal className="h-3.5 w-3.5"/></Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64">
-                <div className="grid gap-3">
+            <PopoverContent className="w-56">
+                <div className="grid gap-2">
                     <div className="space-y-1">
-                        <h4 className="font-medium leading-none text-sm">Page Settings</h4>
-                        <p className="text-xs text-muted-foreground">
+                        <h4 className="font-medium leading-none text-xs">Page Settings</h4>
+                        <p className="text-[10px] text-muted-foreground">
                         Adjust the settings for the current page.
                         </p>
                     </div>
-                     <div className="space-y-1.5">
-                        <Label htmlFor="pageName" className="flex items-center gap-1.5 text-xs">
-                            <FilePenLine className="h-3.5 w-3.5"/> Page Name
+                     <div className="space-y-1">
+                        <Label htmlFor="pageName" className="flex items-center gap-1 text-xs">
+                            <FilePenLine className="h-3 w-3"/> Page Name
                         </Label>
                         <Input id="pageName" value={currentPage.name} onChange={e => updatePage({ name: e.target.value })}/>
                     </div>
-                    <div className="space-y-1.5">
-                        <Label htmlFor="pageBgColor" className="flex items-center gap-1.5 text-xs"><Palette className="h-3.5 w-3.5" />Background Color</Label>
-                        <div className="flex items-center gap-2">
-                        <Input id="pageBgColor" type="color" value={currentPage.backgroundColor} onChange={e => updatePage({ backgroundColor: e.target.value })} className="w-8 h-8 p-0.5"/>
+                    <div className="space-y-1">
+                        <Label htmlFor="pageBgColor" className="flex items-center gap-1 text-xs"><Palette className="h-3 w-3" />Background Color</Label>
+                        <div className="flex items-center gap-1">
+                        <Input id="pageBgColor" type="color" value={currentPage.backgroundColor} onChange={e => updatePage({ backgroundColor: e.target.value })} className="w-7 h-7 p-0.5"/>
                         <Input value={currentPage.backgroundColor} onChange={e => updatePage({ backgroundColor: e.target.value })}/>
                         </div>
                     </div>
-                     <div className="space-y-1.5">
-                        <Label htmlFor="pageBgImage" className="flex items-center gap-1.5 text-xs"><ImageIcon className="h-3.5 w-3.5" />Background Image URL</Label>
+                     <div className="space-y-1">
+                        <Label htmlFor="pageBgImage" className="flex items-center gap-1 text-xs"><ImageIcon className="h-3 w-3" />Background Image URL</Label>
                         <Input id="pageBgImage" value={currentPage.backgroundImage || ''} onChange={e => updatePage({ backgroundImage: e.target.value })} placeholder="https://..." />
                     </div>
                     <Separator/>
-                    <p className="text-xs font-medium flex items-center gap-1.5"><LinkIcon className="h-3.5 w-3.5"/>Page Redirect</p>
-                    <div className="space-y-1.5">
+                    <p className="text-xs font-medium flex items-center gap-1"><LinkIcon className="h-3 w-3"/>Page Redirect</p>
+                    <div className="space-y-1">
                         <Label className="text-xs">Redirect to</Label>
                         <Select value={currentPage.redirect?.toPageId || 'none'} onValueChange={(toPageId) => updatePage({ redirect: { toPageId: toPageId === 'none' ? '' : toPageId, delay: currentPage.redirect?.delay || 0 }})}>
                             <SelectTrigger><SelectValue placeholder="Select a page..."/></SelectTrigger>
@@ -135,15 +135,15 @@ export default function PageManager() {
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="space-y-1.5">
-                        <Label className="flex items-center gap-1.5 text-xs"><Clock className="h-3.5 w-3.5"/>Delay (seconds)</Label>
+                    <div className="space-y-1">
+                        <Label className="flex items-center gap-1 text-xs"><Clock className="h-3 w-3"/>Delay (seconds)</Label>
                         <Input type="number" value={currentPage.redirect?.delay || 0} onChange={e => updatePage({ redirect: { ...currentPage.redirect, delay: Number(e.target.value), toPageId: currentPage.redirect?.toPageId || '' }})} min="0" step="0.1"/>
                     </div>
                      <Separator/>
                      <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="destructive" size="sm" className="w-full" disabled={project.pages.length <=1}>
-                                   <Trash2 className="mr-2 h-3.5 w-3.5"/> Delete Page
+                                   <Trash2 className="mr-1.5 h-3 w-3"/> Delete Page
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
