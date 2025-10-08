@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor } from '@/context/EditorContext';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import type { ButtonElement, ContainerElement, ImageElement, TextElement } from '@/lib/types';
+import type { ButtonElement, ContainerElement, ImageElement, Project, TextElement } from '@/lib/types';
 import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw, Eye, Github, HardHat, Share2, Code } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
@@ -162,6 +162,27 @@ export default function Toolbar() {
     const html = generateHtmlForProject(state.project);
     setQuickBuilderCode(html);
     setQuickBuilderOpen(true);
+  };
+  
+  const handleQuickDownload = () => {
+    if (!quickBuilderCode) {
+      toast({
+        variant: 'destructive',
+        title: 'No Code to Download',
+        description: 'Code has not been generated yet.',
+      });
+      return;
+    }
+    const project: Project = state.project;
+    const blob = new Blob([quickBuilderCode], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${project.name.toLowerCase().replace(/\s/g, '-') || 'ura-project'}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -383,8 +404,9 @@ export default function Toolbar() {
                 <ScrollArea className="h-96 rounded-md border">
                     <Textarea readOnly value={quickBuilderCode} className="h-full w-full font-mono text-xs" />
                 </ScrollArea>
-                <DialogFooter>
-                    <Button onClick={() => navigator.clipboard.writeText(quickBuilderCode)}>Copy to Clipboard</Button>
+                <DialogFooter className="gap-2 sm:justify-end">
+                    <Button variant="secondary" onClick={() => navigator.clipboard.writeText(quickBuilderCode)}>Copy to Clipboard</Button>
+                    <Button onClick={handleQuickDownload}>Download Code</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
