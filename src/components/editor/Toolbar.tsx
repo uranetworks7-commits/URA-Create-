@@ -5,12 +5,15 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useEditor } from '@/context/EditorContext';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import type { ButtonElement, ContainerElement, ImageElement, TextElement } from '@/lib/types';
-import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, Separator } from 'lucide-react';
+import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
 
 export default function Toolbar() {
   const { state, dispatch } = useEditor();
   const isElementSelected = !!state.selectedElementId;
+  const selectedElement = state.project.pages[state.currentPageIndex]?.elements.find(el => el.id === state.selectedElementId);
 
   const addElement = (type: 'text' | 'button' | 'image' | 'container') => {
     const commonProps = {
@@ -74,18 +77,68 @@ export default function Toolbar() {
     }
   }
 
+  const handleMove = (direction: 'up' | 'down' | 'left' | 'right') => {
+    if (!selectedElement) return;
+
+    const newPosition = { ...selectedElement.position };
+    const increment = state.moveIncrement;
+
+    switch (direction) {
+      case 'up':
+        newPosition.y -= increment;
+        break;
+      case 'down':
+        newPosition.y += increment;
+        break;
+      case 'left':
+        newPosition.x -= increment;
+        break;
+      case 'right':
+        newPosition.x += increment;
+        break;
+    }
+    dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, position: newPosition } });
+  }
+
   return (
-    <aside className="w-16 border-r bg-card flex flex-col items-center gap-2 py-4 z-10">
+    <aside className="w-20 border-r bg-card flex flex-col items-center gap-2 py-4 z-10">
       <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant={isElementSelected ? "secondary" : "ghost"} size="icon" disabled={!isElementSelected}>
-              <Move />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="right"><p>Move Element (Drag)</p></TooltipContent>
-        </Tooltip>
-         <div className="w-10 my-1 border-t border-border" />
+        <div className="flex flex-col items-center gap-1 w-full px-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+                <Button variant={isElementSelected ? "secondary" : "ghost"} size="icon" disabled={!isElementSelected}>
+                    <Move />
+                </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right"><p>Move Tool</p></TooltipContent>
+          </Tooltip>
+
+          {isElementSelected && (
+            <div className='flex flex-col gap-2 items-center p-2 border-t mt-1 w-full'>
+                <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleMove('up')}><ArrowUp className='h-4 w-4'/></Button>
+                <div className='flex gap-2'>
+                    <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleMove('left')}><ArrowLeft className='h-4 w-4'/></Button>
+                    <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleMove('down')}><ArrowDown className='h-4 w-4'/></Button>
+                </div>
+                <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => handleMove('right')}><ArrowRight className='h-4 w-4'/></Button>
+                
+                <div className="mt-2 space-y-1 text-center">
+                    <Label htmlFor="move-speed" className="text-xs">Move Speed</Label>
+                    <Input 
+                        id="move-speed"
+                        type="number"
+                        value={state.moveIncrement}
+                        onChange={(e) => dispatch({ type: 'SET_MOVE_INCREMENT', payload: { increment: Number(e.target.value) }})}
+                        className="w-14 h-8 text-center"
+                        min="1"
+                    />
+                </div>
+            </div>
+          )}
+        </div>
+
+        <div className="w-10 my-1 border-t border-border" />
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" onClick={() => addElement('text')}>
@@ -118,6 +171,7 @@ export default function Toolbar() {
           </TooltipTrigger>
           <TooltipContent side="right"><p>Add Container</p></TooltipContent>
         </Tooltip>
+
         <div className="w-10 my-1 border-t border-border" />
         <Tooltip>
           <TooltipTrigger asChild>
@@ -143,6 +197,16 @@ export default function Toolbar() {
           </TooltipTrigger>
           <TooltipContent side="right"><p>Add Content Template</p></TooltipContent>
         </Tooltip>
+        <div className="w-10 my-1 border-t border-border" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" >
+                <Crop />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right"><p>Crop Tool (Coming Soon)</p></TooltipContent>
+        </Tooltip>
+
       </TooltipProvider>
     </aside>
   );

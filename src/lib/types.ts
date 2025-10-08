@@ -67,4 +67,5 @@ export interface EditorState {
   showSettings: boolean;
   history: Project[];
   historyIndex: number;
+  moveIncrement: number;
 }

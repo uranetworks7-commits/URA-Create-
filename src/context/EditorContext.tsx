@@ -18,7 +18,8 @@ type EditorAction =
   | { type: 'UPDATE_ELEMENT'; payload: Partial<EditorElement> & { id: string } }
   | { type: 'DELETE_ELEMENT'; payload: { elementId: string } }
   | { type: 'SELECT_ELEMENT'; payload: { elementId: string | null } }
-  | { type: 'TOGGLE_SETTINGS' };
+  | { type: 'TOGGLE_SETTINGS' }
+  | { type: 'SET_MOVE_INCREMENT'; payload: { increment: number } };
 
 const createNewPage = (name: string, backgroundColor: string): Page => ({
   id: crypto.randomUUID(),
@@ -36,6 +37,7 @@ const initialState: EditorState = {
   showSettings: false,
   history: [],
   historyIndex: -1,
+  moveIncrement: 10,
 };
 
 const editorReducer = (state: EditorState, action: EditorAction): EditorState => {
@@ -146,6 +148,9 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
         break;
       case 'TOGGLE_SETTINGS':
         draft.showSettings = !draft.showSettings;
+        break;
+      case 'SET_MOVE_INCREMENT':
+        draft.moveIncrement = action.payload.increment;
         break;
     }
   });
