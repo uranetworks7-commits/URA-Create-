@@ -165,9 +165,9 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
   return (
     <>
     <header className="flex h-10 items-center justify-between border-b bg-card px-2 z-10 shadow-sm">
-      <div className="flex items-center gap-1.5">
-        <Blocks className="h-4 w-4 text-accent" />
-        <h1 className="text-sm font-bold tracking-tight">URA-Create</h1>
+      <div className="flex items-center gap-1">
+        <Blocks className="h-3 w-3 text-accent" />
+        <h1 className="text-[10px] font-bold tracking-tighter">URA-Create</h1>
          <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
             <DialogTrigger asChild>
                  <Button variant="ghost" size="icon" className="h-7 w-7"><HelpCircle className="h-4 w-4 text-muted-foreground"/></Button>
