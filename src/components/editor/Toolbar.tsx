@@ -535,7 +535,23 @@ export default function Toolbar() {
                     </DialogFooter>
                 </DialogContent>
                </Dialog>
-
+                <div className="w-10 my-0.5 border-t border-border" />
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" disabled={!isElementSelected}>
+                            <Expand />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right"><p>Crop/Resize</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => window.open('https://github.com/google/firebase-studio', '_blank')}>
+                            <Github />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right"><p>GitHub</p></TooltipContent>
+                </Tooltip>
             </div>
         ) : (
             <Tooltip>
@@ -574,3 +590,4 @@ export default function Toolbar() {
     
 
     
+
