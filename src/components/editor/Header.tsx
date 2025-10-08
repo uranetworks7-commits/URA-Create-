@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2 } from 'lucide-react';
+import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2, Trash2 } from 'lucide-react';
 import { useEditor } from '@/context/EditorContext';
 import { useState } from 'react';
 import {
@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
 } from '../ui/alert-dialog';
 import { ScrollArea } from '../ui/scroll-area';
+import { Checkbox } from '../ui/checkbox';
 
 export default function Header({ onStartNew }: { onStartNew: () => void }) {
   const { state, dispatch } = useEditor();
@@ -45,6 +46,11 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
   
   const [saveAccessId, setSaveAccessId] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<ProjectWithId | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [deleteAgreed, setDeleteAgreed] = useState(false);
   
   const handleAccessIdSubmit = async () => {
     if (accessId.length !== 6) {
@@ -103,6 +109,25 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
       } finally {
         setIsSaving(false);
       }
+  }
+
+  const handleDeleteProject = async () => {
+    if (!projectToDelete || !accessId) return;
+    try {
+      await deleteProjectFromDb(accessId, projectToDelete.id);
+      toast({ title: 'Project Deleted', description: `"${projectToDelete.project.name}" has been removed.` });
+      setCloudProjects(cloudProjects.filter(p => p.id !== projectToDelete.id));
+      if (selectedCloudProject?.id === projectToDelete.id) {
+        setSelectedCloudProject(null);
+      }
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Deletion Failed', description: (e as Error).message });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setProjectToDelete(null);
+      setDeleteConfirmation('');
+      setDeleteAgreed(false);
+    }
   }
 
   const resetLoadState = () => {
@@ -195,6 +220,13 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
                                 {cloudProjects.map(p => (
                                     <div key={p.id} className="flex items-center justify-between text-sm p-1 rounded-md hover:bg-muted">
                                         <Label htmlFor={p.id} className="flex-1 cursor-pointer">{p.project.name}</Label>
+                                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={(e) => {
+                                            e.stopPropagation();
+                                            setProjectToDelete(p);
+                                            setIsDeleteDialogOpen(true);
+                                        }}>
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
                                         <RadioGroupItem value={p.id} id={p.id} />
                                     </div>
                                 ))}
@@ -233,9 +265,47 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-
       </div>
     </header>
+    
+    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete the project
+            <span className="font-semibold text-foreground">"{projectToDelete?.project.name}"</span>.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="space-y-4">
+            <Label>To confirm, type "DELETE" below:</Label>
+            <Input 
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                placeholder='DELETE'
+                className="font-mono"
+            />
+            <div className="flex items-center space-x-2">
+                <Checkbox id="agree-delete" checked={deleteAgreed} onCheckedChange={(checked) => setDeleteAgreed(Boolean(checked))} />
+                <Label htmlFor="agree-delete" className="text-xs">I understand this action is irreversible.</Label>
+            </div>
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => {
+            setProjectToDelete(null);
+            setDeleteConfirmation('');
+            setDeleteAgreed(false);
+          }}>Cancel</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={handleDeleteProject} 
+            className="bg-destructive hover:bg-destructive/90"
+            disabled={deleteConfirmation !== 'DELETE' || !deleteAgreed}
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     </>
   );
 }
