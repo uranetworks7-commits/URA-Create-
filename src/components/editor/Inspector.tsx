@@ -10,7 +10,6 @@ import { Trash2, Copy, Palette, Link, Clock } from 'lucide-react';
 import type { ButtonElement, EditorElement, TextElement } from '@/lib/types';
 import { ScrollArea } from '../ui/scroll-area';
 import { Slider } from '../ui/slider';
-import AiSuggestions from './AiSuggestions';
 import { Separator } from '../ui/separator';
 
 export default function Inspector() {
@@ -122,10 +121,19 @@ export default function Inspector() {
                 <Label>Rotation</Label>
                 <Slider value={[el.rotation]} onValueChange={([v]) => updateElement({ rotation: v })} min={0} max={360} step={1} />
             </div>
-        </div>
-        <Separator />
-        <div className="p-4">
-            <AiSuggestions element={el} />
+             <div className="space-y-2">
+                <Label>Animation</Label>
+                <Select value={el.animation} onValueChange={v => updateElement({ animation: v })}>
+                    <SelectTrigger><SelectValue placeholder="Select animation..." /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="anim-fade-in">Fade In</SelectItem>
+                        <SelectItem value="anim-slide-in-up">Slide In Up</SelectItem>
+                        <SelectItem value="anim-pulse">Pulse</SelectItem>
+                        <SelectItem value="anim-pop">Pop</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
         </div>
       </>
     );
