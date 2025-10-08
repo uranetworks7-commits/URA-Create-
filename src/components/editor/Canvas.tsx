@@ -4,6 +4,7 @@ import { useEditor } from '@/context/EditorContext';
 import Element from './Element';
 import { Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { generateHtmlForProject } from '@/lib/html-builder';
 
 export default function Canvas() {
   const { state, dispatch } = useEditor();
@@ -20,7 +21,7 @@ export default function Canvas() {
   }
 
   const handleCanvasClick = (e: React.MouseEvent) => {
-    if (currentPage.isCustomHtml) return;
+    if (currentPage.isCustomHtml || currentPage.isBuildFromHtml) return;
     // Deselect if clicking on canvas itself
     if (e.target === e.currentTarget || (e.target as HTMLElement).id === 'canvas-scaler') {
       dispatch({ type: 'SELECT_ELEMENT', payload: { elementId: null } });
@@ -37,6 +38,35 @@ export default function Canvas() {
     canvasStyle.backgroundPosition = 'center';
   }
 
+  const renderContent = () => {
+    if (currentPage.isCustomHtml) {
+      return (
+        <div className="absolute inset-0 bg-muted/80 flex flex-col items-center justify-center gap-2">
+          <Lock className="h-8 w-8 text-muted-foreground" />
+          <p className="text-muted-foreground text-sm">Visual editing is disabled for this page.</p>
+          <p className="text-muted-foreground text-xs">Use the Page Settings to manage custom HTML.</p>
+        </div>
+      );
+    }
+    
+    if (currentPage.isBuildFromHtml) {
+       const pageHtml = generateHtmlForProject({ ...project, pages: [currentPage] });
+       return (
+         <iframe
+            srcDoc={pageHtml}
+            className="w-full h-full border-none pointer-events-none"
+            title="HTML Build Preview"
+            style={{ transform: `scale(${zoom})`, transformOrigin: '0 0' }}
+         />
+       );
+    }
+
+    return currentPage.elements.map(element => (
+      <Element key={element.id} element={element} />
+    ));
+  };
+
+
   return (
     <div
       id="canvas-container"
@@ -47,9 +77,9 @@ export default function Canvas() {
         id="canvas-scaler"
         className="relative origin-top-left transition-transform duration-200"
         style={{ 
-          transform: `scale(${zoom})`,
-          width: `${100 / zoom}%`,
-          height: `${100 / zoom}%`,
+          transform: currentPage.isBuildFromHtml ? 'none' : `scale(${zoom})`,
+          width: currentPage.isBuildFromHtml ? '100%' : `${100 / zoom}%`,
+          height: currentPage.isBuildFromHtml ? '100%' : `${100 / zoom}%`,
          }}
       >
         <div 
@@ -57,17 +87,7 @@ export default function Canvas() {
           className={cn("relative h-full w-full", showGrid && "grid-bg")}
           style={canvasStyle}
         >
-          {currentPage.isCustomHtml ? (
-            <div className="absolute inset-0 bg-muted/80 flex flex-col items-center justify-center gap-2">
-              <Lock className="h-8 w-8 text-muted-foreground" />
-              <p className="text-muted-foreground text-sm">Visual editing is disabled for this page.</p>
-              <p className="text-muted-foreground text-xs">Use the Page Settings to manage custom HTML.</p>
-            </div>
-          ) : (
-            currentPage.elements.map(element => (
-              <Element key={element.id} element={element} />
-            ))
-          )}
+          {renderContent()}
         </div>
       </div>
     </div>
