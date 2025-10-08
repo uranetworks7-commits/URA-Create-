@@ -1,0 +1,150 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import type { Project, Page, EditorElement, ButtonElement } from '@/lib/types';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import Image from 'next/image';
+
+function PreviewElement({ element, onButtonClick }: { element: EditorElement, onButtonClick: (pageId: string) => void }) {
+  const getElementStyle = (): React.CSSProperties => {
+    return {
+      position: 'absolute',
+      left: element.position.x,
+      top: element.position.y,
+      width: element.size.width,
+      height: element.size.height,
+      transform: `rotate(${element.rotation || 0}deg)`,
+      overflow: 'hidden'
+    };
+  };
+
+  const getClipPathForShape = (shape: ButtonElement['shape']): string | undefined => {
+    switch (shape) {
+      case 'triangle-up': return 'polygon(50% 0%, 0% 100%, 100% 100%)';
+      case 'triangle-down': return 'polygon(0% 0%, 100% 0%, 50% 100%)';
+      default: return undefined;
+    }
+  }
+
+  const renderSpecificElement = () => {
+    switch (element.type) {
+      case 'text':
+        return <p style={{
+          fontSize: element.fontSize,
+          color: element.color,
+          fontWeight: element.fontWeight,
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>{element.content}</p>;
+      case 'button':
+        const clipPath = getClipPathForShape(element.shape);
+        let borderRadius;
+        if (element.shape === 'circle') borderRadius = '50%';
+        else if (element.shape === 'pill') borderRadius = '9999px';
+        else borderRadius = element.borderRadius;
+
+        return (
+          <div className="w-full h-full" style={{ clipPath }}>
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full h-full"
+              style={{
+                fontSize: element.fontSize,
+                color: element.color,
+                backgroundColor: element.backgroundColor,
+                fontWeight: element.fontWeight,
+                borderRadius: borderRadius,
+                clipPath: 'none',
+              }}
+              onClick={() => element.linkToPageId && onButtonClick(element.linkToPageId)}
+            >{element.content}</Button>
+          </div>
+        );
+      case 'image':
+        return <Image src={element.src} alt="preview image" layout="fill" objectFit="cover" />;
+      case 'container':
+        return <div style={{ backgroundColor: element.backgroundColor }} className="w-full h-full"></div>
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div style={getElementStyle()} className={cn(element.animation || '')}>
+      <div className="w-full h-full relative">
+        {renderSpecificElement()}
+      </div>
+    </div>
+  );
+}
+
+export default function PreviewPage() {
+  const [project, setProject] = useState<Project | null>(null);
+  const [currentPage, setCurrentPage] = useState<Page | null>(null);
+
+  useEffect(() => {
+    const storedProject = localStorage.getItem('ura-preview-project');
+    if (storedProject) {
+      const parsedProject: Project = JSON.parse(storedProject);
+      setProject(parsedProject);
+      if (parsedProject.pages.length > 0) {
+        setCurrentPage(parsedProject.pages[0]);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (currentPage?.redirect?.toPageId && currentPage.redirect.delay > 0) {
+      const timer = setTimeout(() => {
+        handleNavigate(currentPage.redirect!.toPageId);
+      }, currentPage.redirect.delay * 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage]);
+
+  const handleNavigate = (pageId: string) => {
+    const targetPage = project?.pages.find(p => p.id === pageId);
+    if (targetPage) {
+      setCurrentPage(targetPage);
+    } else {
+      console.warn(`Preview: Page with id ${pageId} not found.`);
+    }
+  }
+
+  if (!project || !currentPage) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <p>Loading Preview...</p>
+      </div>
+    );
+  }
+
+  const canvasStyle: React.CSSProperties = {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    backgroundColor: currentPage.backgroundColor,
+  };
+
+  if (currentPage.backgroundImage) {
+    canvasStyle.backgroundImage = `url(${currentPage.backgroundImage})`;
+    canvasStyle.backgroundSize = 'cover';
+    canvasStyle.backgroundPosition = 'center';
+  }
+
+  return (
+    <main className="h-screen w-screen overflow-auto">
+      <div style={canvasStyle}>
+        {currentPage.elements.map(element => (
+          <PreviewElement key={element.id} element={element} onButtonClick={handleNavigate} />
+        ))}
+      </div>
+    </main>
+  );
+}
