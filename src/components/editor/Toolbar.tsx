@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor } from '@/context/EditorContext';
 import type { ButtonElement, ContainerElement, ImageElement, Project, TextElement, VideoElement } from '@/lib/types';
-import { Type, Square, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud } from 'lucide-react';
+import { Type, Square, Video, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -159,8 +159,8 @@ export default function Toolbar() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) { // 2MB limit
-        toast({ variant: 'destructive', title: 'File too large', description: 'Please upload a file smaller than 2MB.' });
+    if (file.size > 1 * 1024 * 1024) { // 1MB limit
+        toast({ variant: 'destructive', title: 'File too large', description: 'Please upload a file smaller than 1MB.' });
         return;
     }
 
@@ -440,16 +440,7 @@ export default function Toolbar() {
           </TooltipTrigger>
           <TooltipContent side="right"><p>Add Content Template</p></TooltipContent>
         </Tooltip>
-        <div className="w-10 my-0.5 border-t border-border" />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-7 w-7" >
-                <Crop />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="right"><p>Crop Tool (Coming Soon)</p></TooltipContent>
-        </Tooltip>
-
+      
         <div className="w-10 my-0.5 border-t border-border" />
 
         {showDigitalMenu ? (

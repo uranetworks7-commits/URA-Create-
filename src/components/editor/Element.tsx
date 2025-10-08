@@ -15,6 +15,7 @@ interface ElementProps {
 export default function Element({ element }: ElementProps) {
   const { state, dispatch } = useEditor();
   const isSelected = state.selectedElementId === element.id;
+  const hasAnimation = element.animation && element.animation !== 'none' && element.animation !== '';
 
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -257,6 +258,9 @@ export default function Element({ element }: ElementProps) {
       <div className="w-full h-full relative pointer-events-none">
         {renderSpecificElement()}
       </div>
+       {hasAnimation && (
+        <div className="absolute -top-1 -left-1 h-2.5 w-2.5 rounded-full bg-green-400 border border-background shadow" title={`Animation: ${element.animation}`}></div>
+      )}
       {isSelected && (
         <>
           <div
