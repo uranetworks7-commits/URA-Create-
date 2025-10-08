@@ -379,8 +379,7 @@ export const generateHtmlForProject = (project: Project): string => {
 
               animate() {
                 if (!this.running) return;
-                this.ctx.fillStyle = "rgba(0,0,0,0.3)";
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
                 for (let i = this.rockets.length - 1; i >= 0; i--) {
                   const r = this.rockets[i];
