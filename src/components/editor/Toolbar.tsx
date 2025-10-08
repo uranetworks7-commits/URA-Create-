@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useEditor } from '@/context/EditorContext';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import type { ButtonElement, ContainerElement, ImageElement, TextElement } from '@/lib/types';
-import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw, Monitor, Eye, Github, HardHat, Share2 } from 'lucide-react';
+import { Type, Square, Image as ImageIcon, Crop, RectangleHorizontal, FileText, Table, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, Shrink, RotateCcw, Eye, Github, HardHat, Share2 } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -359,3 +359,5 @@ export default function Toolbar() {
     </aside>
   );
 }
+
+    
