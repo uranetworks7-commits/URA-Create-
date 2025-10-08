@@ -13,7 +13,7 @@ type EditorAction =
   | { type: 'DELETE_PAGE'; payload: { pageId: string } }
   | { type: 'SWITCH_PAGE'; payload: { pageIndex: number } }
   | { type: 'UPDATE_PAGE'; payload: Partial<Page> & { id: string } }
-  | { type: 'APPLY_SETTINGS_TO_ALL_PAGES'; payload: { settings: { backgroundColor: string; backgroundImage?: string; audioUrl?: string; } } }
+  | { type: 'APPLY_SETTINGS_TO_ALL_PAGES'; payload: { settings: { backgroundColor: string; backgroundImage?: string; audioUrl?: string; audioLoop?: boolean; } } }
   | { type: 'ADD_ELEMENT'; payload: { element: EditorElement } }
   | { type: 'ADD_ELEMENTS'; payload: { elements: EditorElement[] } }
   | { type: 'UPDATE_ELEMENT'; payload: Partial<EditorElement> & { id: string } }
@@ -31,6 +31,7 @@ const createNewPage = (name: string, backgroundColor: string): Page => ({
   name,
   backgroundColor,
   elements: [],
+  audioLoop: true,
 });
 
 const initialState: EditorState = {
@@ -124,6 +125,7 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
           page.backgroundColor = action.payload.settings.backgroundColor;
           page.backgroundImage = action.payload.settings.backgroundImage;
           page.audioUrl = action.payload.settings.audioUrl;
+          page.audioLoop = action.payload.settings.audioLoop;
         });
         break;
       }

@@ -60,6 +60,7 @@ export default function PageManager() {
              backgroundColor: currentPage.backgroundColor,
              backgroundImage: currentPage.backgroundImage,
              audioUrl: currentPage.audioUrl,
+             audioLoop: currentPage.audioLoop,
            }
          }
        });
@@ -128,6 +129,10 @@ export default function PageManager() {
                          <div className="space-y-1">
                             <Label htmlFor="pageAudioUrl" className="flex items-center gap-1 text-xs"><Music className="h-3 w-3" />Background Audio URL</Label>
                             <Input id="pageAudioUrl" value={currentPage.audioUrl || ''} onChange={e => updatePage({ audioUrl: e.target.value })} placeholder="https://..." />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                           <Switch id="audio-loop" checked={currentPage.audioLoop} onCheckedChange={(checked) => updatePage({ audioLoop: checked })} />
+                           <Label htmlFor="audio-loop" className="text-xs font-medium">Loop Audio</Label>
                         </div>
                       </>
                     )}

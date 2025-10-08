@@ -55,6 +55,7 @@ export interface Page {
   backgroundColor: string;
   backgroundImage?: string;
   audioUrl?: string;
+  audioLoop?: boolean;
   redirect?: {
     toPageId: string;
     delay: number;

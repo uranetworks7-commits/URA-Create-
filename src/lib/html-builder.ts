@@ -78,9 +78,10 @@ export const generateHtmlForProject = (project: Project): string => {
 
     const redirectAttr = page.redirect?.toPageId ? `data-redirect-to="${page.redirect.toPageId}" data-redirect-delay="${page.redirect.delay * 1000}"` : '';
     const audioAttr = page.audioUrl ? `data-audio-src="${page.audioUrl}"` : '';
+    const audioLoopAttr = page.audioLoop !== false ? `data-audio-loop="true"` : '';
     const displayStyle = index === 0 ? 'block' : 'none';
     
-    return `<div id="${page.id}" class="page" style="overflow: hidden; ${displayStyle}; ${pageStyle}" ${redirectAttr} ${audioAttr}>${pageContent}</div>`;
+    return `<div id="${page.id}" class="page" style="overflow: hidden; ${displayStyle}; ${pageStyle}" ${redirectAttr} ${audioAttr} ${audioLoopAttr}>${pageContent}</div>`;
   }).join('');
 
   return `
@@ -108,7 +109,7 @@ export const generateHtmlForProject = (project: Project): string => {
     </head>
     <body>
       ${pagesHtml}
-      <audio id="background-audio" loop></audio>
+      <audio id="background-audio"></audio>
       <script>
         document.addEventListener('DOMContentLoaded', () => {
             const pages = document.querySelectorAll('.page');
@@ -140,12 +141,15 @@ export const generateHtmlForProject = (project: Project): string => {
 
                 // Handle Audio
                 const audioSrc = pageElement.getAttribute('data-audio-src');
-                if (audioSrc && audioPlayer.src !== audioSrc) {
-                    audioPlayer.src = audioSrc;
-                    audioPlayer.play().catch(e => console.error("Audio play failed:", e));
-                } else if (!audioSrc) {
-                    audioPlayer.pause();
-                    audioPlayer.src = '';
+                if (audioPlayer) {
+                    if (audioSrc && audioPlayer.src !== audioSrc) {
+                        audioPlayer.src = audioSrc;
+                        audioPlayer.loop = pageElement.hasAttribute('data-audio-loop');
+                        audioPlayer.play().catch(e => console.error("Audio play failed:", e));
+                    } else if (!audioSrc) {
+                        audioPlayer.pause();
+                        audioPlayer.src = '';
+                    }
                 }
             }
 

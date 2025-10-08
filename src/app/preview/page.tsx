@@ -113,6 +113,7 @@ export default function PreviewPage() {
     if (audioRef.current) {
         if (currentPage?.audioUrl) {
             audioRef.current.src = currentPage.audioUrl;
+            audioRef.current.loop = currentPage.audioLoop ?? true;
             audioRef.current.play().catch(e => console.error("Audio play failed:", e));
         } else {
             audioRef.current.pause();
@@ -159,7 +160,7 @@ export default function PreviewPage() {
           <PreviewElement key={element.id} element={element} onButtonClick={handleNavigate} />
         ))}
       </div>
-       <audio ref={audioRef} loop />
+       <audio ref={audioRef} />
     </main>
   );
 }
