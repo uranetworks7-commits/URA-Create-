@@ -33,8 +33,12 @@ export default function BuildPage() {
 
     const statuses = [
         'Parsing project structure...',
+        'Resolving dependencies...',
         'Generating HTML elements...',
         'Assembling CSS styles...',
+        'Running script optimizations...',
+        'Compiling TypeScript modules...',
+        'Analyzing component tree...',
         'Implementing page navigation...',
         'Compressing assets...',
         'Finalizing build...',
@@ -43,7 +47,7 @@ export default function BuildPage() {
 
     progressInterval = setInterval(() => {
         setProgress(prev => {
-            const newProgress = prev + (100 - prev) * 0.1;
+            const newProgress = prev + (100 - prev) * 0.05; // Slower progress
             if (newProgress > 99) {
                 clearInterval(progressInterval);
                 return 100;
@@ -56,29 +60,27 @@ export default function BuildPage() {
             }
             return newProgress;
         });
-    }, 300);
+    }, 500);
 
-    // Simulate build time
-    setTimeout(() => {
-        try {
-            buildAndShareProject({ project, forShare: false }).then(result => {
-                if(result.htmlContent) {
-                   setGeneratedHtml(result.htmlContent);
-                   setStatusText('Project Built Successfully!');
-                   setBuildState('finished');
-                   clearInterval(progressInterval);
-                   setProgress(100);
-                } else {
-                    throw new Error("Build process failed to generate HTML.");
-                }
-            });
-        } catch (e) {
-            console.error(e);
-            setBuildState('error');
-            setStatusText((e as Error).message || 'Could not generate code for the project.');
-            clearInterval(progressInterval);
-        }
-    }, 3000); // Increased timeout to feel more realistic
+    // Simulate a 30-second build time
+    buildAndShareProject({ project, forShare: false }).then(result => {
+        setTimeout(() => {
+            if(result.htmlContent) {
+               setGeneratedHtml(result.htmlContent);
+               setStatusText('Project Built Successfully!');
+               setBuildState('finished');
+               clearInterval(progressInterval);
+               setProgress(100);
+            } else {
+                throw new Error("Build process failed to generate HTML.");
+            }
+        }, 30000);
+    }).catch (e => {
+        console.error(e);
+        setBuildState('error');
+        setStatusText((e as Error).message || 'Could not generate code for the project.');
+        clearInterval(progressInterval);
+    });
 
     return () => clearInterval(progressInterval);
   }, []);
@@ -94,7 +96,7 @@ export default function BuildPage() {
             const projectName = JSON.parse(localStorage.getItem('ura-preview-project')!).name || 'ura-project';
             a.download = `${projectName.toLowerCase().replace(/\s/g, '-')}.zip`;
             document.body.appendChild(a);
-            a.click();
+a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
@@ -103,7 +105,7 @@ export default function BuildPage() {
 
   const handleShare = () => {
       setBuildState('sharing');
-      setStatusText('Uploading project...');
+      setStatusText('Uploading project to Catbox for sharing...');
       buildAndShareProject({ project: JSON.parse(localStorage.getItem('ura-preview-project')!), forShare: true, zip: true }).then(result => {
           if (result.shareUrl) {
               setShareUrl(result.shareUrl);
