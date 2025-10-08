@@ -9,7 +9,7 @@ import Inspector from './Inspector';
 import PageManager from './PageManager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Blocks, File, FileText, Palette, Table } from 'lucide-react';
+import { Blocks, File, FileText, Palette, Table, CheckCircle2 } from 'lucide-react';
 import { Input } from '../ui/input';
 import { pageTemplates } from '@/lib/templates';
 import { ScrollArea } from '../ui/scroll-area';
@@ -62,16 +62,17 @@ export default function EditorView() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div 
                         className={cn(
-                            "cursor-pointer rounded-lg border bg-card text-card-foreground shadow-sm hover:border-primary", 
-                            selectedTemplateId === 'blank' && 'border-primary'
+                            "relative cursor-pointer rounded-lg border bg-card p-3 text-card-foreground shadow-sm hover:border-primary transition-all", 
+                            selectedTemplateId === 'blank' && 'border-primary ring-2 ring-primary'
                         )} 
                         onClick={() => setSelectedTemplateId('blank')}
                     >
-                         <div className="flex flex-col space-y-0.5 p-3">
+                         {selectedTemplateId === 'blank' && <CheckCircle2 className="h-4 w-4 absolute top-2 right-2 text-primary" />}
+                         <div className="flex flex-col space-y-0.5">
                             <File className="h-4 w-4 mx-auto mb-1 text-accent"/>
-                            <div className="text-sm font-semibold leading-none tracking-tight">Blank Page</div>
+                            <div className="text-sm text-center font-semibold leading-none tracking-tight">Blank Page</div>
                         </div>
-                        <div className="p-3 pt-0">
+                        <div className="mt-2">
                              <div className="flex items-center gap-2 border p-1 rounded-md">
                                 <label htmlFor="page-color" className="text-xs font-medium flex items-center gap-1"><Palette className="h-3 w-3"/> Color:</label>
                                 <Input type="color" id="page-color" value={pageColor} onChange={(e) => setPageColor(e.target.value)} className="w-10 h-5 p-0.5"/>
@@ -82,19 +83,20 @@ export default function EditorView() {
                         <div 
                             key={template.id} 
                             className={cn(
-                                "cursor-pointer rounded-lg border bg-card text-card-foreground shadow-sm hover:border-primary",
-                                selectedTemplateId === template.id && 'border-primary'
+                                "relative cursor-pointer rounded-lg border bg-card p-3 text-card-foreground shadow-sm hover:border-primary transition-all",
+                                selectedTemplateId === template.id && 'border-primary ring-2 ring-primary'
                             )} 
                             onClick={() => setSelectedTemplateId(template.id)}
                         >
-                            <div className="flex flex-col space-y-0.5 p-3">
+                            {selectedTemplateId === template.id && <CheckCircle2 className="h-4 w-4 absolute top-2 right-2 text-primary" />}
+                            <div className="flex flex-col space-y-0.5">
                                 {template.name === 'MCQ Page' && <FileText className="h-4 w-4 mx-auto mb-1 text-accent"/>}
                                 {template.name === 'Table Page' && <Table className="h-4 w-4 mx-auto mb-1 text-accent"/>}
                                 {template.name === 'Content Page' && <FileText className="h-4 w-4 mx-auto mb-1 text-accent"/>}
-                                <div className="text-sm font-semibold leading-none tracking-tight">{template.name}</div>
+                                <div className="text-sm text-center font-semibold leading-none tracking-tight">{template.name}</div>
                             </div>
-                            <div className="p-3 pt-0">
-                                <p className="text-[10px] text-muted-foreground">{template.description}</p>
+                            <div className="p-3 pt-0 mt-2">
+                                <p className="text-[10px] text-center text-muted-foreground">{template.description}</p>
                             </div>
                         </div>
                     ))}
