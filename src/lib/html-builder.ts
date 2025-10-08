@@ -347,8 +347,6 @@ export const generateHtmlForProject = (project: Project): string => {
               launchRockets() {
                 if (this.launchIntervalId) clearInterval(this.launchIntervalId);
 
-                this.rockets.push(new this.Rocket(Math.random() * this.canvas.width, this));
-
                 const intervalLogic = () => {
                     let nextShotType = 'normal';
                     let centerShot = false;
@@ -443,7 +441,8 @@ export const generateHtmlForProject = (project: Project): string => {
               Rocket = class {
                 constructor(x, instance, shotType = 'normal') {
                   this.instance = instance;
-                  this.x = x; this.y = this.instance.canvas.height;
+                  this.x = x;
+                  this.y = this.instance.canvas.height;
                   this.shotType = shotType;
                   const config = {
                       normal: { speed: 7, colors: ['#FFD700', '#FFA500', '#ADD8E6', '#FFFFFF'], targetY: 0.4, tailLength: 15, headSize: 2.1, headShadow: 8 },
@@ -455,7 +454,7 @@ export const generateHtmlForProject = (project: Project): string => {
                   };
                   const c = config[shotType] || config.normal;
                   this.speed = Math.random() * 4 + c.speed; this.colorSet = c.colors;
-                  this.targetY = Math.random() * (this.instance.canvas.height * c.targetY) + 20;
+                  this.targetY = Math.random() * (this.instance.canvas.height * c.targetY) + (this.instance.canvas.height * 0.1);
                   this.tailLength = c.tailLength; this.headSize = c.headSize; this.headShadow = c.headShadow;
                   this.history = []; this.exploded = false;
                   this.color = this.colorSet[Math.floor(Math.random() * this.colorSet.length)];
