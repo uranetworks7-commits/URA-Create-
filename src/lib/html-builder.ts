@@ -15,7 +15,7 @@ export const generateHtmlForProject = (project: Project): string => {
       if (animationName === 'glow') duration = '2s';
 
       const iterationCount = element.loopAnimation ? 'infinite' : '1';
-      style += ` animation: ${animationName} ${duration} ${iterationCount} ease-in-out;`;
+      style += ' animation: ' + animationName + ' ' + duration + ' ' + iterationCount + ' ease-in-out;';
     }
     
     return style;
@@ -91,9 +91,14 @@ export const generateHtmlForProject = (project: Project): string => {
     let pageContent;
     let pageStyle;
 
-    if (page.isCustomHtml) {
+    if (page.isBuildFromHtml && page.buildHtml) {
+        // If building from HTML, we just wrap it in a page container.
+        // The user's HTML should define its own styling.
+        pageContent = page.buildHtml;
+        pageStyle = '';
+    } else if (page.isCustomHtml) {
         pageContent = page.customHtml || '';
-        pageStyle = ''; // Custom HTML takes full control
+        pageStyle = ''; // Custom HTML for preview takes full control
     } else {
         pageContent = page.elements.map(generateElementHtml).join('');
         pageStyle = `position: relative; width: 100vw; height: 100vh; background-color: ${page.backgroundColor}; ${page.backgroundImage ? `background-image: url(${page.backgroundImage}); background-size: cover; background-position: center;` : ''}`;

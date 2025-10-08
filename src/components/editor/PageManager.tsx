@@ -2,7 +2,7 @@
 
 import { useEditor } from '@/context/EditorContext';
 import { Button } from '@/components/ui/button';
-import { FilePenLine, Plus, Trash2, Palette, Clock, Link as LinkIcon, MoreHorizontal, Image as ImageIcon, Code, Music, Copy } from 'lucide-react';
+import { FilePenLine, Plus, Trash2, Palette, Clock, Link as LinkIcon, MoreHorizontal, Image as ImageIcon, Code, Music, Copy, HardHat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '../ui/scroll-area';
 import {
@@ -100,105 +100,128 @@ export default function PageManager() {
                 <Button variant="ghost" size="icon" className="h-6 w-6"><MoreHorizontal className="h-3.5 w-3.5"/></Button>
             </PopoverTrigger>
             <PopoverContent className="w-64">
-                <div className="grid gap-3">
-                    <div className="space-y-1">
-                        <h4 className="font-medium leading-none text-xs">Page Settings</h4>
-                        <p className="text-[10px] text-muted-foreground">
-                        Adjust the settings for the current page.
-                        </p>
-                    </div>
-                     <div className="space-y-1">
-                        <Label htmlFor="pageName" className="flex items-center gap-1 text-xs">
-                            <FilePenLine className="h-3 w-3"/> Page Name
-                        </Label>
-                        <Input id="pageName" value={currentPage.name} onChange={e => updatePage({ name: e.target.value })}/>
-                    </div>
-                    {!currentPage.isCustomHtml && (
-                      <>
+                <ScrollArea className="h-96">
+                    <div className="grid gap-3 p-1">
                         <div className="space-y-1">
-                            <Label htmlFor="pageBgColor" className="flex items-center gap-1 text-xs"><Palette className="h-3 w-3" />Background Color</Label>
-                            <div className="flex items-center gap-1">
-                            <Input id="pageBgColor" type="color" value={currentPage.backgroundColor} onChange={e => updatePage({ backgroundColor: e.target.value })} className="w-7 h-7 p-0.5"/>
-                            <Input value={currentPage.backgroundColor} onChange={e => updatePage({ backgroundColor: e.target.value })}/>
-                            </div>
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="pageBgImage" className="flex items-center gap-1 text-xs"><ImageIcon className="h-3 w-3" />Background Image URL</Label>
-                            <Input id="pageBgImage" value={currentPage.backgroundImage || ''} onChange={e => updatePage({ backgroundImage: e.target.value })} placeholder="https://..." />
+                            <h4 className="font-medium leading-none text-xs">Page Settings</h4>
+                            <p className="text-[10px] text-muted-foreground">
+                            Adjust the settings for the current page.
+                            </p>
                         </div>
                          <div className="space-y-1">
-                            <Label htmlFor="pageAudioUrl" className="flex items-center gap-1 text-xs"><Music className="h-3 w-3" />Background Audio URL</Label>
-                            <Input id="pageAudioUrl" value={currentPage.audioUrl || ''} onChange={e => updatePage({ audioUrl: e.target.value })} placeholder="https://..." />
+                            <Label htmlFor="pageName" className="flex items-center gap-1 text-xs">
+                                <FilePenLine className="h-3 w-3"/> Page Name
+                            </Label>
+                            <Input id="pageName" value={currentPage.name} onChange={e => updatePage({ name: e.target.value })}/>
                         </div>
-                        <div className="flex items-center space-x-2">
-                           <Switch id="audio-loop" checked={currentPage.audioLoop} onCheckedChange={(checked) => updatePage({ audioLoop: checked })} />
-                           <Label htmlFor="audio-loop" className="text-xs font-medium">Loop Audio</Label>
-                        </div>
-                      </>
-                    )}
-                    <Separator/>
-                     <div className="flex items-center space-x-2">
-                        <Checkbox id="apply-all" onCheckedChange={handleApplyToAll} />
-                        <Label htmlFor="apply-all" className="text-xs font-medium flex items-center gap-1"><Copy className="h-3 w-3"/>Apply to all pages</Label>
-                    </div>
-                    <Separator/>
-                    <p className="text-xs font-medium flex items-center gap-1"><LinkIcon className="h-3 w-3"/>Page Redirect</p>
-                    <div className="space-y-1">
-                        <Label className="text-xs">Redirect to</Label>
-                        <Select value={currentPage.redirect?.toPageId || 'none'} onValueChange={(toPageId) => updatePage({ redirect: { toPageId: toPageId === 'none' ? '' : toPageId, delay: currentPage.redirect?.delay || 0 }})}>
-                            <SelectTrigger><SelectValue placeholder="Select a page..."/></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="none">None</SelectItem>
-                                {project.pages.filter(p => p.id !== currentPage.id).map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-1">
-                        <Label className="flex items-center gap-1 text-xs"><Clock className="h-3 w-3"/>Delay (seconds)</Label>
-                        <Input type="number" value={currentPage.redirect?.delay || 0} onChange={e => updatePage({ redirect: { ...currentPage.redirect, delay: Number(e.target.value), toPageId: currentPage.redirect?.toPageId || '' }})} min="0" step="0.1"/>
-                    </div>
-                    <Separator/>
-                    <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                            <Code className="h-3 w-3"/>
-                            <Label htmlFor="custom-html-switch" className="text-xs font-medium">Custom HTML</Label>
-                            <Switch id="custom-html-switch" checked={currentPage.isCustomHtml} onCheckedChange={(checked) => updatePage({ isCustomHtml: checked })} />
-                        </div>
-                        {currentPage.isCustomHtml && (
+                        {!currentPage.isCustomHtml && (
+                          <>
                             <div className="space-y-1">
-                                <Label htmlFor="customHtml" className="text-xs">HTML Code</Label>
-                                <Textarea 
-                                    id="customHtml"
-                                    value={currentPage.customHtml || ''}
-                                    onChange={e => updatePage({ customHtml: e.target.value })}
-                                    placeholder="<div>Your HTML here</div>"
-                                    className="h-32 font-mono text-xs"
-                                />
-                                <p className="text-[10px] text-muted-foreground">The visual editor will be disabled for this page.</p>
+                                <Label htmlFor="pageBgColor" className="flex items-center gap-1 text-xs"><Palette className="h-3 w-3" />Background Color</Label>
+                                <div className="flex items-center gap-1">
+                                <Input id="pageBgColor" type="color" value={currentPage.backgroundColor} onChange={e => updatePage({ backgroundColor: e.target.value })} className="w-7 h-7 p-0.5"/>
+                                <Input value={currentPage.backgroundColor} onChange={e => updatePage({ backgroundColor: e.target.value })}/>
+                                </div>
                             </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="pageBgImage" className="flex items-center gap-1 text-xs"><ImageIcon className="h-3 w-3" />Background Image URL</Label>
+                                <Input id="pageBgImage" value={currentPage.backgroundImage || ''} onChange={e => updatePage({ backgroundImage: e.target.value })} placeholder="https://..." />
+                            </div>
+                             <div className="space-y-1">
+                                <Label htmlFor="pageAudioUrl" className="flex items-center gap-1 text-xs"><Music className="h-3 w-3" />Background Audio URL</Label>
+                                <Input id="pageAudioUrl" value={currentPage.audioUrl || ''} onChange={e => updatePage({ audioUrl: e.target.value })} placeholder="https://..." />
+                            </div>
+                            <div className="flex items-center space-x-2">
+                               <Switch id="audio-loop" checked={currentPage.audioLoop} onCheckedChange={(checked) => updatePage({ audioLoop: checked })} />
+                               <Label htmlFor="audio-loop" className="text-xs font-medium">Loop Audio</Label>
+                            </div>
+                          </>
                         )}
+                        <Separator/>
+                         <div className="flex items-center space-x-2">
+                            <Checkbox id="apply-all" onCheckedChange={handleApplyToAll} />
+                            <Label htmlFor="apply-all" className="text-xs font-medium flex items-center gap-1"><Copy className="h-3 w-3"/>Apply to all pages</Label>
+                        </div>
+                        <Separator/>
+                        <p className="text-xs font-medium flex items-center gap-1"><LinkIcon className="h-3 w-3"/>Page Redirect</p>
+                        <div className="space-y-1">
+                            <Label className="text-xs">Redirect to</Label>
+                            <Select value={currentPage.redirect?.toPageId || 'none'} onValueChange={(toPageId) => updatePage({ redirect: { toPageId: toPageId === 'none' ? '' : toPageId, delay: currentPage.redirect?.delay || 0 }})}>
+                                <SelectTrigger><SelectValue placeholder="Select a page..."/></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">None</SelectItem>
+                                    {project.pages.filter(p => p.id !== currentPage.id).map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-1">
+                            <Label className="flex items-center gap-1 text-xs"><Clock className="h-3 w-3"/>Delay (seconds)</Label>
+                            <Input type="number" value={currentPage.redirect?.delay || 0} onChange={e => updatePage({ redirect: { ...currentPage.redirect, delay: Number(e.target.value), toPageId: currentPage.redirect?.toPageId || '' }})} min="0" step="0.1"/>
+                        </div>
+                        <Separator/>
+                        <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                                <Code className="h-3 w-3"/>
+                                <Label htmlFor="custom-html-switch" className="text-xs font-medium">Custom HTML (Preview)</Label>
+                                <Switch id="custom-html-switch" checked={currentPage.isCustomHtml} onCheckedChange={(checked) => updatePage({ isCustomHtml: checked })} />
+                            </div>
+                            {currentPage.isCustomHtml && (
+                                <div className="space-y-1">
+                                    <Label htmlFor="customHtml" className="text-xs">HTML for Preview</Label>
+                                    <Textarea 
+                                        id="customHtml"
+                                        value={currentPage.customHtml || ''}
+                                        onChange={e => updatePage({ customHtml: e.target.value })}
+                                        placeholder="<div>Your HTML here</div>"
+                                        className="h-32 font-mono text-xs"
+                                    />
+                                    <p className="text-[10px] text-muted-foreground">The visual editor will be disabled for this page.</p>
+                                </div>
+                            )}
+                        </div>
+                         <Separator/>
+                        <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                                <HardHat className="h-3 w-3"/>
+                                <Label htmlFor="build-html-switch" className="text-xs font-medium">Build from HTML</Label>
+                                <Switch id="build-html-switch" checked={currentPage.isBuildFromHtml} onCheckedChange={(checked) => updatePage({ isBuildFromHtml: checked })} />
+                            </div>
+                            {currentPage.isBuildFromHtml && (
+                                <div className="space-y-1">
+                                    <Label htmlFor="buildHtml" className="text-xs">HTML for Build</Label>
+                                    <Textarea 
+                                        id="buildHtml"
+                                        value={currentPage.buildHtml || ''}
+                                        onChange={e => updatePage({ buildHtml: e.target.value })}
+                                        placeholder="<html>...</html>"
+                                        className="h-32 font-mono text-xs"
+                                    />
+                                    <p className="text-[10px] text-muted-foreground">This HTML will be used for this page in the final build, overriding editor content.</p>
+                                </div>
+                            )}
+                        </div>
+                         <Separator/>
+                         <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" size="sm" className="w-full" disabled={project.pages.length <=1}>
+                                       <Trash2 className="mr-1.5 h-3 w-3"/> Delete Page
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete this page and all its content.
+                                    </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeletePage(currentPage.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                     </div>
-                     <Separator/>
-                     <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="destructive" size="sm" className="w-full" disabled={project.pages.length <=1}>
-                                   <Trash2 className="mr-1.5 h-3 w-3"/> Delete Page
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete this page and all its content.
-                                </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeletePage(currentPage.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                </div>
+                </ScrollArea>
             </PopoverContent>
         </Popover>
     </div>

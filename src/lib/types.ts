@@ -73,6 +73,8 @@ export interface Page {
   };
   isCustomHtml?: boolean;
   customHtml?: string;
+  isBuildFromHtml?: boolean;
+  buildHtml?: string;
 }
 
 export interface Project {
