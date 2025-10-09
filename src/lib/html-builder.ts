@@ -1,4 +1,4 @@
-import type { Project, EditorElement, ButtonElement, AnimationElement } from './types';
+import type { Project, EditorElement, ButtonElement, AnimationElement, LoginFormElement } from './types';
 
 export const generateHtmlForProject = (project: Project): string => {
   const getElementStyle = (element: EditorElement): string => {
@@ -82,6 +82,52 @@ export const generateHtmlForProject = (project: Project): string => {
         break;
       case 'animation':
         content = generateAnimationHtml(element as AnimationElement);
+        break;
+      case 'login-form':
+        const formEl = element as LoginFormElement;
+        const formId = `login-form-${formEl.id}`;
+        content = `
+          <div style="${style}">
+            <form id="${formId}" style="width: 100%; height: 100%; padding: 20px; box-sizing: border-box; background-color: ${formEl.formBackgroundColor}; border: 2px solid ${formEl.formBorderColor}; border-radius: 8px; display: flex; flex-direction: column; gap: 15px; justify-content: center;">
+              <h2 style="font-size: ${formEl.titleFontSize}px; font-weight: ${formEl.titleFontWeight}; color: ${formEl.titleColor}; text-align: center; margin: 0 0 10px 0;">${formEl.titleText}</h2>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label for="${formId}-username" style="font-size: ${formEl.labelFontSize}px; color: ${formEl.labelColor};">${formEl.usernameLabel}</label>
+                <input type="text" id="${formId}-username" name="username" required style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box;">
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label for="${formId}-password" style="font-size: ${formEl.labelFontSize}px; color: ${formEl.labelColor};">${formEl.passwordLabel}</label>
+                <input type="password" id="${formId}-password" name="password" required style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box;">
+              </div>
+              <button type="submit" style="padding: 10px; border-radius: 4px; border: none; background-color: #007bff; color: white; cursor: pointer; font-size: 16px;">${formEl.buttonText}</button>
+            </form>
+            <script>
+              (function() {
+                const form = document.getElementById('${formId}');
+                if (form) {
+                  form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const username = e.target.username.value;
+                    const password = e.target.password.value;
+                    const correctUsername = '${formEl.correctUsername}';
+                    const correctPassword = '${formEl.correctPassword}';
+
+                    if (username === correctUsername && password === correctPassword) {
+                      const successMsg = '${formEl.successMessage}';
+                      if (successMsg) alert(successMsg);
+                      const successPage = '${formEl.successPageId}';
+                      if (successPage) window.navigateTo(successPage);
+                    } else {
+                      const failureMsg = '${formEl.failureMessage}';
+                      if (failureMsg) alert(failureMsg);
+                      const failurePage = '${formEl.failurePageId}';
+                      if (failurePage) window.navigateTo(failurePage);
+                    }
+                  });
+                }
+              })();
+            </script>
+          </div>
+        `;
         break;
     }
     return content;
@@ -187,6 +233,7 @@ export const generateHtmlForProject = (project: Project): string => {
                 history.replaceState(null, '', '#' + pageId);
               }
             }
+            window.navigateTo = navigateTo;
 
             function handlePageChange(pageElement) {
                 clearTimeout(redirectTimer);
@@ -297,7 +344,7 @@ export const generateHtmlForProject = (project: Project): string => {
                 target = target.parentElement;
               }
 
-              if (target && target.tagName === 'BUTTON') {
+              if (target && target.tagName === 'BUTTON' && !target.closest('form')) {
                 const linkTo = target.getAttribute('data-link-to');
                 if (linkTo) {
                   navigateTo(linkTo);

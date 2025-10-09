@@ -1,12 +1,14 @@
 'use client';
 
 import { useEditor } from '@/context/EditorContext';
-import type { ButtonElement, ContainerElement, EditorElement, ImageElement, TextElement, VideoElement, AnimationElement } from '@/lib/types';
+import type { ButtonElement, ContainerElement, EditorElement, ImageElement, TextElement, VideoElement, AnimationElement, LoginFormElement } from '@/lib/types';
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { AlertTriangle, Zap, PartyPopper, FerrisWheel } from 'lucide-react';
+import { AlertTriangle, Zap, PartyPopper, FerrisWheel, LogIn } from 'lucide-react';
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
 
 interface ElementProps {
   element: EditorElement;
@@ -227,6 +229,24 @@ export default function Element({ element }: ElementProps) {
             <div className="w-full h-full flex items-center justify-center bg-accent/10 border-2 border-dashed border-accent rounded-md">
                 <Icon className="h-1/2 w-1/2 text-accent opacity-70" />
             </div>
+        );
+      case 'login-form':
+        const formEl = el as LoginFormElement;
+        return (
+          <div className="w-full h-full p-4 rounded-md flex flex-col items-center justify-center gap-2" style={{ backgroundColor: formEl.formBackgroundColor, border: `2px solid ${formEl.formBorderColor}` }}>
+             <p style={{ fontSize: formEl.titleFontSize, fontWeight: formEl.titleFontWeight, color: formEl.titleColor }}>{formEl.titleText}</p>
+              <div className="w-full space-y-2">
+                  <div className="space-y-1">
+                      <Label style={{ fontSize: formEl.labelFontSize, color: formEl.labelColor }}>{formEl.usernameLabel}</Label>
+                      <Input readOnly placeholder="Username" />
+                  </div>
+                  <div className="space-y-1">
+                      <Label style={{ fontSize: formEl.labelFontSize, color: formEl.labelColor }}>{formEl.passwordLabel}</Label>
+                      <Input readOnly type="password" placeholder="Password" />
+                  </div>
+                   <Button className="w-full pointer-events-none">{formEl.buttonText}</Button>
+              </div>
+          </div>
         );
       default:
         return null;

@@ -1,4 +1,4 @@
-export type ElementType = 'text' | 'button' | 'image' | 'container' | 'video' | 'animation';
+export type ElementType = 'text' | 'button' | 'image' | 'container' | 'video' | 'animation' | 'login-form';
 
 export type Position = { x: number; y: number };
 export type Size = { width: number; height: number };
@@ -56,7 +56,32 @@ export interface AnimationElement extends BaseElement {
   animationType: 'fireworks' | 'confetti' | 'sparks';
 }
 
-export type EditorElement = TextElement | ButtonElement | ImageElement | ContainerElement | VideoElement | AnimationElement;
+export interface LoginFormElement extends BaseElement {
+  type: 'login-form';
+  // Content
+  titleText: string;
+  usernameLabel: string;
+  passwordLabel: string;
+  buttonText: string;
+  // Logic
+  correctUsername: string;
+  correctPassword: string;
+  successMessage?: string;
+  failureMessage?: string;
+  successPageId?: string;
+  failurePageId?: string;
+  // Styling
+  formBackgroundColor: string;
+  formBorderColor: string;
+  titleColor: string;
+  titleFontSize: number;
+  titleFontWeight: 'normal' | 'bold';
+  labelColor: string;
+  labelFontSize: number;
+}
+
+
+export type EditorElement = TextElement | ButtonElement | ImageElement | ContainerElement | VideoElement | AnimationElement | LoginFormElement;
 
 export interface Page {
   id:string;

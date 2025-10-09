@@ -3,8 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor } from '@/context/EditorContext';
-import type { ButtonElement, ContainerElement, ImageElement, Project, TextElement, VideoElement, AnimationElement } from '@/lib/types';
-import { Type, Square, Video, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud, RectangleVertical, FileText, Table, Sparkles, Zap, PartyPopper, FerrisWheel, Smile } from 'lucide-react';
+import type { ButtonElement, ContainerElement, ImageElement, Project, TextElement, VideoElement, AnimationElement, LoginFormElement } from '@/lib/types';
+import { Type, Square, Video, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, ZoomOut, Expand, RotateCcw, Eye, Github, HardHat, Share2, Code, Cloud, RectangleVertical, FileText, Table, Sparkles, Zap, PartyPopper, FerrisWheel, Smile, LogIn } from 'lucide-react';
 import { pageTemplates } from '@/lib/templates';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -90,7 +90,7 @@ export default function Toolbar() {
       }
   }
 
-  const addElement = (type: 'text' | 'button' | 'container') => {
+  const addElement = (type: 'text' | 'button' | 'container' | 'login-form') => {
     const commonProps = {
       id: crypto.randomUUID(),
       position: { x: 50, y: 50 },
@@ -133,6 +133,32 @@ export default function Toolbar() {
         size: { width: 300, height: 200 },
       };
        dispatch({ type: 'ADD_ELEMENT', payload: { element } });
+    } else if (type === 'login-form') {
+      const element: LoginFormElement = {
+        ...commonProps,
+        type: 'login-form',
+        name: 'Login Form',
+        size: { width: 350, height: 420 },
+        // Content
+        titleText: 'Login',
+        usernameLabel: 'Username',
+        passwordLabel: 'Password',
+        buttonText: 'Submit',
+        // Logic
+        correctUsername: 'user',
+        correctPassword: '123',
+        successMessage: 'Login successful!',
+        failureMessage: 'Wrong credentials.',
+        // Styling
+        formBackgroundColor: '#ffffff',
+        formBorderColor: '#e5e7eb',
+        titleColor: '#000000',
+        titleFontSize: 24,
+        titleFontWeight: 'bold',
+        labelColor: '#374151',
+        labelFontSize: 14,
+      };
+      dispatch({ type: 'ADD_ELEMENT', payload: { element } });
     }
   };
 
@@ -378,6 +404,14 @@ export default function Toolbar() {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right"><p>Add Button</p></TooltipContent>
+        </Tooltip>
+         <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => addElement('login-form')}>
+              <LogIn />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right"><p>Add Login Form</p></TooltipContent>
         </Tooltip>
         
         <Dialog open={isMediaDialogOpen} onOpenChange={setIsMediaDialogOpen}>

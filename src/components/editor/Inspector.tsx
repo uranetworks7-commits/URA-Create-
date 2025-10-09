@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '../ui/button';
 import { Trash2, Copy, Palette, Link, Clock, Edit, Settings, FilePenLine, X, Pencil, Sparkles } from 'lucide-react';
-import type { ButtonElement, ButtonShape, ContainerElement, EditorElement, ImageElement, TextElement, VideoElement, AnimationElement } from '@/lib/types';
+import type { ButtonElement, ButtonShape, ContainerElement, EditorElement, ImageElement, TextElement, VideoElement, AnimationElement, LoginFormElement } from '@/lib/types';
 import { ScrollArea } from '../ui/scroll-area';
 import { Slider } from '../ui/slider';
 import { Separator } from '../ui/separator';
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/sheet"
 import { Textarea } from '../ui/textarea';
 import { Switch } from '../ui/switch';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 
 export default function Inspector() {
@@ -155,6 +156,122 @@ export default function Inspector() {
                     </Select>
                   </div>
                 </>
+            )}
+            {el.type === 'login-form' && (
+                 <Accordion type="multiple" defaultValue={['content', 'logic', 'styling']} className="w-full">
+                    <AccordionItem value="content">
+                        <AccordionTrigger>Content</AccordionTrigger>
+                        <AccordionContent className="space-y-2">
+                            <div className="space-y-1">
+                                <Label>Title Text</Label>
+                                <Input value={(el as LoginFormElement).titleText} onChange={e => updateElement({ titleText: e.target.value })} />
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Username Label</Label>
+                                <Input value={(el as LoginFormElement).usernameLabel} onChange={e => updateElement({ usernameLabel: e.target.value })} />
+                            </div>
+                             <div className="space-y-1">
+                                <Label>Password Label</Label>
+                                <Input value={(el as LoginFormElement).passwordLabel} onChange={e => updateElement({ passwordLabel: e.target.value })} />
+                            </div>
+                             <div className="space-y-1">
+                                <Label>Button Text</Label>
+                                <Input value={(el as LoginFormElement).buttonText} onChange={e => updateElement({ buttonText: e.target.value })} />
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="logic">
+                        <AccordionTrigger>Logic</AccordionTrigger>
+                        <AccordionContent className="space-y-2">
+                             <div className="space-y-1">
+                                <Label>Correct Username</Label>
+                                <Input value={(el as LoginFormElement).correctUsername} onChange={e => updateElement({ correctUsername: e.target.value })} />
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Correct Password</Label>
+                                <Input value={(el as LoginFormElement).correctPassword} onChange={e => updateElement({ correctPassword: e.target.value })} />
+                            </div>
+                             <div className="space-y-1">
+                                <Label>Success Message (optional)</Label>
+                                <Input value={(el as LoginFormElement).successMessage} onChange={e => updateElement({ successMessage: e.target.value })} placeholder="Login Successful!" />
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Failure Message (optional)</Label>
+                                <Input value={(el as LoginFormElement).failureMessage} onChange={e => updateElement({ failureMessage: e.target.value })} placeholder="Incorrect credentials." />
+                            </div>
+                             <div className="space-y-1">
+                                <Label>Success Page</Label>
+                                <Select value={(el as LoginFormElement).successPageId || "none"} onValueChange={(v) => updateElement({ successPageId: v === 'none' ? undefined : v })}>
+                                    <SelectTrigger><SelectValue placeholder="Select a page..."/></SelectTrigger>
+                                    <SelectContent>
+                                    <SelectItem value="none">None</SelectItem>
+                                    {project.pages.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Failure Page (optional)</Label>
+                                <Select value={(el as LoginFormElement).failurePageId || "none"} onValueChange={(v) => updateElement({ failurePageId: v === 'none' ? undefined : v })}>
+                                    <SelectTrigger><SelectValue placeholder="Select a page..."/></SelectTrigger>
+                                    <SelectContent>
+                                    <SelectItem value="none">None</SelectItem>
+                                    {project.pages.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="styling">
+                        <AccordionTrigger>Styling</AccordionTrigger>
+                        <AccordionContent className="space-y-2">
+                            <div className="space-y-1">
+                                <Label>Form Background</Label>
+                                <div className="flex items-center gap-2"><Input type="color" value={(el as LoginFormElement).formBackgroundColor} onChange={e => updateElement({ formBackgroundColor: e.target.value })} className="w-7 h-7 p-0.5"/>
+                                <Input value={(el as LoginFormElement).formBackgroundColor} onChange={e => updateElement({ formBackgroundColor: e.target.value })} /></div>
+                            </div>
+                             <div className="space-y-1">
+                                <Label>Form Border Color</Label>
+                                <div className="flex items-center gap-2"><Input type="color" value={(el as LoginFormElement).formBorderColor} onChange={e => updateElement({ formBorderColor: e.target.value })} className="w-7 h-7 p-0.5"/>
+                                <Input value={(el as LoginFormElement).formBorderColor} onChange={e => updateElement({ formBorderColor: e.target.value })} /></div>
+                            </div>
+                            <Separator />
+                             <Label className="text-xs font-semibold">Title Font</Label>
+                             <div className="space-y-1">
+                                <Label>Size</Label>
+                                <div className="flex items-center gap-2">
+                                <Slider value={[(el as LoginFormElement).titleFontSize]} onValueChange={([v]) => updateElement({ titleFontSize: v })} min={8} max={72} step={1} />
+                                <Input type="number" value={(el as LoginFormElement).titleFontSize} onChange={e => updateElement({ titleFontSize: Number(e.target.value) })} className="w-14" />
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Weight</Label>
+                                <Select value={(el as LoginFormElement).titleFontWeight} onValueChange={(v: 'normal' | 'bold') => updateElement({ titleFontWeight: v })}>
+                                    <SelectTrigger><SelectValue/></SelectTrigger>
+                                    <SelectContent><SelectItem value="normal">Normal</SelectItem><SelectItem value="bold">Bold</SelectItem></SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Color</Label>
+                                <div className="flex items-center gap-2"><Input type="color" value={(el as LoginFormElement).titleColor} onChange={e => updateElement({ titleColor: e.target.value })} className="w-7 h-7 p-0.5"/>
+                                <Input value={(el as LoginFormElement).titleColor} onChange={e => updateElement({ titleColor: e.target.value })} /></div>
+                            </div>
+                            <Separator />
+                            <Label className="text-xs font-semibold">Label Font</Label>
+                             <div className="space-y-1">
+                                <Label>Size</Label>
+                                <div className="flex items-center gap-2">
+                                <Slider value={[(el as LoginFormElement).labelFontSize]} onValueChange={([v]) => updateElement({ labelFontSize: v })} min={8} max={32} step={1} />
+                                <Input type="number" value={(el as LoginFormElement).labelFontSize} onChange={e => updateElement({ labelFontSize: Number(e.target.value) })} className="w-14" />
+                                </div>
+                            </div>
+                             <div className="space-y-1">
+                                <Label>Color</Label>
+                                <div className="flex items-center gap-2"><Input type="color" value={(el as LoginFormElement).labelColor} onChange={e => updateElement({ labelColor: e.target.value })} className="w-7 h-7 p-0.5"/>
+                                <Input value={(el as LoginFormElement).labelColor} onChange={e => updateElement({ labelColor: e.target.value })} /></div>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
             )}
             {(el.type === 'image' || el.type === 'video') && (
                  <>
