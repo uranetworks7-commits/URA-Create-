@@ -100,32 +100,6 @@ export const generateHtmlForProject = (project: Project): string => {
               </div>
               <button type="submit" style="padding: 10px; border-radius: 4px; border: none; background-color: #007bff; color: white; cursor: pointer; font-size: 16px;">${formEl.buttonText}</button>
             </form>
-            <script>
-              (function() {
-                const form = document.getElementById('${formId}');
-                if (form) {
-                  form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const username = e.target.username.value;
-                    const password = e.target.password.value;
-                    const correctUsername = '${formEl.correctUsername}';
-                    const correctPassword = '${formEl.correctPassword}';
-
-                    if (username === correctUsername && password === correctPassword) {
-                      const successMsg = '${formEl.successMessage}';
-                      if (successMsg) alert(successMsg);
-                      const successPage = '${formEl.successPageId}';
-                      if (successPage) window.navigateTo(successPage);
-                    } else {
-                      const failureMsg = '${formEl.failureMessage}';
-                      if (failureMsg) alert(failureMsg);
-                      const failurePage = '${formEl.failurePageId}';
-                      if (failurePage) window.navigateTo(failurePage);
-                    }
-                  });
-                }
-              })();
-            </script>
           </div>
         `;
         break;
@@ -157,6 +131,42 @@ export const generateHtmlForProject = (project: Project): string => {
     
     return `<div id="${page.id}" class="page" style="overflow: hidden; display: ${displayStyle}; ${pageStyle}" ${redirectAttr} ${audioAttr} ${audioLoopAttr}>${pageContent}</div>`;
   }).join('');
+
+  // Collect all login form scripts
+  const loginFormScripts = project.pages
+    .flatMap(page => page.elements)
+    .filter(el => el.type === 'login-form')
+    .map(el => {
+        const formEl = el as LoginFormElement;
+        const formId = `login-form-${formEl.id}`;
+        return `
+            (function() {
+                const form = document.getElementById('${formId}');
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        const username = e.target.username.value;
+                        const password = e.target.password.value;
+                        const correctUsername = '${formEl.correctUsername}';
+                        const correctPassword = '${formEl.correctPassword}';
+
+                        if (username === correctUsername && password === correctPassword) {
+                            const successMsg = '${formEl.successMessage || ''}';
+                            if (successMsg) alert(successMsg);
+                            const successPage = '${formEl.successPageId || ''}';
+                            if (successPage) window.navigateTo(successPage);
+                        } else {
+                            const failureMsg = '${formEl.failureMessage || ''}';
+                            if (failureMsg) alert(failureMsg);
+                            const failurePage = '${formEl.failurePageId || ''}';
+                            if (failurePage) window.navigateTo(failurePage);
+                        }
+                    });
+                }
+            })();
+        `;
+    }).join('\n');
+
 
   return `
     <!DOCTYPE html>
@@ -336,6 +346,7 @@ export const generateHtmlForProject = (project: Project): string => {
                  }
             }
 
+            ${loginFormScripts}
 
             document.body.addEventListener('click', (e) => {
               // Traverse up the DOM to find the button if a child was clicked
