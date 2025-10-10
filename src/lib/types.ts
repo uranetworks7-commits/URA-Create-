@@ -44,6 +44,7 @@ export interface ImageElement extends BaseElement {
 export interface VideoElement extends BaseElement {
   type: 'video';
   src: string;
+  loop?: boolean;
 }
 
 export interface ContainerElement extends BaseElement {

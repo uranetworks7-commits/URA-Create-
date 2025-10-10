@@ -1,4 +1,4 @@
-import type { Project, EditorElement, ButtonElement, AnimationElement, LoginFormElement } from './types';
+import type { Project, EditorElement, ButtonElement, AnimationElement, LoginFormElement, VideoElement } from './types';
 
 export const generateHtmlForProject = (project: Project): string => {
   const getElementStyle = (element: EditorElement): string => {
@@ -74,7 +74,9 @@ export const generateHtmlForProject = (project: Project): string => {
         content = `<div style="${style}"><img src="${element.src}" alt="image" style="width: 100%; height: 100%; object-fit: cover;" /></div>`;
         break;
       case 'video':
-        content = `<div style="${style}"><video src="${element.src}" autoplay loop muted style="width: 100%; height: 100%; object-fit: cover;"></video></div>`;
+        const videoEl = element as VideoElement;
+        const loopAttr = videoEl.loop ? 'loop' : '';
+        content = `<div style="${style}"><video src="${videoEl.src}" autoplay ${loopAttr} muted style="width: 100%; height: 100%; object-fit: cover;"></video></div>`;
         break;
       case 'container':
         style += `background-color: ${element.backgroundColor};`;

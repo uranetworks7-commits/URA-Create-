@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import type { Project, Page, EditorElement, ButtonElement } from '@/lib/types';
+import type { Project, Page, EditorElement, ButtonElement, VideoElement } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -69,7 +69,8 @@ function PreviewElement({ element, onButtonClick }: { element: EditorElement, on
       case 'image':
         return <Image src={element.src} alt="preview image" fill objectFit="cover" />;
       case 'video':
-        return <video src={element.src} autoPlay loop muted style={{width: '100%', height: '100%', objectFit: 'cover'}}/>
+        const videoEl = element as VideoElement;
+        return <video src={videoEl.src} autoPlay loop={videoEl.loop} muted style={{width: '100%', height: '100%', objectFit: 'cover'}}/>
       default:
         return null;
     }

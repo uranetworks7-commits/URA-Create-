@@ -204,15 +204,16 @@ export default function Element({ element }: ElementProps) {
                     onError={() => setMediaError(true)}
                 />;
       case 'video':
-        const videoSrc = (el as VideoElement).src;
-        if (mediaError || !videoSrc) {
+        const videoEl = el as VideoElement;
+        if (mediaError || !videoEl.src) {
             return renderErrorState('Video');
         }
         return <video
-                  src={videoSrc}
+                  src={videoEl.src}
                   className="w-full h-full object-cover pointer-events-none"
                   autoPlay
-                  loop
+                  loop={videoEl.loop}
+                  muted
                   onError={() => setMediaError(true)}
                 />
       case 'container':

@@ -332,6 +332,10 @@ export default function Inspector() {
                         className="h-20 text-xs text-muted-foreground"
                         placeholder="Video URL will appear here"
                     />
+                    <div className="flex items-center space-x-2">
+                        <Switch id="video-loop" checked={(el as VideoElement).loop} onCheckedChange={(checked) => updateElement({ loop: checked })}/>
+                        <Label htmlFor="video-loop" className="text-xs">Loop Video</Label>
+                    </div>
                 </div>
             )}
              <div className="space-y-1">
