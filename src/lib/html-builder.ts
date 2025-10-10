@@ -76,7 +76,7 @@ export const generateHtmlForProject = (project: Project): string => {
       case 'video':
         const videoEl = element as VideoElement;
         const loopAttr = videoEl.loop ? 'loop' : '';
-        content = `<div style="${style}"><video src="${videoEl.src}" autoplay ${loopAttr} muted style="width: 100%; height: 100%; object-fit: cover;"></video></div>`;
+        content = `<div style="${style}"><video src="${videoEl.src}" autoplay ${loopAttr} style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;"></video></div>`;
         break;
       case 'container':
         style += `background-color: ${element.backgroundColor};`;
@@ -128,7 +128,7 @@ export const generateHtmlForProject = (project: Project): string => {
 
     const redirectAttr = page.redirect?.toPageId ? `data-redirect-to="${page.redirect.toPageId}" data-redirect-delay="${page.redirect.delay * 1000}"` : '';
     const audioAttr = page.audioUrl ? `data-audio-src="${page.audioUrl}"` : '';
-    const audioLoopAttr = page.audioLoop !== false ? `data-audio-loop="true"` : '';
+    const audioLoopAttr = page.audioLoop ? `data-audio-loop="true"` : '';
     const displayStyle = 'none'; // Initially hide all pages
     
     return `<div id="${page.id}" class="page" style="overflow: hidden; display: ${displayStyle}; ${pageStyle}" ${redirectAttr} ${audioAttr} ${audioLoopAttr}>${pageContent}</div>`;
@@ -282,6 +282,12 @@ export const generateHtmlForProject = (project: Project): string => {
                         audioPlayer.src = audioSrc;
                         audioPlayer.loop = pageElement.hasAttribute('data-audio-loop');
                         audioPlayer.play().catch(e => console.error("Audio play failed:", e));
+                    } else if (audioSrc && audioPlayer.src === audioSrc) {
+                        // If src is the same, just update loop property and ensure it plays
+                        audioPlayer.loop = pageElement.hasAttribute('data-audio-loop');
+                        if (audioPlayer.paused) {
+                           audioPlayer.play().catch(e => console.error("Audio play failed:", e));
+                        }
                     } else if (!audioSrc) {
                         audioPlayer.pause();
                         audioPlayer.src = '';
