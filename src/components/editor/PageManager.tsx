@@ -25,13 +25,15 @@ import { Switch } from '../ui/switch';
 import { Textarea } from '../ui/textarea';
 import { Checkbox } from '../ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 export default function PageManager() {
   const { state, dispatch } = useEditor();
   const { project, currentPageIndex } = state;
   const { toast } = useToast();
   const [isCustomHtmlAlertOpen, setIsCustomHtmlAlertOpen] = useState(false);
+  const [showDeleteForPageId, setShowDeleteForPageId] = useState<string | null>(null);
+  const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const currentPage = project.pages[currentPageIndex];
 
@@ -47,6 +49,7 @@ export default function PageManager() {
   
   const handleDeletePage = (pageId: string) => {
       dispatch({type: 'DELETE_PAGE', payload: {pageId}});
+      setShowDeleteForPageId(null);
   }
 
   const updatePage = (payload: Partial<typeof currentPage>) => {
@@ -79,6 +82,36 @@ export default function PageManager() {
     }
     updatePage({ isCustomHtml: checked });
   };
+  
+  const handleMouseDown = (pageId: string) => {
+    longPressTimeoutRef.current = setTimeout(() => {
+      setShowDeleteForPageId(pageId);
+    }, 750);
+  };
+
+  const clearLongPress = () => {
+    if (longPressTimeoutRef.current) {
+      clearTimeout(longPressTimeoutRef.current);
+      longPressTimeoutRef.current = null;
+    }
+  };
+
+  const handleMouseUp = () => {
+    clearLongPress();
+  };
+  
+  const handleMouseLeave = () => {
+    clearLongPress();
+  };
+
+  const handleClick = (index: number) => {
+    if (showDeleteForPageId) {
+      setShowDeleteForPageId(null);
+    } else {
+      handleSwitchPage(index);
+    }
+  };
+
 
   return (
     <>
@@ -86,18 +119,49 @@ export default function PageManager() {
         <ScrollArea className="w-full whitespace-nowrap">
             <div className="flex items-center gap-1">
                 {project.pages.map((page, index) => (
-                    <Button
-                        key={page.id}
-                        variant={currentPageIndex === index ? 'secondary' : 'ghost'}
-                        size="sm"
-                        onClick={() => handleSwitchPage(index)}
-                        className={cn(
-                        'shrink-0 h-7 px-2 py-1 text-[10px]',
-                        currentPageIndex === index && 'font-semibold'
-                        )}
+                    <div
+                      key={page.id}
+                      className="relative shrink-0"
+                      onMouseDown={() => handleMouseDown(page.id)}
+                      onMouseUp={handleMouseUp}
+                      onMouseLeave={handleMouseLeave}
+                      onTouchStart={() => handleMouseDown(page.id)}
+                      onTouchEnd={handleMouseUp}
                     >
-                        {page.name}
-                    </Button>
+                      <Button
+                          variant={currentPageIndex === index ? 'secondary' : 'ghost'}
+                          size="sm"
+                          onClick={() => handleClick(index)}
+                          className={cn(
+                          'h-7 px-2 py-1 text-[10px]',
+                          currentPageIndex === index && 'font-semibold',
+                          showDeleteForPageId === page.id && 'bg-destructive/20 text-destructive-foreground'
+                          )}
+                      >
+                          {page.name}
+                      </Button>
+                      {showDeleteForPageId === page.id && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer bg-destructive p-1 rounded-full">
+                                <Trash2 className="h-3 w-3 text-destructive-foreground"/>
+                             </div>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the page "{page.name}".
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel onClick={() => setShowDeleteForPageId(null)}>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeletePage(page.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
                 ))}
                 <Button variant="outline" size="icon" className="h-6 w-6 shrink-0" onClick={handleAddPage}>
                     <Plus className="h-3 w-3" />
