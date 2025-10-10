@@ -69,9 +69,7 @@ function PreviewElement({ element, onButtonClick }: { element: EditorElement, on
       case 'image':
         return <Image src={element.src} alt="preview image" fill objectFit="cover" />;
       case 'video':
-        return <video src={element.src} autoPlay loop style={{width: '100%', height: '100%', objectFit: 'cover'}}/>
-      case 'container':
-        return <div style={{ backgroundColor: element.backgroundColor }} className="w-full h-full"></div>
+        return <video src={element.src} autoPlay loop muted style={{width: '100%', height: '100%', objectFit: 'cover'}}/>
       default:
         return null;
     }
@@ -91,6 +89,7 @@ export default function PreviewPage() {
   const [currentPage, setCurrentPage] = useState<Page | null>(null);
   const [generatedHtml, setGeneratedHtml] = useState<string>('');
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
     const storedProject = localStorage.getItem('ura-preview-project');
@@ -101,6 +100,16 @@ export default function PreviewPage() {
         setCurrentPage(parsedProject.pages[0]);
       }
     }
+
+    const handleFirstInteraction = () => {
+      setHasInteracted(true);
+      window.removeEventListener('click', handleFirstInteraction);
+    };
+    window.addEventListener('click', handleFirstInteraction);
+
+    return () => {
+      window.removeEventListener('click', handleFirstInteraction);
+    };
   }, []);
 
   useEffect(() => {
@@ -122,15 +131,19 @@ export default function PreviewPage() {
   useEffect(() => {
     if (audioRef.current) {
         if (currentPage?.audioUrl) {
-            audioRef.current.src = currentPage.audioUrl;
+            if (audioRef.current.src !== currentPage.audioUrl) {
+                audioRef.current.src = currentPage.audioUrl;
+            }
             audioRef.current.loop = currentPage.audioLoop ?? true;
-            audioRef.current.play().catch(e => console.error("Audio play failed:", e));
+            if (hasInteracted) {
+                 audioRef.current.play().catch(e => console.error("Audio play failed:", e));
+            }
         } else {
             audioRef.current.pause();
             audioRef.current.src = '';
         }
     }
-  }, [currentPage]);
+  }, [currentPage, hasInteracted]);
 
 
   const handleNavigate = (pageId: string) => {

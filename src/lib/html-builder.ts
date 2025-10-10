@@ -74,7 +74,7 @@ export const generateHtmlForProject = (project: Project): string => {
         content = `<div style="${style}"><img src="${element.src}" alt="image" style="width: 100%; height: 100%; object-fit: cover;" /></div>`;
         break;
       case 'video':
-        content = `<div style="${style}"><video src="${element.src}" autoplay loop style="width: 100%; height: 100%; object-fit: cover;"></video></div>`;
+        content = `<div style="${style}"><video src="${element.src}" autoplay loop muted style="width: 100%; height: 100%; object-fit: cover;"></video></div>`;
         break;
       case 'container':
         style += `background-color: ${element.backgroundColor};`;
@@ -230,7 +230,15 @@ export const generateHtmlForProject = (project: Project): string => {
             const audioPlayer = document.getElementById('background-audio');
             let currentPageId = pages.length > 0 ? pages[0].id : null;
             let redirectTimer;
+            let hasInteracted = false;
             const animationInstances = new Map();
+            
+            function handleFirstInteraction() {
+                hasInteracted = true;
+                handlePageChange(document.getElementById(currentPageId));
+                window.removeEventListener('click', handleFirstInteraction, true);
+            }
+            window.addEventListener('click', handleFirstInteraction, true);
 
             function navigateTo(pageId) {
               const targetPage = document.getElementById(pageId);
@@ -246,6 +254,7 @@ export const generateHtmlForProject = (project: Project): string => {
             window.navigateTo = navigateTo;
 
             function handlePageChange(pageElement) {
+                if (!pageElement) return;
                 clearTimeout(redirectTimer);
                 
                 // Clear all running animation instances
@@ -263,7 +272,7 @@ export const generateHtmlForProject = (project: Project): string => {
 
                 // Handle Audio
                 const audioSrc = pageElement.getAttribute('data-audio-src');
-                if (audioPlayer) {
+                if (audioPlayer && hasInteracted) {
                     if (audioSrc && audioPlayer.src !== audioSrc) {
                         audioPlayer.src = audioSrc;
                         audioPlayer.loop = pageElement.hasAttribute('data-audio-loop');
