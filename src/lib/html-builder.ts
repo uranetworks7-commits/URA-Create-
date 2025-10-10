@@ -74,7 +74,7 @@ export const generateHtmlForProject = (project: Project): string => {
         content = `<div style="${style}"><img src="${element.src}" alt="image" style="width: 100%; height: 100%; object-fit: cover;" /></div>`;
         break;
       case 'video':
-        content = `<div style="${style}"><video src="${element.src}" muted autoplay loop style="width: 100%; height: 100%; object-fit: cover;"></video></div>`;
+        content = `<div style="${style}"><video src="${element.src}" autoplay loop controls style="width: 100%; height: 100%; object-fit: cover;"></video></div>`;
         break;
       case 'container':
         style += `background-color: ${element.backgroundColor};`;
@@ -120,7 +120,7 @@ export const generateHtmlForProject = (project: Project): string => {
         pageContent = page.customHtml || '';
         pageStyle = ''; // Custom HTML for preview takes full control
     } else {
-        pageContent = page.elements.map(generateElementHtml).join('');
+        pageContent = page.elements?.map(generateElementHtml).join('') || '';
         pageStyle = `position: relative; width: 100vw; height: 100vh; background-color: ${page.backgroundColor}; ${page.backgroundImage ? `background-image: url(${page.backgroundImage}); background-size: cover; background-position: center;` : ''}`;
     }
 
@@ -135,7 +135,7 @@ export const generateHtmlForProject = (project: Project): string => {
   // Collect all login form scripts
   const loginFormScripts = project.pages
     .flatMap(page => page.elements)
-    .filter(el => el.type === 'login-form')
+    .filter(el => !!el && el.type === 'login-form')
     .map(el => {
         const formEl = el as LoginFormElement;
         const formId = `login-form-${formEl.id}`;

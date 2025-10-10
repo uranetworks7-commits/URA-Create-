@@ -69,7 +69,7 @@ function PreviewElement({ element, onButtonClick }: { element: EditorElement, on
       case 'image':
         return <Image src={element.src} alt="preview image" fill objectFit="cover" />;
       case 'video':
-        return <video src={element.src} muted autoPlay loop style={{width: '100%', height: '100%', objectFit: 'cover'}}/>
+        return <video src={element.src} autoPlay loop controls style={{width: '100%', height: '100%', objectFit: 'cover'}}/>
       case 'container':
         return <div style={{ backgroundColor: element.backgroundColor }} className="w-full h-full"></div>
       default:
