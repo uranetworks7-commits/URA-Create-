@@ -62,6 +62,10 @@ export default function Canvas() {
        );
     }
 
+    if (!currentPage.elements) {
+        return null;
+    }
+
     return currentPage.elements.map(element => (
       <Element key={element.id} element={element} />
     ));
