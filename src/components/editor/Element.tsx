@@ -39,6 +39,9 @@ export default function Element({ element }: ElementProps) {
     if (!isSelected) {
       dispatch({ type: 'SELECT_ELEMENT', payload: { elementId: element.id } });
     }
+    if (element.type === 'video' && videoRef.current) {
+        videoRef.current.muted = !videoRef.current.muted;
+    }
   };
   
   const handleDragStart = (e: React.MouseEvent) => {
@@ -199,7 +202,7 @@ export default function Element({ element }: ElementProps) {
         return <Image 
                     src={imageSrc} 
                     alt="canvas image" 
-                    layout="fill" 
+                    fill
                     objectFit="cover" 
                     className="pointer-events-none" 
                     onError={() => setMediaError(true)}
@@ -212,7 +215,7 @@ export default function Element({ element }: ElementProps) {
         return <video
                   ref={videoRef}
                   src={videoEl.src}
-                  className="w-full h-full object-cover pointer-events-none"
+                  className="w-full h-full object-cover"
                   autoPlay
                   loop={videoEl.loop}
                   muted

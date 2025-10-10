@@ -76,7 +76,7 @@ export const generateHtmlForProject = (project: Project): string => {
       case 'video':
         const videoEl = element as VideoElement;
         const loopAttr = videoEl.loop ? 'loop' : '';
-        content = `<div style="${style}"><video src="${videoEl.src}" autoplay ${loopAttr} style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;"></video></div>`;
+        content = `<div style="${style}"><video src="${videoEl.src}" autoplay ${loopAttr} muted style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;"></video></div>`;
         break;
       case 'container':
         style += `background-color: ${element.backgroundColor};`;
@@ -86,7 +86,7 @@ export const generateHtmlForProject = (project: Project): string => {
         content = generateAnimationHtml(element as AnimationElement);
         break;
       case 'login-form':
-        const formEl = element as LoginFormElement;
+        const formEl = el as LoginFormElement;
         const formId = `login-form-${formEl.id}`;
         content = `
           <div style="${style}">
