@@ -76,7 +76,7 @@ export const generateHtmlForProject = (project: Project): string => {
       case 'video':
         const videoEl = element as VideoElement;
         const loopAttr = videoEl.loop ? 'loop' : '';
-        content = `<div style="${style}"><video src="${videoEl.src}" autoplay ${loopAttr} style="width: 100%; height: 100%; object-fit: cover;"></video></div>`;
+        content = `<div style="${style}"><video src="${videoEl.src}" autoplay ${loopAttr} muted controls style="width: 100%; height: 100%; object-fit: cover;"></video></div>`;
         break;
       case 'container':
         style += `background-color: ${element.backgroundColor};`;

@@ -210,9 +210,11 @@ export default function Element({ element }: ElementProps) {
         }
         return <video
                   src={videoEl.src}
-                  className="w-full h-full object-cover pointer-events-none"
+                  className="w-full h-full object-cover"
                   autoPlay
                   loop={videoEl.loop}
+                  muted
+                  controls
                   onError={() => setMediaError(true)}
                 />
       case 'container':
@@ -288,7 +290,7 @@ export default function Element({ element }: ElementProps) {
       onClick={handleSelect}
       onMouseDown={handleDragStart}
     >
-      <div className="w-full h-full relative pointer-events-none">
+      <div className="w-full h-full relative">
         {renderSpecificElement()}
       </div>
        {(hasAnimation || isAnimationElement) && (
