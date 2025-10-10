@@ -212,7 +212,6 @@ export default function Element({ element }: ElementProps) {
                   src={videoSrc}
                   className="w-full h-full object-cover pointer-events-none"
                   autoPlay
-                  muted
                   loop
                   onError={() => setMediaError(true)}
                 />
