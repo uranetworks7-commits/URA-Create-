@@ -83,7 +83,7 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
       }
       case 'LOAD_PROJECT':
         draft.project = action.payload;
-        draft.currentPageIndex = 0;
+        draft.currentPageIndex = action.payload.pages.length > 0 ? 0 : -1;
         draft.selectedElementId = null;
         draft.showSettings = false;
         draft.initialElementSizes = {};

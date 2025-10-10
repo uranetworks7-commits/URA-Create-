@@ -25,7 +25,8 @@ import { stickers } from '@/lib/stickers';
 export default function Toolbar() {
   const { state, dispatch } = useEditor();
   const isElementSelected = !!state.selectedElementId;
-  const selectedElement = state.project.pages[state.currentPageIndex]?.elements.find(el => el.id === state.selectedElementId);
+  const currentPage = state.project.pages[state.currentPageIndex];
+  const selectedElement = isElementSelected && currentPage?.elements ? currentPage.elements.find(el => el.id === state.selectedElementId) : undefined;
   const [showDigitalMenu, setShowDigitalMenu] = useState(false);
 
   const [isShareDialogOpen, setShareIsDialogOpen] = useState(false);
