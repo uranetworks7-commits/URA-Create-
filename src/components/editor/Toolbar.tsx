@@ -10,6 +10,17 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
 import { saveProjectToDb } from '@/lib/firebase';
 import { Loader2 } from 'lucide-react';
@@ -86,6 +97,7 @@ export default function Toolbar() {
           name: 'Video',
           src: src,
           size: { width: 300, height: 200 },
+          loop: false,
         };
         dispatch({ type: 'ADD_ELEMENT', payload: { element } });
       }
@@ -606,14 +618,32 @@ export default function Toolbar() {
                     </TooltipTrigger>
                     <TooltipContent side="right"><p>Crop/Resize</p></TooltipContent>
                 </Tooltip>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => window.open('https://github.com/google/firebase-studio', '_blank')}>
-                            <Github />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right"><p>GitHub</p></TooltipContent>
-                </Tooltip>
+                <AlertDialog>
+                  <Tooltip>
+                      <TooltipTrigger asChild>
+                          <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                  <Github />
+                              </Button>
+                          </AlertDialogTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent side="right"><p>GitHub</p></TooltipContent>
+                  </Tooltip>
+                  <AlertDialogContent>
+                      <AlertDialogHeader>
+                          <AlertDialogTitle>Open GitHub?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                              This will open the project's GitHub repository in a new tab. Your current work might be closed. Are you sure?
+                          </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => window.open('https://github.com/google/firebase-studio', '_blank')}>
+                              Continue
+                          </AlertDialogAction>
+                      </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
             </div>
         ) : (
             <Tooltip>
