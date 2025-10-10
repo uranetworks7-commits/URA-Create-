@@ -70,7 +70,7 @@ function PreviewElement({ element, onButtonClick }: { element: EditorElement, on
         return <Image src={element.src} alt="preview image" fill objectFit="cover" />;
       case 'video':
         const videoEl = element as VideoElement;
-        return <video src={videoEl.src} autoPlay loop={videoEl.loop} muted controls style={{width: '100%', height: '100%', objectFit: 'cover'}}/>
+        return <video src={videoEl.src} autoPlay loop={videoEl.loop} muted style={{width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer'}} onClick={(e) => (e.currentTarget.muted = !e.currentTarget.muted)}/>
       default:
         return null;
     }
@@ -102,14 +102,17 @@ export default function PreviewPage() {
       }
     }
 
-    const handleFirstInteraction = () => {
-      setHasInteracted(true);
-      window.removeEventListener('click', handleFirstInteraction);
+    const handleFirstInteraction = (e: MouseEvent) => {
+      // Don't count clicks on video elements as the first general interaction
+      if ((e.target as HTMLElement).tagName !== 'VIDEO') {
+        setHasInteracted(true);
+        window.removeEventListener('click', handleFirstInteraction, true);
+      }
     };
-    window.addEventListener('click', handleFirstInteraction);
+    window.addEventListener('click', handleFirstInteraction, true);
 
     return () => {
-      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('click', handleFirstInteraction, true);
     };
   }, []);
 
@@ -209,5 +212,3 @@ export default function PreviewPage() {
     </main>
   );
 }
-
-    

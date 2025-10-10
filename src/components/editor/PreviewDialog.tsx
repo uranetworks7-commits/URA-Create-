@@ -72,7 +72,7 @@ function PreviewElement({ element, onButtonClick }: { element: EditorElement, on
         return <Image src={element.src} alt="preview image" layout="fill" objectFit="cover" />;
       case 'video':
         const videoEl = element as VideoElement;
-        return <video src={videoEl.src} autoPlay loop={videoEl.loop} muted controls style={{width: '100%', height: '100%', objectFit: 'cover'}}/>
+        return <video src={videoEl.src} autoPlay loop={videoEl.loop} muted style={{width: '100%', height: '100%', objectFit: 'cover'}}/>
       case 'container':
         return <div style={{ backgroundColor: element.backgroundColor }} className="w-full h-full"></div>
       default:

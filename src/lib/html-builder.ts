@@ -76,7 +76,7 @@ export const generateHtmlForProject = (project: Project): string => {
       case 'video':
         const videoEl = element as VideoElement;
         const loopAttr = videoEl.loop ? 'loop' : '';
-        content = `<div style="${style}"><video src="${videoEl.src}" autoplay ${loopAttr} muted controls style="width: 100%; height: 100%; object-fit: cover;"></video></div>`;
+        content = `<div style="${style}"><video src="${videoEl.src}" autoplay ${loopAttr} muted style="width: 100%; height: 100%; object-fit: cover;"></video></div>`;
         break;
       case 'container':
         style += `background-color: ${element.backgroundColor};`;
@@ -180,6 +180,7 @@ export const generateHtmlForProject = (project: Project): string => {
       <style>
         body, html { margin: 0; padding: 0; font-family: sans-serif; overflow: hidden; }
         .page { width: 100vw; height: 100vh; }
+        video { cursor: pointer; }
         
         /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -235,10 +236,12 @@ export const generateHtmlForProject = (project: Project): string => {
             let hasInteracted = false;
             const animationInstances = new Map();
             
-            function handleFirstInteraction() {
-                hasInteracted = true;
-                handlePageChange(document.getElementById(currentPageId));
-                window.removeEventListener('click', handleFirstInteraction, true);
+            function handleFirstInteraction(e) {
+                if(e.target.tagName !== 'VIDEO') {
+                    hasInteracted = true;
+                    handlePageChange(document.getElementById(currentPageId));
+                    window.removeEventListener('click', handleFirstInteraction, true);
+                }
             }
             window.addEventListener('click', handleFirstInteraction, true);
 
@@ -360,6 +363,10 @@ export const generateHtmlForProject = (project: Project): string => {
             ${loginFormScripts}
 
             document.body.addEventListener('click', (e) => {
+              if (e.target.tagName === 'VIDEO') {
+                e.target.muted = !e.target.muted;
+                return;
+              }
               // Traverse up the DOM to find the button if a child was clicked
               let target = e.target;
               while(target && target.tagName !== 'BUTTON') {
@@ -580,5 +587,3 @@ export const generateHtmlForProject = (project: Project): string => {
     </html>
   `;
 };
-
-    

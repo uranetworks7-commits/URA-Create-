@@ -25,6 +25,7 @@ export default function Element({ element }: ElementProps) {
   const [mediaError, setMediaError] = useState(false);
 
   const ref = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (element.type === 'image' || element.type === 'video') {
@@ -209,12 +210,12 @@ export default function Element({ element }: ElementProps) {
             return renderErrorState('Video');
         }
         return <video
+                  ref={videoRef}
                   src={videoEl.src}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover pointer-events-none"
                   autoPlay
                   loop={videoEl.loop}
                   muted
-                  controls
                   onError={() => setMediaError(true)}
                 />
       case 'container':
@@ -319,5 +320,3 @@ export default function Element({ element }: ElementProps) {
     </div>
   );
 }
-
-    
