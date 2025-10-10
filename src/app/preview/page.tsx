@@ -70,7 +70,7 @@ function PreviewElement({ element, onButtonClick }: { element: EditorElement, on
         return <Image src={element.src} alt="preview image" fill objectFit="cover" />;
       case 'video':
         const videoEl = element as VideoElement;
-        return <video src={videoEl.src} autoPlay loop={videoEl.loop} muted style={{width: '100%', height: '100%', objectFit: 'cover'}}/>
+        return <video src={videoEl.src} autoPlay loop={videoEl.loop} style={{width: '100%', height: '100%', objectFit: 'cover'}}/>
       default:
         return null;
     }
@@ -209,3 +209,5 @@ export default function PreviewPage() {
     </main>
   );
 }
+
+    

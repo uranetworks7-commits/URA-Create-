@@ -213,7 +213,6 @@ export default function Element({ element }: ElementProps) {
                   className="w-full h-full object-cover pointer-events-none"
                   autoPlay
                   loop={videoEl.loop}
-                  muted
                   onError={() => setMediaError(true)}
                 />
       case 'container':
@@ -318,3 +317,5 @@ export default function Element({ element }: ElementProps) {
     </div>
   );
 }
+
+    
