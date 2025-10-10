@@ -3,7 +3,7 @@
 import type { Dispatch } from 'react';
 import React, { createContext, useContext, useReducer } from 'react';
 import { produce } from 'immer';
-import type { EditorElement, Page, Project, EditorState } from '@/lib/types';
+import type { EditorElement, Page, Project, EditorState, LoginFormElement } from '@/lib/types';
 
 type EditorAction =
   | { type: 'NEW_PROJECT'; payload: { backgroundColor: string, name: string } }
@@ -76,24 +76,46 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
         draft.selectedElementId = null;
         draft.showSettings = false;
         draft.initialElementSizes = {};
-        newPage.elements.forEach(el => {
-          draft.initialElementSizes[el.id] = el.size;
-        });
+        if (newPage.elements) {
+            newPage.elements.forEach(el => {
+                draft.initialElementSizes[el.id] = el.size;
+            });
+        }
         break;
       }
       case 'LOAD_PROJECT':
-        draft.project = action.payload;
-        draft.currentPageIndex = action.payload.pages.length > 0 ? 0 : -1;
+        const loadedProject = action.payload;
+        // Data sanitization and defaults for backward compatibility
+        loadedProject.pages.forEach(page => {
+            if (!page.elements) page.elements = [];
+            if (page.isCustomHtml === undefined) page.isCustomHtml = false;
+            if (page.isBuildFromHtml === undefined) page.isBuildFromHtml = false;
+            if (page.audioLoop === undefined) page.audioLoop = true;
+            page.elements.forEach(element => {
+                if (element.type === 'login-form') {
+                    const formEl = element as LoginFormElement;
+                    if (formEl.titleText === undefined) formEl.titleText = 'Login';
+                    if (formEl.usernameLabel === undefined) formEl.usernameLabel = 'Username';
+                    if (formEl.passwordLabel === undefined) formEl.passwordLabel = 'Password';
+                    if (formEl.buttonText === undefined) formEl.buttonText = 'Submit';
+                    if (formEl.correctUsername === undefined) formEl.correctUsername = 'user';
+                    if (formEl.correctPassword === undefined) formEl.correctPassword = '123';
+                    if (formEl.formBackgroundColor === undefined) formEl.formBackgroundColor = '#ffffff';
+                    if (formEl.formBorderColor === undefined) formEl.formBorderColor = '#e5e7eb';
+                    if (formEl.titleColor === undefined) formEl.titleColor = '#000000';
+                    if (formEl.titleFontSize === undefined) formEl.titleFontSize = 24;
+                    if (formEl.titleFontWeight === undefined) formEl.titleFontWeight = 'bold';
+                    if (formEl.labelColor === undefined) formEl.labelColor = '#374151';
+                    if (formEl.labelFontSize === undefined) formEl.labelFontSize = 14;
+                }
+                 draft.initialElementSizes[element.id] = element.size;
+            });
+        });
+
+        draft.project = loadedProject;
+        draft.currentPageIndex = loadedProject.pages.length > 0 ? 0 : -1;
         draft.selectedElementId = null;
         draft.showSettings = false;
-        draft.initialElementSizes = {};
-        action.payload.pages.forEach(p => {
-            if (p.elements) { // Check if elements array exists
-                p.elements.forEach(el => {
-                    draft.initialElementSizes[el.id] = el.size;
-                });
-            }
-        });
         break;
       case 'UPDATE_PROJECT_NAME':
         draft.project.name = action.payload.name;
@@ -139,8 +161,10 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
       }
       case 'ADD_ELEMENT': {
         if (draft.currentPageIndex !== -1) {
+          const page = draft.project.pages[draft.currentPageIndex];
+          if (!page.elements) page.elements = [];
           const element = action.payload.element;
-          draft.project.pages[draft.currentPageIndex].elements.push(element);
+          page.elements.push(element);
           draft.selectedElementId = element.id;
           draft.showSettings = true;
           draft.initialElementSizes[element.id] = element.size;
@@ -149,21 +173,25 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
       }
       case 'ADD_ELEMENTS': {
         if (draft.currentPageIndex !== -1) {
+            const page = draft.project.pages[draft.currentPageIndex];
+            if (!page.elements) page.elements = [];
             const newElements = action.payload.elements.map(el => {
                 const newEl = { ...el, id: crypto.randomUUID() };
                 draft.initialElementSizes[newEl.id] = newEl.size;
                 return newEl;
             });
-            draft.project.pages[draft.currentPageIndex].elements.push(...newElements);
+            page.elements.push(...newElements);
         }
         break;
       }
       case 'UPDATE_ELEMENT': {
         if (draft.currentPageIndex !== -1) {
           const page = draft.project.pages[draft.currentPageIndex];
-          const elementIndex = page.elements.findIndex(el => el.id === action.payload.id);
-          if (elementIndex !== -1) {
-            Object.assign(page.elements[elementIndex], action.payload);
+          if (page && page.elements) {
+            const elementIndex = page.elements.findIndex(el => el.id === action.payload.id);
+            if (elementIndex !== -1) {
+                Object.assign(page.elements[elementIndex], action.payload);
+            }
           }
         }
         break;
@@ -171,11 +199,13 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
       case 'DELETE_ELEMENT': {
         if (draft.currentPageIndex !== -1) {
           const page = draft.project.pages[draft.currentPageIndex];
-          page.elements = page.elements.filter(el => el.id !== action.payload.elementId);
-          delete draft.initialElementSizes[action.payload.elementId];
-          if (draft.selectedElementId === action.payload.elementId) {
-            draft.selectedElementId = null;
-            draft.showSettings = false;
+          if (page && page.elements) {
+            page.elements = page.elements.filter(el => el.id !== action.payload.elementId);
+            delete draft.initialElementSizes[action.payload.elementId];
+            if (draft.selectedElementId === action.payload.elementId) {
+                draft.selectedElementId = null;
+                draft.showSettings = false;
+            }
           }
         }
         break;
@@ -204,6 +234,7 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
         if (draft.currentPageIndex === -1) break;
         const { elementId, scale } = action.payload;
         const page = draft.project.pages[draft.currentPageIndex];
+        if (!page || !page.elements) break;
         const element = page.elements.find(el => el.id === elementId);
         
         if (element) {
@@ -288,3 +319,5 @@ export const EditorProvider = ({ children }: { children: React.ReactNode }) => {
     </EditorContext.Provider>
   );
 };
+
+    
