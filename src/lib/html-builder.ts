@@ -86,7 +86,7 @@ export const generateHtmlForProject = (project: Project): string => {
         content = generateAnimationHtml(element as AnimationElement);
         break;
       case 'login-form':
-        const formEl = el as LoginFormElement;
+        const formEl = element as LoginFormElement;
         const formId = `login-form-${formEl.id}`;
         content = `
           <div style="${style}">
