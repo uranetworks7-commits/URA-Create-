@@ -2,7 +2,7 @@
 
 import { useEditor } from '@/context/EditorContext';
 import { Button } from '@/components/ui/button';
-import { FilePenLine, Plus, Trash2, Palette, Clock, Link as LinkIcon, MoreHorizontal, Image as ImageIcon, Code, Music, Copy, HardHat, Wand2 } from 'lucide-react';
+import { FilePenLine, Plus, Trash2, Palette, Clock, Link as LinkIcon, MoreHorizontal, Image as ImageIcon, Code, Music, Copy, HardHat, Wand2, ZoomIn, ZoomOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '../ui/scroll-area';
 import {
@@ -70,6 +70,14 @@ export default function PageManager() {
   const updatePage = (payload: Partial<typeof currentPage>) => {
     dispatch({ type: 'UPDATE_PAGE', payload: { id: currentPage.id, ...payload} });
   };
+  
+  const handleDeleteElement = (elementId: string) => {
+    dispatch({ type: 'DELETE_ELEMENT', payload: { elementId } });
+  }
+
+  const handleResizeElement = (elementId: string, scale: number) => {
+    dispatch({ type: 'RESIZE_ELEMENT', payload: { elementId, scale } });
+  }
 
   const handleApplyToAll = (checked: boolean) => {
     if(checked) {
@@ -199,10 +207,21 @@ export default function PageManager() {
                         {Object.entries(pageElementsSummary).length > 0 ? (
                             Object.entries(pageElementsSummary).map(([type, elements]) => (
                             <div key={type}>
-                                <h3 className="font-semibold text-sm capitalize mb-1">{type} ({elements.length})</h3>
-                                <ul className="list-disc list-inside space-y-1 text-xs text-muted-foreground">
-                                {elements.map(el => <li key={el.id}>{el.name}</li>)}
-                                </ul>
+                                <h3 className="font-semibold text-sm capitalize mb-2 border-b pb-1">{type} ({elements.length})</h3>
+                                <div className="space-y-2">
+                                {elements.map(el => (
+                                    <div key={el.id} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
+                                        <p className="text-xs font-medium">{el.name}</p>
+                                        <div className="flex items-center gap-1">
+                                            <Button variant="outline" size="sm" onClick={() => handleResizeElement(el.id, 0.5)}>0.5x</Button>
+                                            <Button variant="outline" size="sm" onClick={() => handleResizeElement(el.id, 2)}>2x</Button>
+                                            <Button variant="destructive" size="icon" className="h-6 w-6" onClick={() => handleDeleteElement(el.id)}>
+                                                <Trash2 className="h-3 w-3"/>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                                </div>
                             </div>
                             ))
                         ) : (
