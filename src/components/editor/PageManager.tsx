@@ -215,9 +215,25 @@ export default function PageManager() {
                                         <div className="flex items-center gap-1">
                                             <Button variant="outline" size="sm" onClick={() => handleResizeElement(el.id, 0.5)}>0.5x</Button>
                                             <Button variant="outline" size="sm" onClick={() => handleResizeElement(el.id, 2)}>2x</Button>
-                                            <Button variant="destructive" size="icon" className="h-6 w-6" onClick={() => handleDeleteElement(el.id)}>
-                                                <Trash2 className="h-3 w-3"/>
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="destructive" size="icon" className="h-6 w-6">
+                                                        <Trash2 className="h-3 w-3"/>
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This action will permanently delete the element "{el.name}".
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteElement(el.id)}>Delete</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </div>
                                     </div>
                                 ))}
