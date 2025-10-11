@@ -2,7 +2,7 @@
 
 import { useEditor } from '@/context/EditorContext';
 import { Button } from '@/components/ui/button';
-import { FilePenLine, Plus, Trash2, Palette, Clock, Link as LinkIcon, MoreHorizontal, Image as ImageIcon, Code, Music, Copy, HardHat } from 'lucide-react';
+import { FilePenLine, Plus, Trash2, Palette, Clock, Link as LinkIcon, MoreHorizontal, Image as ImageIcon, Code, Music, Copy, HardHat, Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '../ui/scroll-area';
 import {
@@ -25,7 +25,10 @@ import { Switch } from '../ui/switch';
 import { Textarea } from '../ui/textarea';
 import { Checkbox } from '../ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { EditorElement } from '@/lib/types';
+
 
 export default function PageManager() {
   const { state, dispatch } = useEditor();
@@ -34,8 +37,20 @@ export default function PageManager() {
   const [isCustomHtmlAlertOpen, setIsCustomHtmlAlertOpen] = useState(false);
   const [showDeleteForPageId, setShowDeleteForPageId] = useState<string | null>(null);
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
 
   const currentPage = project.pages[currentPageIndex];
+
+  const pageElementsSummary = useMemo(() => {
+    if (!currentPage) return {};
+    return currentPage.elements.reduce((acc, el) => {
+      if (!acc[el.type]) {
+        acc[el.type] = [];
+      }
+      acc[el.type].push(el);
+      return acc;
+    }, {} as Record<string, EditorElement[]>);
+  }, [currentPage]);
 
   if (!currentPage) return null;
 
@@ -169,6 +184,35 @@ export default function PageManager() {
             </div>
             <ScrollBar orientation="horizontal" />
         </ScrollArea>
+
+        <Dialog open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
+            <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6"><Wand2 className="h-3.5 w-3.5"/></Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Page Element Summary</DialogTitle>
+                    <DialogDescription>A list of all elements used on the page "{currentPage.name}".</DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-72">
+                    <div className="space-y-4 pr-4">
+                        {Object.entries(pageElementsSummary).length > 0 ? (
+                            Object.entries(pageElementsSummary).map(([type, elements]) => (
+                            <div key={type}>
+                                <h3 className="font-semibold text-sm capitalize mb-1">{type} ({elements.length})</h3>
+                                <ul className="list-disc list-inside space-y-1 text-xs text-muted-foreground">
+                                {elements.map(el => <li key={el.id}>{el.name}</li>)}
+                                </ul>
+                            </div>
+                            ))
+                        ) : (
+                            <p className="text-sm text-muted-foreground">This page has no elements.</p>
+                        )}
+                    </div>
+                </ScrollArea>
+            </DialogContent>
+        </Dialog>
+        
         <Popover>
             <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-6 w-6"><MoreHorizontal className="h-3.5 w-3.5"/></Button>
