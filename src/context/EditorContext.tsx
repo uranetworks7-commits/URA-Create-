@@ -162,25 +162,29 @@ const editorReducer = (state: EditorState, action: EditorAction): EditorState =>
       case 'ADD_ELEMENT': {
         if (draft.currentPageIndex !== -1) {
           const page = draft.project.pages[draft.currentPageIndex];
-          if (!page.elements) page.elements = [];
-          const element = action.payload.element;
-          page.elements.push(element);
-          draft.selectedElementId = element.id;
-          draft.showSettings = true;
-          draft.initialElementSizes[element.id] = element.size;
+          if (page) {
+            if (!page.elements) page.elements = [];
+            const element = action.payload.element;
+            page.elements.push(element);
+            draft.selectedElementId = element.id;
+            draft.showSettings = true;
+            draft.initialElementSizes[element.id] = element.size;
+          }
         }
         break;
       }
       case 'ADD_ELEMENTS': {
         if (draft.currentPageIndex !== -1) {
             const page = draft.project.pages[draft.currentPageIndex];
-            if (!page.elements) page.elements = [];
-            const newElements = action.payload.elements.map(el => {
-                const newEl = { ...el, id: crypto.randomUUID() };
-                draft.initialElementSizes[newEl.id] = newEl.size;
-                return newEl;
-            });
-            page.elements.push(...newElements);
+            if (page) {
+              if (!page.elements) page.elements = [];
+              const newElements = action.payload.elements.map(el => {
+                  const newEl = { ...el, id: crypto.randomUUID() };
+                  draft.initialElementSizes[newEl.id] = newEl.size;
+                  return newEl;
+              });
+              page.elements.push(...newElements);
+            }
         }
         break;
       }
