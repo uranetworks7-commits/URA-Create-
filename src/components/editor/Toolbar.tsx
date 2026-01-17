@@ -319,7 +319,7 @@ export default function Toolbar() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${project.name.toLowerCase().replace(/\s/g, '-') || 'ura-project'}.html`;
+    a.download = `${project.name.toLowerCase().replace(/\s/g, '-') || 'create-x-project'}.html`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -557,104 +557,83 @@ export default function Toolbar() {
       
         <div className="w-10 my-0.5 border-t border-border" />
 
-        {showDigitalMenu ? (
-            <div className="flex flex-col items-center gap-0.5 w-full px-1">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handlePreview}>
-                    <Eye />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handlePreview}>
+              <Eye />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right"><p>Preview Project</p></TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleBuild}>
+              <HardHat />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right"><p>Build Project</p></TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleQuickBuild}>
+              <Code />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right"><p>Quick Builder</p></TooltipContent>
+        </Tooltip>
+          <Dialog open={isShareDialogOpen} onOpenChange={setShareIsDialogOpen}>
+          <Tooltip>
+              <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShareIsDialogOpen(true)}>
+                      <Share2 />
                   </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right"><p>Preview Project</p></TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleBuild}>
-                    <HardHat />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right"><p>Build Project</p></TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleQuickBuild}>
-                    <Code />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right"><p>Quick Builder</p></TooltipContent>
-              </Tooltip>
-               <Dialog open={isShareDialogOpen} onOpenChange={setShareIsDialogOpen}>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShareIsDialogOpen(true)}>
-                            <Share2 />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right"><p>Share Project</p></TooltipContent>
-                </Tooltip>
-                <DialogContent className="sm:max-w-sm">
-                    <DialogHeader>
-                    <DialogTitle>Share Project</DialogTitle>
-                    <DialogDescription>Enter a 6-digit ID to save your project. Anyone with this ID can load it.</DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                    <Label htmlFor="share-id">Project ID</Label>
-                    <Input id="share-id" value={projectId} onChange={(e) => setProjectId(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="e.g., 123456" maxLength={6} />
-                    </div>
-                    <DialogFooter>
-                    <Button onClick={handleShare} disabled={isSaving} size="sm">
-                        {isSaving && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
-                        Save & Share
-                    </Button>
-                    </DialogFooter>
-                </DialogContent>
-               </Dialog>
-                <div className="w-10 my-0.5 border-t border-border" />
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" disabled={!isElementSelected}>
-                            <Expand />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right"><p>Crop/Resize</p></TooltipContent>
-                </Tooltip>
-                <AlertDialog>
-                  <Tooltip>
-                      <TooltipTrigger asChild>
-                          <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-7 w-7">
-                                  <Github />
-                              </Button>
-                          </AlertDialogTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent side="right"><p>GitHub</p></TooltipContent>
-                  </Tooltip>
-                  <AlertDialogContent>
-                      <AlertDialogHeader>
-                          <AlertDialogTitle>Open GitHub?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                              This will open the project's GitHub repository in a new tab. Your current work might be closed. Are you sure?
-                          </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => window.open('https://github.com/google/firebase-studio', '_blank')}>
-                              Continue
-                          </AlertDialogAction>
-                      </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-            </div>
-        ) : (
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowDigitalMenu(true)}>
-                        <Github />
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right"><p>Digital Menu</p></TooltipContent>
-            </Tooltip>
-        )}
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Share Project</p></TooltipContent>
+          </Tooltip>
+          <DialogContent className="sm:max-w-sm">
+              <DialogHeader>
+              <DialogTitle>Share Project</DialogTitle>
+              <DialogDescription>Enter a 6-digit ID to save your project. Anyone with this ID can load it.</DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+              <Label htmlFor="share-id">Project ID</Label>
+              <Input id="share-id" value={projectId} onChange={(e) => setProjectId(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="e.g., 123456" maxLength={6} />
+              </div>
+              <DialogFooter>
+              <Button onClick={handleShare} disabled={isSaving} size="sm">
+                  {isSaving && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
+                  Save & Share
+              </Button>
+              </DialogFooter>
+          </DialogContent>
+          </Dialog>
+        <AlertDialog>
+          <Tooltip>
+              <TooltipTrigger asChild>
+                  <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <Github />
+                      </Button>
+                  </AlertDialogTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>GitHub</p></TooltipContent>
+          </Tooltip>
+          <AlertDialogContent>
+              <AlertDialogHeader>
+                  <AlertDialogTitle>Open GitHub?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                      This will open the project's GitHub repository in a new tab. Your current work might be closed. Are you sure?
+                  </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => window.open('https://github.com/google/firebase-studio', '_blank')}>
+                      Continue
+                  </AlertDialogAction>
+              </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
 
         <Dialog open={isQuickBuilderOpen} onOpenChange={setQuickBuilderOpen}>
             <DialogContent className="max-w-3xl">

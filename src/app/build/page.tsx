@@ -92,7 +92,7 @@ export default function BuildPage() {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            const projectName = JSON.parse(localStorage.getItem('ura-preview-project')!).name || 'ura-project';
+            const projectName = JSON.parse(localStorage.getItem('ura-preview-project')!).name || 'create-x-project';
             a.download = `${projectName.toLowerCase().replace(/\s/g, '-')}.zip`;
             document.body.appendChild(a);
 a.click();

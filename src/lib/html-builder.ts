@@ -138,8 +138,8 @@ export const generateHtmlForProject = (project: Project): string => {
   const loginFormScripts = project.pages
     .flatMap(page => page.elements)
     .filter(el => !!el && el.type === 'login-form')
-    .map(el => {
-        const formEl = el as LoginFormElement;
+    .map(element => {
+        const formEl = element as LoginFormElement;
         const formId = `login-form-${formEl.id}`;
         return `
             (function() {
@@ -176,7 +176,7 @@ export const generateHtmlForProject = (project: Project): string => {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-      <title>${project.name || 'URA Project'}</title>
+      <title>${project.name || 'Create-X Project'}</title>
       <style>
         body, html { margin: 0; padding: 0; font-family: sans-serif; overflow: hidden; }
         .page { width: 100vw; height: 100vh; }
@@ -277,14 +277,16 @@ export const generateHtmlForProject = (project: Project): string => {
 
                 // Handle Audio
                 const audioSrc = pageElement.getAttribute('data-audio-src');
+                const audioLoop = pageElement.hasAttribute('data-audio-loop');
+
                 if (audioPlayer && hasInteracted) {
                     if (audioSrc && audioPlayer.src !== audioSrc) {
                         audioPlayer.src = audioSrc;
-                        audioPlayer.loop = pageElement.hasAttribute('data-audio-loop');
+                        audioPlayer.loop = audioLoop;
                         audioPlayer.play().catch(e => console.error("Audio play failed:", e));
                     } else if (audioSrc && audioPlayer.src === audioSrc) {
                         // If src is the same, just update loop property and ensure it plays
-                        audioPlayer.loop = pageElement.hasAttribute('data-audio-loop');
+                        audioPlayer.loop = audioLoop;
                         if (audioPlayer.paused) {
                            audioPlayer.play().catch(e => console.error("Audio play failed:", e));
                         }
@@ -293,7 +295,7 @@ export const generateHtmlForProject = (project: Project): string => {
                         audioPlayer.src = '';
                     }
                 }
-                
+
                 // Start animations on new page
                 startAnimationsForPage(pageElement);
             }

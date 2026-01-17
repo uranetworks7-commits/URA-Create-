@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2, Trash2, Grid, HelpCircle, AlertTriangle } from 'lucide-react';
+import { Blocks, FilePlus, Loader2, Save, FolderOpen, Settings, Undo2, Redo2, Trash2, Grid, HelpCircle, AlertTriangle, Github } from 'lucide-react';
 import { useEditor } from '@/context/EditorContext';
 import { useState, useEffect } from 'react';
 import {
@@ -168,14 +168,14 @@ export default function Header({ onStartNew }: { onStartNew: () => void }) {
     <header className="flex h-10 items-center justify-between border-b bg-card px-2 z-10 shadow-sm">
       <div className="flex items-center gap-1">
         <Blocks className="h-2.5 w-2.5 text-accent" />
-        <h1 className="text-[8px] font-bold tracking-tighter">URA-Create</h1>
+        <h1 className="text-[8px] font-bold tracking-tighter">Create-X</h1>
          <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
             <DialogTrigger asChild>
                  <Button variant="ghost" size="icon" className="h-7 w-7"><HelpCircle className="h-4 w-4 text-muted-foreground"/></Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
                  <DialogHeader>
-                    <DialogTitle>URA-Create User Manual</DialogTitle>
+                    <DialogTitle>Create-X User Manual</DialogTitle>
                     <DialogDescription>A guide to all the tools and features in the editor.</DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="h-[60vh] p-2">

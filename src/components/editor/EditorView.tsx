@@ -20,7 +20,7 @@ import { Label } from '../ui/label';
 export default function EditorView() {
   const { state, dispatch } = useEditor();
   const [isStarted, setIsStarted] = useState(false);
-  const [projectName, setProjectName] = useState('My URA Project');
+  const [projectName, setProjectName] = useState('My Create-X Project');
   const [pageColor, setPageColor] = useState('#ffffff');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('blank');
 
@@ -43,7 +43,7 @@ export default function EditorView() {
             <div className="mx-auto bg-accent/20 p-2 rounded-full w-fit mb-2">
               <Blocks className="h-6 w-6 text-accent" />
             </div>
-            <CardTitle className="text-xl font-bold">URA-Create</CardTitle>
+            <CardTitle className="text-xl font-bold">Create-X</CardTitle>
             <CardDescription className="text-sm">
               Start from a blank page or a pre-designed template.
             </CardDescription>
